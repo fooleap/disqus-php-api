@@ -8,7 +8,7 @@
     $filedata = $_FILES['file']['tmp_name'];
     $filesize = $_FILES['file']['size'];
     $post_data = array(
-        'api_key' => $pubile_key,
+        'api_key' => $public_key,
         'permanent' => 1,
         'upload' => $cfile
     );

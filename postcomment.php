@@ -7,7 +7,7 @@
     $author_email = $_POST['email'] == $email ? null : $_POST['email'];
     $author_url = $_POST['url'] == 'null' || $_POST['url'] == '' ? null : $_POST['url'];
     $post_data = array(
-        'api_key' => $pubile_key,
+        'api_key' => $public_key,
         'thread' => $_POST['thread'],
         'parent' => $_POST['parent'],
         'message' => $_POST['message'],

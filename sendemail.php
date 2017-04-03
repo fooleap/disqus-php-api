@@ -5,7 +5,7 @@
 
     // 获取被回复人信息
     $fields_data = array(
-        'api_key' => $pubile_key,
+        'api_key' => $public_key,
         'post' => $_POST['parent']
     );
     $curl_url = 'https://disqus.com/api/3.0/posts/details.json?'.http_build_query($fields_data);
@@ -17,7 +17,7 @@
 
     // 获取回复信息
     $fields_data = array(
-        'api_key' => $pubile_key,
+        'api_key' => $public_key,
         'post' => $_POST['id']
     );
     $curl_url = 'https://disqus.com/api/3.0/posts/details.json?'.http_build_query($fields_data);

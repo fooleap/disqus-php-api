@@ -3,7 +3,7 @@
     require_once('init.php');
 
     $fields_data = array(
-        'api_key' => $pubile_key,
+        'api_key' => $public_key,
         'limit' => 6,
         'forum' => $forum,
         'interval' => '30d'

@@ -3,7 +3,7 @@
     require_once('init.php');
 
     $fields_data = array(
-        'api_key' => $pubile_key,
+        'api_key' => $public_key,
         'cursor' => $_GET['cursor'],
         'limit' => 100,
         'forum' => $forum,
@@ -14,7 +14,7 @@
     $data = curl_get($curl_url);
 
     $fields_data = array(
-        'api_key' => $pubile_key,
+        'api_key' => $public_key,
         'forum' => $forum,
         'thread' => 'link:'.$origin.$_GET['link'],
     );

@@ -5,7 +5,7 @@ require_once('init.php');
 $links = '&thread=link:'.$origin.preg_replace('/,/i','&thread=link:'.$origin, $_GET['link']);
 
 $fields_data = array(
-    'api_key' => $pubile_key,
+    'api_key' => $public_key,
     'forum' => $forum
 );
 

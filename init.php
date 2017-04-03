@@ -7,7 +7,7 @@ $client = new Client(new Ruleset());
 $client->imageType = 'png';
 $client->imagePathPNG = '//assets-cdn.github.com/images/icons/emoji/unicode/';
 
-$pubile_key = ''; // Disqus 评论框或官网的 Pubile Key 
+$public_key = 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F'; // Disqus 评论框或官网的 Public Key 
 $origin = ''; // 域名如 http://blog.fooleap.org
 $forum = ''; // forum id 如 fooleap
 $username = ''; // 个人昵称 如 fooleap 为了自己发表评论是登录状态，postcomment 有相关的判断
