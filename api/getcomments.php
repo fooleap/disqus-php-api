@@ -25,13 +25,15 @@
         $posts[$key] = post_format($post);
     }
 
-    $listposts = array(
-       'code' => $detail -> code,
-       'cursor' => $data -> cursor,
-       'link' => 'https://disqus.com/home/discussion/'.$forum.'/'.$detail -> response -> slug,
-       'posts' => count($posts),
-       'response' => $posts,
-       'thread' => $detail -> response -> id
+    $listposts = $detail -> code === 2 ? array(
+        'code' => $detail -> code,
+    ) : array(
+        'code' => $detail -> code,
+        'cursor' => $data -> cursor,
+        'link' => 'https://disqus.com/home/discussion/'.$forum.'/'.$detail -> response -> slug,
+        'posts' => count($posts),
+        'response' => $posts,
+        'thread' => $detail -> response -> id
     );
-    
+
     print_r(json_encode($listposts));

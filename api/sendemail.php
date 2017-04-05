@@ -26,13 +26,13 @@
     $reply_name    = $post['name']; //回复者人名
     $reply_message = $post['message']; //回复者留言
 
-    $content = '<p>' . $parent_name . '，您在<a href="http://blog.fooleap.org/" target="_blank">「Fooleap\'s Blog」</a>的评论：</p>';
+    $content = '<p>' . $parent_name . '，您在<a href="'.$origin.'" target="_blank">「'.$site_name.'」</a>的评论：</p>';
     $content .= $parent_message;
     $content .= '<p>' . $reply_name . ' 的回复如下：</p>';
     $content .= $reply_message;
-    $content .= '<p>查看详情及回复请点击：<a target="_blank" href="http://blog.fooleap.org' . $_POST['link'] . '#comment-' . $_POST['parent'] . '">' . $_POST['title'] . '</a></p>';
+    $content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$origin. $_POST['link'] . '#comment-' . $_POST['parent'] . '">' . $_POST['title'] . '</a></p>';
     
-    // 以下为发邮件配置
+    // 发送邮件
     use PHPMailer;
     require_once('class.phpmailer.php');
     require_once('class.smtp.php');
@@ -41,14 +41,16 @@
     $mail->IsSMTP();
     $mail->SMTPAuth   = true;
     $mail->SMTPSecure = "ssl";
-    $mail->Host       = "smtp.exmail.qq.com";
-    $mail->Port       = 465;
-    $mail->Username   = ""; 
-    $mail->Password   = "";
-    $mail->SetFrom('noreply@fooleap.org', 'Fooleap\'s Blog'); 
-    $mail->Subject = '您在「Fooleap\'s Blog」的评论有了新回复';
-    //$mail->AddReplyTo('fooleap@gmail.com', 'fooleap'); // 设置邮件回复人地址和名称
-    //$mail->AltBody    = '为了查看该邮件，请切换到支持 HTML 的邮件客户端'; // 可选项，向下兼容考虑
+    $mail->Host       = $smtp_host;
+    $mail->Port       = $smtp_port;
+    $mail->Username   = $smtp_username;
+    $mail->Password   = $smtp_password;
+    $mail->SetFrom($smtp_username, $site_name); 
+    $mail->Subject = '您在「'.$site_name.'」的评论有了新回复';
     $mail->MsgHTML($content);
     $mail->AddAddress($parent_email, $parent_name);
-    $mail->Send();
+    if(!$mail->Send()) {
+        echo "发送失败：" . $mail->ErrorInfo;
+    } else {
+        echo "恭喜，邮件发送成功！";
+    }

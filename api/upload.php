@@ -13,5 +13,4 @@
         'upload' => $cfile
     );
     $data = curl_post($curl_url, $post_data);
-
     print_r(json_encode($data));

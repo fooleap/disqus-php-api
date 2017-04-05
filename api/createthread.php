@@ -8,7 +8,7 @@
         'message' => $_POST['message'],
         'slug' => $_POST['slug'],
         'title' => $_POST['title'],
-        'url' => $origin.$_POST['url']
+        'url' => $_POST['url']
     );
     $data = curl_post($curl_url, $post_data);
     print_r(json_encode($data)); 

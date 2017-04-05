@@ -5,7 +5,7 @@
     $curl_url = 'https://disqus.com/api/3.0/posts/create.json';
     $author_name = $_POST['name'] == $username ? null : $_POST['name'];
     $author_email = $_POST['email'] == $email ? null : $_POST['email'];
-    $author_url = $_POST['url'] == 'null' || $_POST['url'] == '' ? null : $_POST['url'];
+    $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null: $_POST['url'];
     $post_data = array(
         'api_key' => $public_key,
         'thread' => $_POST['thread'],
@@ -26,7 +26,7 @@
        'thread' => $post -> thread,
        'response' => $content
     );
-    /*
+
     if ( $_POST['parent'] != '' && $data -> code == 0 ){
         $mail_query = array(
             'parent'=> $_POST['parent'],
@@ -36,7 +36,7 @@
         );
         $mail = curl_init();
         $curl_opt = array(
-            CURLOPT_URL => 'path/to/sendemail',
+            CURLOPT_URL => 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/sendemail.php',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $mail_query,
@@ -45,5 +45,5 @@
         curl_setopt_array($mail, $curl_opt);
         curl_exec($mail);
         curl_close($mail);
-    }*/
+    }
     print_r(json_encode($output));

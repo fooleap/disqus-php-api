@@ -7,12 +7,20 @@ $client = new Client(new Ruleset());
 $client->imageType = 'png';
 $client->imagePathPNG = '//assets-cdn.github.com/images/icons/emoji/unicode/';
 
-$public_key = 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F'; // Disqus 评论框或官网的 Public Key 
-$origin = ''; // 域名如 http://blog.fooleap.org
-$forum = ''; // forum id 如 fooleap
-$username = ''; // 个人昵称 如 fooleap 为了自己发表评论是登录状态，postcomment 有相关的判断
+$public_key = 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F';
+$origin = 'http://blog.fooleap.org'; // 网站域名
+$forum = '';  // 网站shortname
+$username = ''; // 个人昵称 如 fooleap，为了自己发表评论是登录状态，postcomment 有相关的判断
 $email = ''; // Disqus 账号，邮箱号
 $password = ''; // Disqus 密码
+$emoticons_path ='http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/emoticons';
+
+// PHPMailer 相关配置，具体可查看 sendmail 文件
+$site_name = 'Fooleap\'s Blog'; // 网站名
+$smtp_host = 'smtp.exmail.qq.com'; // SMTP 服务器
+$smtp_port = 465; // SMTP 服务器的端口号
+$smtp_username = 'noreply@fooleap.org'; // SMTP 服务器用户名
+$smtp_password = ''; //SMTP 服务器密码
 
 //读取文件
 $session_data = json_decode(file_get_contents(sys_get_temp_dir().'/session.json'));
@@ -101,13 +109,49 @@ function curl_post($url, $data){
 
 function post_format( $post ){
     global $client;
+    global $emoticons_path;
 
     // 访客指定 Gravatar 头像
     $avatar_url = '//cdn.v2ex.com/gravatar/'.md5($post->author->email).'?d=https://a.disquscdn.com/images/noavatar92.png';
     $post->author->avatar->cache = $post->author->isAnonymous ? $avatar_url : $post->author->avatar->cache;
 
-    //Emoji
-    $post->message = $client->shortnameToImage($post->message);
+    // 表情
+    $post->message = str_replace(
+        array(
+            ':doge:',
+            ':tanshou:',
+            ':wx_smirk:',
+            ':wx_hey:',
+            ':wx_facepalm:',
+            ':wx_smart:',
+            ':wx_tea:',
+            ':wx_yeah:',
+            ':wx_moue:',
+        ),
+        array(
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/doge.png">',
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/tanshou.png">',
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_02.png">',
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_04.png">',
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_05.png">',
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_06.png">',
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_07.png">',
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_11.png">',
+            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_12.png">',
+        ),
+        $client->shortnameToImage($post->message)
+    );
+
+    // 去除重定向链接
+    $urlPat = '/<a.*?href="(.*?disq\.us.*?)".*?>(.*?)<\/a>/i';
+    preg_match_all($urlPat, $post->message, $urlArr);    
+    if( count($urlArr[0]) > 0 ){
+        foreach ( $urlArr[1] as $item => $urlItem){
+            parse_str(parse_url($urlItem,PHP_URL_QUERY),$out);
+            $linkArr[$item] = '<a href="'.join(':', explode(':',$out['url'],-1)).'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
+        }
+        $post->message = str_replace($urlArr[0],$linkArr,$post->message);
+    }
 
     // 去掉图片链接
     $imgpat = '/<a(.*?)href="(.*?\.(jpg|gif|png))"(.*?)>(.*?)<\/a>/i';
