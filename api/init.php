@@ -17,6 +17,7 @@ $emoticons_path ='http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']
 
 // PHPMailer 相关配置，具体可查看 sendmail 文件
 $site_name = 'Fooleap\'s Blog'; // 网站名
+$smtp_secure = 'ssl'; //
 $smtp_host = 'smtp.exmail.qq.com'; // SMTP 服务器
 $smtp_port = 465; // SMTP 服务器的端口号
 $smtp_username = 'noreply@fooleap.org'; // SMTP 服务器用户名
@@ -142,7 +143,7 @@ function post_format( $post ){
         $client->shortnameToImage($post->message)
     );
 
-    // 去除重定向链接
+    // 去除链接重定向
     $urlPat = '/<a.*?href="(.*?disq\.us.*?)".*?>(.*?)<\/a>/i';
     preg_match_all($urlPat, $post->message, $urlArr);    
     if( count($urlArr[0]) > 0 ){

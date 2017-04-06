@@ -40,7 +40,7 @@
     $mail->CharSet = "UTF-8"; 
     $mail->IsSMTP();
     $mail->SMTPAuth   = true;
-    $mail->SMTPSecure = "ssl";
+    $mail->SMTPSecure = $smtp_secure;
     $mail->Host       = $smtp_host;
     $mail->Port       = $smtp_port;
     $mail->Username   = $smtp_username;

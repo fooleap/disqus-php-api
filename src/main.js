@@ -409,7 +409,6 @@ Comment.prototype = {
     load: function(post, i){
 
         post.url = post.url ? post.url : 'javascript:;';
-        post.createdAt = new Date(post.createdAt).getTime().toString().slice(0, -3);
 
         var parent = !post.parent ? {
             'name': '',
