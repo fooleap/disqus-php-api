@@ -10,7 +10,11 @@ disqus-php-api
 
 ### 使用
 
-配置项在 `api/init.php` 文件，有简单说明，具体使用可参考如下，不清楚可联系 [@fooleap](http://blog.fooleap.org)
+
+配置项在 `api/init.php` 文件，有简单说明。
+
+`disqus-api.js` 文件需与 `api` 目录放同一目录下，具体在网页中使用可参考如下，不清楚可联系 [@fooleap](http://blog.fooleap.org)
+
 
 ```html
 <!DOCTYPE html>

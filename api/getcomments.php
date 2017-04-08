@@ -5,9 +5,9 @@
     $fields_data = array(
         'api_key' => $public_key,
         'cursor' => $_GET['cursor'],
-        'limit' => 100,
+        'limit' => 50,
         'forum' => $forum,
-        'order' => 'asc',
+        'order' => 'desc',
         'thread' => 'link:'.$origin.$_GET['link']
     );
     $curl_url = 'https://disqus.com/api/3.0/posts/list.json?'.http_build_query($fields_data);
@@ -25,15 +25,13 @@
         $posts[$key] = post_format($post);
     }
 
-    $listposts = $detail -> code === 2 ? array(
-        'code' => $detail -> code,
-    ) : array(
-        'code' => $detail -> code,
-        'cursor' => $data -> cursor,
-        'link' => 'https://disqus.com/home/discussion/'.$forum.'/'.$detail -> response -> slug,
-        'posts' => count($posts),
-        'response' => $posts,
-        'thread' => $detail -> response -> id
+    $listposts = array(
+       'code' => $detail -> code,
+       'cursor' => $data -> cursor,
+       'link' => 'https://disqus.com/home/discussion/'.$forum.'/'.$detail -> response -> slug,
+       'posts' => $detail -> response -> posts,
+       'response' => array_reverse($posts),
+       'thread' => $detail -> response -> id
     );
-
+    
     print_r(json_encode($listposts));

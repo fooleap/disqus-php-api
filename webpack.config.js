@@ -1,4 +1,6 @@
-var ExtractTextPlugin = require("extract-text-webpack-plugin");
+const webpack = require('webpack');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const autoprefixer = require('autoprefixer'); 
 module.exports = {
     entry: './src/main.js',
     output: {
@@ -17,6 +19,13 @@ module.exports = {
         ],
     },
     plugins: [
+        new webpack.LoaderOptionsPlugin({
+            options: {
+                postcss: [
+                    autoprefixer(),
+                ]
+            }
+        }),
         new ExtractTextPlugin("disqus-api.css"),
     ],
 };
