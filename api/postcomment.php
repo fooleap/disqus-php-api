@@ -6,11 +6,13 @@
     $author_name = $_POST['name'] == $username ? null : $_POST['name'];
     $author_email = $_POST['email'] == $email ? null : $_POST['email'];
     $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null: $_POST['url'];
+    $post_message = $client->shortnameToUnicode($_POST['message']);
+
     $post_data = array(
         'api_key' => $public_key,
         'thread' => $_POST['thread'],
         'parent' => $_POST['parent'],
-        'message' => $_POST['message'],
+        'message' => $post_message,
         'author_name' => $author_name,
         'author_email' => $author_email,
         'author_url' => $author_url

@@ -140,7 +140,7 @@ function post_format( $post ){
             '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_11.png">',
             '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_12.png">',
         ),
-        $client->shortnameToImage($post->message)
+        $client->unicodeToImage($post->message)
     );
 
     // 去除链接重定向

@@ -1,15 +1,36 @@
 import './main.scss';
-var jsUrl = document.querySelector('[src$="disqus-api.js"]').src;
+var scripts = document.querySelectorAll('script');
+for(var i = 0; i < scripts.length; i++){
+    if( /disqus-api.js/.test(scripts[i].src) ){
+        var jsUrl = scripts[i].src;
+        break;
+    }
+}
+
+function getQuery(param) {
+    if ( jsUrl.indexOf('?') > - 1 && jsUrl.indexOf('=') > -1 ){
+        var query = jsUrl.split('?')[1];
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            if( pair[0] == param ){
+                return pair[1];
+            }
+        }
+    }
+    return false;
+}
+
 var site = {
     'apipath': jsUrl.substring(0, jsUrl.lastIndexOf('/')) + '/api',
-    'origin': location.origin
+    'origin': location.origin,
+    'shortname': getQuery('shortname')
 }
 var page = {
     'title': document.title,
     'url': location.pathname,
     'desc': document.querySelector('meta[name="description"]').content
 }
-var forum = document.getElementById('comment').dataset.forum;
 
 function timeAgo(selector) {
     var templates = {
@@ -59,6 +80,17 @@ function timeAgo(selector) {
     }
     setTimeout(timeAgo, 60000);
 }
+
+var disqus_loaded = false;
+window.disqus_config = function() {
+    this.page.url = site.origin + page.url;
+    this.callbacks.onReady.push(function() {
+        disqus_loaded = true;
+        document.querySelector('.comment').style.display = 'none';
+        document.getElementById('comment').dataset.tips = '';
+        document.querySelector('.disqus').style.display = 'block';
+    });
+};
 
 // 访客信息
 function Guest() {
@@ -144,7 +176,42 @@ Comment.prototype = {
 
     // 初始化
     init: function(){
-        this.getlist();
+        if( site.shortname ){
+            document.getElementById('comment').dataset.tips = '正在检测能否连接 Disqus……';
+            var xhrConfig = new XMLHttpRequest();
+            xhrConfig.open('GET', '//disqus.com/next/config.json?' + new Date().getTime(), true);
+            xhrConfig.timeout = getQuery('timeout') ? getQuery('timeout') : 1000;
+            xhrConfig.onload = function() {
+                document.getElementById('comment').dataset.tips = '连接成功，正在加载 Disqus 评论框……';
+                comment.disqus();
+            }
+            xhrConfig.ontimeout = function() {
+                document.getElementById('comment').dataset.tips = '连接失败，正在加载简单评论框……';
+                comment.getlist();
+                xhrConfig.abort();
+            };
+            xhrConfig.onerror = function() {
+                document.getElementById('comment').dataset.tips = '连接失败，正在加载简单评论框……';
+                comment.getlist();
+            };
+            xhrConfig.send(null);
+        } else {
+            this.getlist();
+        }
+    },
+
+    // 加载 Disqus 评论框
+    disqus: function(){
+        if(!disqus_loaded){
+            var d = document,
+                s = d.createElement('script');
+            s.src = '//' + site.shortname + '.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        } else {
+            document.querySelector('.comment').style.display = 'none';
+            document.querySelector('.disqus').style.display = 'block';
+        }
     },
 
     // 评论表单事件绑定
@@ -321,7 +388,7 @@ Comment.prototype = {
     // 发表/回复评论
     post: function(e){
         var item = e.currentTarget.closest('.comment-item') || e.currentTarget.closest('.comment-box') ;
-        var message = item.querySelector('.comment-form-textarea').value;
+        var message = item.querySelector('.comment-form-textarea').value.replace('+','&#43;');
         var parentId = !!item.dataset.id ? item.dataset.id : '';
         var time = (new Date()).toJSON();
         var imgArr = item.getElementsByClassName('comment-image-item');
@@ -444,96 +511,102 @@ Comment.prototype = {
 
     // 获取评论列表
     getlist: function(){
-        var xhrListPosts = new XMLHttpRequest();
-        xhrListPosts.open('GET', site.apipath + '/getcomments.php?link=' + encodeURIComponent(page.url) + '&cursor=' + this.next, true);
-        xhrListPosts.send();
-        xhrListPosts.onreadystatechange = function() {
-            if (xhrListPosts.readyState == 4 && xhrListPosts.status == 200) {
-                var res = JSON.parse(xhrListPosts.responseText);
-                if (res.code === 0) {
-                    comment.thread = res.thread;
-                    document.getElementById('comment').classList.remove('loading')
-                    if (res.response == null) {
-                        return;
-                    }
-                    var posts = !!comment.unload ? res.response.concat(comment.unload) : res.response;
-                    comment.root = [];
-                    comment.unload = [];
-                    posts.forEach(function(post, i){
-                        comment.load(post,i);
-                        if(!post.parent){
-                            comment.root.unshift(post.id);
+        document.querySelector('.disqus').style.display = 'none';
+        document.querySelector('.comment').style.display = 'block';
+        if(!comment.count){
+            var xhrListPosts = new XMLHttpRequest();
+            xhrListPosts.open('GET', site.apipath + '/getcomments.php?link=' + encodeURIComponent(page.url) + '&cursor=' + this.next, true);
+            xhrListPosts.send();
+            xhrListPosts.onreadystatechange = function() {
+                if (xhrListPosts.readyState == 4 && xhrListPosts.status == 200) {
+                    document.getElementById('comment').dataset.tips = '';
+                    var res = JSON.parse(xhrListPosts.responseText);
+                    if (res.code === 0) {
+                        comment.thread = res.thread;
+                        document.querySelector('.comment').classList.remove('loading')
+                        if (res.response == null) {
+                            comment.count = res.posts;
+                            return;
                         }
-                    });
-                    // 兼容非首次获取
-                    if( res.cursor.hasPrev ){
-                        comment.root.forEach(function(item){
-                             document.querySelector('.comment-list').appendChild(document.getElementById('comment-' + item));
-                        })
-                        window.scrollTo(0, comment.offsetTop - 40);
-                    } else {
-                        comment.count = res.posts;
-                        document.getElementById('comment-count').innerHTML = res.posts + ' 条评论';
-                        document.querySelector('.comment-tips-link').setAttribute('href', res.link);
-                    }
+                        var posts = !!comment.unload ? res.response.concat(comment.unload) : res.response;
+                        comment.root = [];
+                        comment.unload = [];
+                        posts.forEach(function(post, i){
+                            comment.load(post,i);
+                            if(!post.parent){
+                                comment.root.unshift(post.id);
+                            }
+                        });
+                        // 兼容非首次获取
+                        if( res.cursor.hasPrev ){
+                            comment.root.forEach(function(item){
+                                document.querySelector('.comment-list').appendChild(document.getElementById('comment-' + item));
+                            })
+                            window.scrollTo(0, comment.offsetTop - 40);
+                        } else {
+                            comment.count = res.posts;
+                            document.getElementById('comment-count').innerHTML = res.posts + ' 条评论';
+                            document.querySelector('.comment-tips-link').setAttribute('href', res.link);
+                        }
 
-                    var loadmore = document.querySelector('.comment-loadmore');
-                    if( res.cursor.hasNext ){
-                        if (!loadmore){
-                            document.getElementById('comment').insertAdjacentHTML('beforeend', '<a href="javascript:;" class="comment-loadmore">加载更多评论</a>');
-                            document.querySelector('.comment-loadmore').addEventListener('click', function(){
-                                this.classList.add('loading');
-                                comment.offsetTop = this.offsetTop;
-                                comment.getlist();
-                            }, false);
-                        } else{
-                            loadmore.classList.remove('loading');
-                        }
-                        comment.next = res.cursor.next;
-                    } else {
-                        if(loadmore){
-                            loadmore.parentNode.removeChild(loadmore);
-                        }
-                    };
+                        var loadmore = document.querySelector('.comment-loadmore');
+                        if( res.cursor.hasNext ){
+                            if (!loadmore){
+                                document.querySelector('.comment').insertAdjacentHTML('beforeend', '<a href="javascript:;" class="comment-loadmore">加载更多评论</a>');
+                                document.querySelector('.comment-loadmore').addEventListener('click', function(){
+                                    this.classList.add('loading');
+                                    comment.offsetTop = this.offsetTop;
+                                    comment.getlist();
+                                }, false);
+                            } else{
+                                loadmore.classList.remove('loading');
+                            }
+                            comment.next = res.cursor.next;
+                        } else {
+                            if(loadmore){
+                                loadmore.parentNode.removeChild(loadmore);
+                            }
+                        };
 
-                    timeAgo();
-                    if (/^#disqus|^#comment/.test(location.hash) && !res.cursor.hasPrev ) {
-                        window.scrollTo(0, document.querySelector(location.hash).offsetTop);
-                    }
-                } else if ( res.code === 2){
-                    var createHTML = '<div class="comment-header">';
-                    createHTML += '    <span class="comment-header-item">创建 Thread<\/span>';
-                    createHTML += '<\/div>';
-                    createHTML += '<div class="comment-thread-form">';
-                    createHTML += '<p>由于 Disqus 没有本文的相关 Thread，故需先创建 Thread<\/p>';
-                    createHTML += '<div class="comment-form-item"><label class="comment-form-label">url:<\/label><input class="comment-form-input" id="thread-url" name="url" value="'+site.origin+page.url+'" \/><\/div>';
-                    createHTML += '<div class="comment-form-item"><label class="comment-form-label">title:<\/label><input class="comment-form-input" id="thread-title" name="title" value="'+page.title+'" \/><\/div>';
-                    createHTML += '<div class="comment-form-item"><label class="comment-form-label">slug:<\/label><input class="comment-form-input" id="thread-slug" name="slug" placeholder="（别名，选填）" \/><\/div>';
-                    createHTML += '<div class="comment-form-item"><label class="comment-form-label">message:<\/label><textarea class="comment-form-textarea" id="thread-message" name="message">'+page.desc+'<\/textarea><\/div>';
-                    createHTML += '<button id="thread-submit" class="comment-form-submit">提交<\/button><\/div>'
-                    document.getElementById('comment').classList.remove('loading');
-                    document.getElementById('comment').innerHTML = createHTML;
-                    document.getElementById('thread-submit').addEventListener('click',function(){
-                        var threadQuery = 'url=' + document.getElementById('thread-url').value + '&title=' + document.getElementById('thread-title').value + '&slug=' + document.getElementById('thread-slug').value + '&message=' + document.getElementById('thread-message').value;
-                        var xhrcreateThread = new XMLHttpRequest();
-                        xhrcreateThread.open('POST', site.apipath + '/createthread.php', true);
-                        xhrcreateThread.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                        xhrcreateThread.send(threadQuery);
-                        xhrcreateThread.onreadystatechange = function() {
-                            if (xhrcreateThread.readyState == 4 && xhrcreateThread.status == 200) {
-                                var resp = JSON.parse(xhrcreateThread.responseText);
-                                if( resp.code === 0 ) {
-                                    alert('创建 Thread 成功！');
-                                    location.reload();
+                        timeAgo();
+                        if (/^#disqus|^#comment/.test(location.hash) && !res.cursor.hasPrev ) {
+                            window.scrollTo(0, document.querySelector(location.hash).offsetTop);
+                        }
+                    } else if ( res.code === 2){
+                        var createHTML = '<div class="comment-header">';
+                        createHTML += '    <span class="comment-header-item">创建 Thread<\/span>';
+                        createHTML += '<\/div>';
+                        createHTML += '<div class="comment-thread-form">';
+                        createHTML += '<p>由于 Disqus 没有本文的相关 Thread，故需先创建 Thread<\/p>';
+                        createHTML += '<div class="comment-form-item"><label class="comment-form-label">url:<\/label><input class="comment-form-input" id="thread-url" name="url" value="'+site.origin+page.url+'" \/><\/div>';
+                        createHTML += '<div class="comment-form-item"><label class="comment-form-label">title:<\/label><input class="comment-form-input" id="thread-title" name="title" value="'+page.title+'" \/><\/div>';
+                        createHTML += '<div class="comment-form-item"><label class="comment-form-label">slug:<\/label><input class="comment-form-input" id="thread-slug" name="slug" placeholder="（别名，选填）" \/><\/div>';
+                        createHTML += '<div class="comment-form-item"><label class="comment-form-label">message:<\/label><textarea class="comment-form-textarea" id="thread-message" name="message">'+page.desc+'<\/textarea><\/div>';
+                        createHTML += '<button id="thread-submit" class="comment-form-submit">提交<\/button><\/div>'
+                        document.querySelector('.comment').classList.remove('loading');
+                        document.querySelector('.comment').innerHTML = createHTML;
+                        document.getElementById('thread-submit').addEventListener('click',function(){
+                            var threadQuery = 'url=' + document.getElementById('thread-url').value + '&title=' + document.getElementById('thread-title').value + '&slug=' + document.getElementById('thread-slug').value + '&message=' + document.getElementById('thread-message').value;
+                            var xhrcreateThread = new XMLHttpRequest();
+                            xhrcreateThread.open('POST', site.apipath + '/createthread.php', true);
+                            xhrcreateThread.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                            xhrcreateThread.send(threadQuery);
+                            xhrcreateThread.onreadystatechange = function() {
+                                if (xhrcreateThread.readyState == 4 && xhrcreateThread.status == 200) {
+                                    var resp = JSON.parse(xhrcreateThread.responseText);
+                                    if( resp.code === 0 ) {
+                                        alert('创建 Thread 成功！');
+                                        location.reload();
+                                    }
                                 }
                             }
-                        }
-                    },true);
+                        },true);
+                    }
                 }
             }
-        }
-        xhrListPosts.onload = function(){
-            comment.form();
+            xhrListPosts.onload = function(){
+                comment.form();
+            }
         }
 
     },
@@ -662,7 +735,8 @@ Comment.prototype = {
 }
 
 if (!!document.getElementById('comment')){
-    var initHTML = '    <div class="comment-header">';
+    var initHTML = '<div class="comment loading">';
+    initHTML += '    <div class="comment-header">';
     initHTML += '        <span class="comment-header-item" id="comment-count">评论<\/span>';
     initHTML += '    <\/div>';
     initHTML += '    <div class="comment-box">';
@@ -713,9 +787,9 @@ if (!!document.getElementById('comment')){
     initHTML += '    <\/div>';
     initHTML += '    <ul id="comments" class="comment-list">';
     initHTML += '    <\/ul>';
-    document.getElementById('comment').classList.add('comment');
-    document.getElementById('comment').classList.add('loading');
+    initHTML += '<\/div>';
+    initHTML += '<div class=\"disqus\" id=\"disqus_thread\"><\/div>'
     document.getElementById('comment').innerHTML = initHTML;
-    var guest = new Guest();
-    var comment =  new Comment();
+    window.guest = new Guest();
+    window.comment =  new Comment();
 }

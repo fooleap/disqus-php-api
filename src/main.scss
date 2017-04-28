@@ -1,60 +1,36 @@
 @charset "utf-8";
-.comment-toggle{
-    display: flex;
-    .comment-toggle-input{
+#comment{
+    position: relative;
+    margin-bottom: 40px;
+    &:before{
+        content: attr(data-tips);
+        display: block;
+        position: absolute;
+        width: 100%;
+        left: 0;
+        top: 80px;
+        text-align: center;
+        top: 60px;
+        text-align: center;
+        font-size: 14px;
+        color: #aeafb1;
+    }
+    .disqus{
         display: none;
-        &:checked + .comment-toggle-icon {
-            background-color: #2aa0ff;
-            &:before{
-                margin-left: 11px;
-            }
-        }
-    }
-    .comment-toggle-icon{
-        display: block;
-        width: 32px;
-        height: 20px;
-        background-color: #434343;
-        border-radius: 10px;
-        box-sizing: border-box;
-        cursor: pointer;
-        padding: 2.5px 3px;
-        transition: .3s all; 
-        &:before{
-            transition: .3s all; 
-            content: "";
-            display: block;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background-color: #fff;
-        }
-    }
-    .comment-toggle-button{
-        display: block;
-        color: #fff !important;
-        background-color: #434343;
-        border-radius: 2px;
-        line-height: 20px;
-        height: 20px;
-        padding: 0 3px;
-        font-size: 12px;
-        cursor: pointer;
-        margin: 0 5px;
     }
 }
 .comment{
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box
+    }
     font: 13px/1.6 "Helvetica Neue", Helvetica, Arial, "微软雅黑", "Microsoft YaHei", sans-serif;
     min-height: 40px;
     margin: 5px auto;
     word-wrap: break-word;
     .icon{
         max-width: 20px;
-    }
-    *{
-        margin:0;
-        padding:0;
-        box-sizing:border-box
     }
     strong,b{
         font-weight:bold;
