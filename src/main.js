@@ -295,16 +295,42 @@ Comment.prototype = {
     //emoji表情
     emoji: [
         {
-            code:':grin:',
-            title:'露齿笑',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f601.png'
-        },
-        {
+            code:':smile:',
+            title:'笑脸',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f604.png'
+        },{
+            code:':mask:',
+            title:'生病',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f637.png'
+        },{
             code:':joy:',
             title:'破涕为笑',
             url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f602.png'
-        },
-        {
+        },{
+            code:':stuck_out_tongue_closed_eyes:',
+            title:'吐舌',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f61d.png'
+        },{
+            code:':flushed:',
+            title:'脸红',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f633.png'
+        },{
+            code:':scream:',
+            title:'恐惧',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f631.png'
+        },{
+            code:':pensive:',
+            title:'失望',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f614.png'
+        },{
+            code:':unamused:',
+            title:'无语',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f612.png'
+        },{
+            code:':grin:',
+            title:'露齿笑',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f601.png'
+        },{
             code:':heart_eyes:',
             title:'色',
             url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f60d.png'
@@ -312,10 +338,6 @@ Comment.prototype = {
             code:':sweat:',
             title:'汗',
             url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f613.png'
-        },{
-            code:':unamused:',
-            title:'无语',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f612.png'
         },{
             code:':smirk:',
             title:'得意',
@@ -325,41 +347,17 @@ Comment.prototype = {
             title:'满意',
             url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f60c.png'
         },{
-            code:':wx_smirk:',
-            title:'奸笑',
-            url: site.apipath + '/emoticons/2_02.png'
+            code:':rolling_eyes:',
+            title:'翻白眼',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f644.png'
         },{
-            code:':wx_hey:',
-            title:'嘿哈',
-            url: site.apipath + '/emoticons/2_04.png'
+            code:':ok_hand:',
+            title:'OK',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f44c.png'
         },{
-            code:':wx_facepalm:',
-            title:'捂脸',
-            url: site.apipath + '/emoticons/2_05.png'
-        },{
-            code:':wx_smart:',
-            title:'机智',
-            url: site.apipath + '/emoticons/2_06.png'
-        },{
-            code:':wx_tea:',
-            title:'茶',
-            url: site.apipath + '/emoticons/2_07.png'
-        },{
-            code:':wx_yeah:',
-            title:'耶',
-            url: site.apipath + '/emoticons/2_11.png'
-        },{
-            code:':wx_moue:',
-            title:'皱眉',
-            url: site.apipath + '/emoticons/2_12.png'
-        },{
-            code:':doge:',
-            title:'doge',
-            url: site.apipath + '/emoticons/doge.png'
-        },{
-            code:':tanshou:',
-            title:'摊手',
-            url: site.apipath + '/emoticons/tanshou.png'
+            code:':v:',
+            title:'胜利',
+            url:'//assets-cdn.github.com/images/icons/emoji/unicode/270c.png'
         }
     ],
     
@@ -513,7 +511,7 @@ Comment.prototype = {
     getlist: function(){
         document.querySelector('.disqus').style.display = 'none';
         document.querySelector('.comment').style.display = 'block';
-        if(!comment.count){
+        if(!this.count){
             var xhrListPosts = new XMLHttpRequest();
             xhrListPosts.open('GET', site.apipath + '/getcomments.php?link=' + encodeURIComponent(page.url) + '&cursor=' + this.next, true);
             xhrListPosts.send();

@@ -13,7 +13,6 @@ $forum = '';  // 网站shortname
 $username = ''; // 个人昵称 如 fooleap，为了自己发表评论是登录状态，postcomment 有相关的判断
 $email = ''; // Disqus 账号，邮箱号
 $password = ''; // Disqus 密码
-$emoticons_path ='http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/emoticons';
 
 // PHPMailer 相关配置，具体可查看 sendmail 文件
 $site_name = 'Fooleap\'s Blog'; // 网站名
@@ -110,38 +109,13 @@ function curl_post($url, $data){
 
 function post_format( $post ){
     global $client;
-    global $emoticons_path;
 
     // 访客指定 Gravatar 头像
     $avatar_url = '//cdn.v2ex.com/gravatar/'.md5($post->author->email).'?d=https://a.disquscdn.com/images/noavatar92.png';
     $post->author->avatar->cache = $post->author->isAnonymous ? $avatar_url : $post->author->avatar->cache;
 
     // 表情
-    $post->message = str_replace(
-        array(
-            ':doge:',
-            ':tanshou:',
-            ':wx_smirk:',
-            ':wx_hey:',
-            ':wx_facepalm:',
-            ':wx_smart:',
-            ':wx_tea:',
-            ':wx_yeah:',
-            ':wx_moue:',
-        ),
-        array(
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/doge.png">',
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/tanshou.png">',
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_02.png">',
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_04.png">',
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_05.png">',
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_06.png">',
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_07.png">',
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_11.png">',
-            '<img class="emojione" width="22" height="22" src="'.$emoticons_path.'/2_12.png">',
-        ),
-        $client->unicodeToImage($post->message)
-    );
+    $post->message = $client->unicodeToImage($post->message);
 
     // 去除链接重定向
     $urlPat = '/<a.*?href="(.*?disq\.us.*?)".*?>(.*?)<\/a>/i';

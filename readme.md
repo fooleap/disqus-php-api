@@ -37,4 +37,4 @@ disqus-php-api
 - [x] 检测是否能连接 Disqus，加载相应的评论框
 - [x] Emoji 表情以 unicode 发送给 Disqus
 - [x] 非访客不发送回复通知邮件
-- [ ] 移除微信表情
+- [x] 移除微信、微博表情
