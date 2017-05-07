@@ -1,28 +1,34 @@
 {
   "name": "disqus_api",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "disqus-api.js",
   "dependencies": {
     "css-loader": "^0.28.0",
     "sass-loader": "^6.0.3",
-    "style-loader": "^0.16.1"
-  },
-  "peerDependencies": {
+    "style-loader": "^0.16.1",
     "node-sass": "^4.0.0",
-    "webpack": "^2.0.0"
-  },
-  "devDependencies": {
+    "webpack": "^2.0.0",
     "autoprefixer": "^6.7.7",
+    "element-closest": "^2.0.2",
     "extract-text-webpack-plugin": "^2.1.0",
     "postcss": "^5.2.16",
     "postcss-loader": "^1.3.3",
+    "timeago.js": "^3.0.1",
     "webpack": "^2.3.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["disqus"],
+  "author": "fooleap",
   "license": "ISC",
-  "description": ""
+  "description": "disqus-php-api ===========",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fooleap/disqus-php-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fooleap/disqus-php-api/issues"
+  },
+  "homepage": "https://github.com/fooleap/disqus-php-api#readme"
 }

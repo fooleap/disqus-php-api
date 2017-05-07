@@ -1,4 +1,7 @@
 import './main.scss';
+var elementClosest = require('element-closest');
+var timeago = require('timeago.js');
+
 var scripts = document.querySelectorAll('script');
 for(var i = 0; i < scripts.length; i++){
     if( /disqus-api.js/.test(scripts[i].src) ){
@@ -30,55 +33,6 @@ var page = {
     'title': document.title,
     'url': location.pathname,
     'desc': document.querySelector('meta[name="description"]').content
-}
-
-function timeAgo(selector) {
-    var templates = {
-        prefix: '',
-        suffix: '前',
-        seconds: '几秒',
-        minute: '1 分钟',
-        minutes: '%d 分钟',
-        hour: '1 小时',
-        hours: '%d 小时',
-        day: '1 天',
-        days: '%d 天',
-        month: '1 个月',
-        months: '%d 个月',
-        year: '1 年',
-        years: '%d 年'
-    };
-    var template = function(t, n) {
-        return templates[t] && templates[t].replace(/%d/i, Math.abs(Math.round(n)));
-    };
-
-    var timer = function(time) {
-        if (!time) return;
-        time = time.replace(/\.\d+/, '');
-        time = time.replace(/-/, '/').replace(/-/, '/');
-        time = time.replace(/T/, ' ').replace(/Z/, ' UTC');
-        time = time.replace(/([\+\-]\d\d)\:?(\d\d)/, ' $1$2'); // -04:00 -> -0400
-        time = new Date(time * 1000 || time);
-
-        var now = new Date();
-        var seconds = ((now.getTime() - time) * .001) >> 0;
-        var minutes = seconds / 60;
-        var hours = minutes / 60;
-        var days = hours / 24;
-        var years = days / 365;
-
-        return templates.prefix + (
-            seconds < 45 && template('seconds', seconds) || seconds < 90 && template('minute', 1) || minutes < 45 && template('minutes', minutes) || minutes < 90 && template('hour', 1) || hours < 24 && template('hours', hours) || hours < 42 && template('day', 1) || days < 30 && template('days', days) || days < 45 && template('month', 1) || days < 365 && template('months', days / 30) || years < 1.5 && template('year', 1) || template('years', years)) + templates.suffix;
-    };
-
-    var elements = document.querySelectorAll('.timeago');
-    for (var i in elements) {
-        var $this = elements[i];
-        if (typeof $this === 'object') {
-            $this.innerHTML = timer($this.getAttribute('title') || $this.getAttribute('datetime'));
-        }
-    }
-    setTimeout(timeAgo, 60000);
 }
 
 var disqus_loaded = false;
@@ -420,7 +374,7 @@ Comment.prototype = {
             'media': media
         };
         comment.load(post, comment.count);
-        timeAgo();
+        timeago().render(document.querySelectorAll('.timeago'), 'zh_CN');
 
         message += mediaStr;
         
@@ -457,7 +411,7 @@ Comment.prototype = {
                     comment.count += 1;
                     document.getElementById('comment-count').innerHTML = comment.count + ' 条评论';
                     comment.load(res.response, comment.count);
-                    timeAgo();
+                    timeago().render(document.querySelectorAll('.timeago'), 'zh_CN');
                     comment.form();
                 } else if (res.code === 2) {
                     if (res.response.indexOf('email') > -1) {
@@ -511,7 +465,7 @@ Comment.prototype = {
     getlist: function(){
         document.querySelector('.disqus').style.display = 'none';
         document.querySelector('.comment').style.display = 'block';
-        if(!this.count){
+        if(!this.count || !!comment.offsetTop){
             var xhrListPosts = new XMLHttpRequest();
             xhrListPosts.open('GET', site.apipath + '/getcomments.php?link=' + encodeURIComponent(page.url) + '&cursor=' + this.next, true);
             xhrListPosts.send();
@@ -540,7 +494,8 @@ Comment.prototype = {
                             comment.root.forEach(function(item){
                                 document.querySelector('.comment-list').appendChild(document.getElementById('comment-' + item));
                             })
-                            window.scrollTo(0, comment.offsetTop - 40);
+                            window.scrollTo(0, comment.offsetTop);
+                            comment.offsetTop = undefined;
                         } else {
                             comment.count = res.posts;
                             document.getElementById('comment-count').innerHTML = res.posts + ' 条评论';
@@ -566,7 +521,7 @@ Comment.prototype = {
                             }
                         };
 
-                        timeAgo();
+                        timeago().render(document.querySelectorAll('.timeago'), 'zh_CN');
                         if (/^#disqus|^#comment/.test(location.hash) && !res.cursor.hasPrev ) {
                             window.scrollTo(0, document.querySelector(location.hash).offsetTop);
                         }
