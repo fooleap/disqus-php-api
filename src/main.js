@@ -25,15 +25,17 @@ function getQuery(param) {
 }
 
 var site = {
-    'apipath': jsUrl.substring(0, jsUrl.lastIndexOf('/')) + '/api',
-    'origin': location.origin,
-    'shortname': getQuery('shortname')
+    "apipath": jsUrl.substring(0, jsUrl.lastIndexOf('/')) + "/api",
+    "origin": location.origin,
+    "emoji": "//assets-cdn.github.com/images/icons/emoji/unicode",
+    "shortname": getQuery('shortname')
 }
 var page = {
-    'title': document.title,
-    'url': location.pathname,
-    'desc': document.querySelector('meta[name="description"]').content
+    "title": document.title,
+    "url": location.pathname,
 }
+
+page.desc = document.querySelector('meta[name="description"]') ? document.querySelector('meta[name="description"]').content : '';
 
 var disqus_loaded = false;
 window.disqus_config = function() {
@@ -251,67 +253,67 @@ Comment.prototype = {
         {
             code:':smile:',
             title:'笑脸',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f604.png'
+            url:site.emoji+'/1f604.png'
         },{
             code:':mask:',
             title:'生病',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f637.png'
+            url:site.emoji+'/1f637.png'
         },{
             code:':joy:',
             title:'破涕为笑',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f602.png'
+            url:site.emoji+'/1f602.png'
         },{
             code:':stuck_out_tongue_closed_eyes:',
             title:'吐舌',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f61d.png'
+            url:site.emoji+'/1f61d.png'
         },{
             code:':flushed:',
             title:'脸红',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f633.png'
+            url:site.emoji+'/1f633.png'
         },{
             code:':scream:',
             title:'恐惧',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f631.png'
+            url:site.emoji+'/1f631.png'
         },{
             code:':pensive:',
             title:'失望',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f614.png'
+            url:site.emoji+'/1f614.png'
         },{
             code:':unamused:',
             title:'无语',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f612.png'
+            url:site.emoji+'/1f612.png'
         },{
             code:':grin:',
             title:'露齿笑',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f601.png'
+            url:site.emoji+'/1f601.png'
         },{
             code:':heart_eyes:',
             title:'色',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f60d.png'
+            url:site.emoji+'/1f60d.png'
         },{
             code:':sweat:',
             title:'汗',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f613.png'
+            url:site.emoji+'/1f613.png'
         },{
             code:':smirk:',
             title:'得意',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f60f.png'
+            url:site.emoji+'/1f60f.png'
         },{
             code:':relieved:',
             title:'满意',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f60c.png'
+            url:site.emoji+'/1f60c.png'
         },{
             code:':rolling_eyes:',
             title:'翻白眼',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f644.png'
+            url:site.emoji+'/1f644.png'
         },{
             code:':ok_hand:',
             title:'OK',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/1f44c.png'
+            url:site.emoji+'/1f44c.png'
         },{
             code:':v:',
             title:'胜利',
-            url:'//assets-cdn.github.com/images/icons/emoji/unicode/270c.png'
+            url:site.emoji+'/270c.png'
         }
     ],
     
@@ -392,7 +394,7 @@ Comment.prototype = {
         // POST 操作
         var postQuery = 'thread=' + comment.thread + 
             '&parent=' + parentId + 
-            '&message=' + message + 
+            '&message=' + encodeURIComponent(message) + 
             '&name=' + guest.name + 
             '&email=' + guest.email + 
             '&url=' + guest.url +
@@ -465,7 +467,7 @@ Comment.prototype = {
     getlist: function(){
         document.querySelector('.disqus').style.display = 'none';
         document.querySelector('.comment').style.display = 'block';
-        if(!this.count || !!comment.offsetTop){
+        if(!this.count || !!this.offsetTop){
             var xhrListPosts = new XMLHttpRequest();
             xhrListPosts.open('GET', site.apipath + '/getcomments.php?link=' + encodeURIComponent(page.url) + '&cursor=' + this.next, true);
             xhrListPosts.send();

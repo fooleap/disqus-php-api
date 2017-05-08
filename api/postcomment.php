@@ -20,8 +20,8 @@
     );
     $data = curl_post($curl_url, $post_data);
 
-    $post = $data->response;
-    $content = $data -> code != 0 ? $post : post_format($post);;
+    $post = $data -> response;
+    $content = $data -> code != 0 ? $post : post_format($post);
 
     $output = array(
        'code' => $data -> code,
