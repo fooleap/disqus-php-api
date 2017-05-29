@@ -37,6 +37,7 @@ if ( $day < date('Ymd') ){
     curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
     curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_HEADER, 1);
     $response = curl_exec($ch);
     preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
@@ -79,7 +80,8 @@ function curl_get($url){
         CURLOPT_URL => $url,
         CURLOPT_COOKIE => $session,
         CURLOPT_HEADER => false,
-        CURLOPT_RETURNTRANSFER => true
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false
     );
     $curl = curl_init();
     curl_setopt_array($curl, $options);
@@ -98,7 +100,8 @@ function curl_post($url, $data){
         CURLOPT_ENCODING => 'gzip, deflate',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => $data
+        CURLOPT_POSTFIELDS => $data,
+        CURLOPT_SSL_VERIFYPEER => false
     );
     $curl = curl_init();
     curl_setopt_array($curl, $options);

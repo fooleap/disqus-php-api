@@ -42,7 +42,7 @@ window.disqus_config = function() {
     this.page.url = site.origin + page.url;
     this.callbacks.onReady.push(function() {
         disqus_loaded = true;
-        document.querySelector('.comment').style.display = 'none';
+        document.querySelector('#comment .comment').style.display = 'none';
         document.getElementById('comment').dataset.tips = '';
         document.querySelector('.disqus').style.display = 'block';
     });
@@ -165,7 +165,7 @@ Comment.prototype = {
             s.setAttribute('data-timestamp', +new Date());
             (d.head || d.body).appendChild(s);
         } else {
-            document.querySelector('.comment').style.display = 'none';
+            document.querySelector('#comment .comment').style.display = 'none';
             document.querySelector('.disqus').style.display = 'block';
         }
     },
@@ -466,7 +466,7 @@ Comment.prototype = {
     // 获取评论列表
     getlist: function(){
         document.querySelector('.disqus').style.display = 'none';
-        document.querySelector('.comment').style.display = 'block';
+        document.querySelector('#comment .comment').style.display = 'block';
         if(!this.count || !!this.offsetTop){
             var xhrListPosts = new XMLHttpRequest();
             xhrListPosts.open('GET', site.apipath + '/getcomments.php?link=' + encodeURIComponent(page.url) + '&cursor=' + this.next, true);
@@ -477,7 +477,7 @@ Comment.prototype = {
                     var res = JSON.parse(xhrListPosts.responseText);
                     if (res.code === 0) {
                         comment.thread = res.thread;
-                        document.querySelector('.comment').classList.remove('loading')
+                        document.querySelector('#comment .comment').classList.remove('loading')
                         if (res.response == null) {
                             comment.count = res.posts;
                             return;
@@ -507,7 +507,7 @@ Comment.prototype = {
                         var loadmore = document.querySelector('.comment-loadmore');
                         if( res.cursor.hasNext ){
                             if (!loadmore){
-                                document.querySelector('.comment').insertAdjacentHTML('beforeend', '<a href="javascript:;" class="comment-loadmore">加载更多评论</a>');
+                                document.querySelector('#comment .comment').insertAdjacentHTML('beforeend', '<a href="javascript:;" class="comment-loadmore">加载更多评论</a>');
                                 document.querySelector('.comment-loadmore').addEventListener('click', function(){
                                     this.classList.add('loading');
                                     comment.offsetTop = this.offsetTop;
@@ -538,8 +538,8 @@ Comment.prototype = {
                         createHTML += '<div class="comment-form-item"><label class="comment-form-label">slug:<\/label><input class="comment-form-input" id="thread-slug" name="slug" placeholder="（别名，选填）" \/><\/div>';
                         createHTML += '<div class="comment-form-item"><label class="comment-form-label">message:<\/label><textarea class="comment-form-textarea" id="thread-message" name="message">'+page.desc+'<\/textarea><\/div>';
                         createHTML += '<button id="thread-submit" class="comment-form-submit">提交<\/button><\/div>'
-                        document.querySelector('.comment').classList.remove('loading');
-                        document.querySelector('.comment').innerHTML = createHTML;
+                        document.querySelector('#comment .comment').classList.remove('loading');
+                        document.querySelector('#comment .comment').innerHTML = createHTML;
                         document.getElementById('thread-submit').addEventListener('click',function(){
                             var threadQuery = 'url=' + document.getElementById('thread-url').value + '&title=' + document.getElementById('thread-title').value + '&slug=' + document.getElementById('thread-slug').value + '&message=' + document.getElementById('thread-message').value;
                             var xhrcreateThread = new XMLHttpRequest();
