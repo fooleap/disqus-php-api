@@ -2,25 +2,13 @@
 namespace Emojione;
 header('Content-type:text/json');
 header('Access-Control-Allow-Origin: *');
+require_once('config.php');
 require_once( dirname(__FILE__) . '/emojione/autoload.php');
 $client = new Client(new Ruleset());
 $client->imageType = 'png';
-$client->imagePathPNG = '//assets-cdn.github.com/images/icons/emoji/unicode/';
+$client->imagePathPNG = $emoji_path;
 
-$public_key = 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F';
-$origin = 'http://blog.fooleap.org'; // 网站域名
-$forum = '';  // 网站shortname
-$username = ''; // 个人昵称 如 fooleap，为了自己发表评论是登录状态，postcomment 有相关的判断
-$email = ''; // Disqus 账号，邮箱号
-$password = ''; // Disqus 密码
-
-// PHPMailer 相关配置，具体可查看 sendmail 文件
-$site_name = 'Fooleap\'s Blog'; // 网站名
-$smtp_secure = 'ssl'; //
-$smtp_host = 'smtp.exmail.qq.com'; // SMTP 服务器
-$smtp_port = 465; // SMTP 服务器的端口号
-$smtp_username = 'noreply@fooleap.org'; // SMTP 服务器用户名
-$smtp_password = ''; //SMTP 服务器密码
+$disqus_host = $gfw_inside ? $disqus_ip : 'disqus.com';
 
 //读取文件
 $session_data = json_decode(file_get_contents(sys_get_temp_dir().'/session.json'));
@@ -29,41 +17,48 @@ $day = date('Ymd', strtotime('+20 day', strtotime($session_data -> day)));
 
 //20 天前则模拟登录，重新获取 session 并保存
 if ( $day < date('Ymd') ){
-    // 取得 csrftoken
-    $url = "https://disqus.com/profile/login/";
-    $cookie = "cookie.txt";
+    $cookie_temp = sys_get_temp_dir().'/cookie_temp.txt';
+    $cookie = sys_get_temp_dir().'/cookie.txt';
+
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
-    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HEADER, 1);
+
+    // 取得 csrftoken
+    $options = array(
+        CURLOPT_URL => 'https://'.$disqus_host.'/profile/login/',
+        CURLOPT_HTTPHEADER => array('Host: disqus.com'),
+        CURLOPT_COOKIEJAR => $cookie_temp,
+        CURLOPT_HEADER => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false
+    );
+    curl_setopt_array($ch, $options);
     $response = curl_exec($ch);
+
     preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
     $cookies = array();
     foreach($matches[1] as $item) {
-        parse_str($item, $cookie);
-        $cookies = array_merge($cookies, $cookie);
+        parse_str($item, $cookie_temp);
+        $cookies = array_merge($cookies, $cookie_temp);
     }
     $token = str_replace("Set-Cookie: csrftoken=", "", $matches[0][0]);
 
-    //取得 session
-    curl_setopt($ch, CURLOPT_REFERER, $url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
-    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie);
+    // 登录并取得 session
     $params = array(
         'csrfmiddlewaretoken' => $token,
         'username' => $email,
         'password' => $password 
     );
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_REFERER, 'https://disqus.com/profile/login/');
+    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_temp);
+    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     $result = curl_exec($ch);
+
     preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $result, $output_matches);
     $session = str_replace("Set-Cookie: ", "", $output_matches[0][2]);
+
     curl_close($ch);
 
     //写入文件
@@ -74,14 +69,17 @@ if ( $day < date('Ymd') ){
 }
 
 function curl_get($url){
-    global $session;
+    global $session, $disqus_host;
+    $curl_url = 'https://'.$disqus_host.$url;
 
     $options = array(
-        CURLOPT_URL => $url,
+        CURLOPT_URL => $curl_url,
+        CURLOPT_HTTPHEADER => array('Host: disqus.com'),
         CURLOPT_COOKIE => $session,
         CURLOPT_HEADER => false,
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false
     );
     $curl = curl_init();
     curl_setopt_array($curl, $options);
@@ -91,17 +89,22 @@ function curl_get($url){
 }
 
 function curl_post($url, $data){
-    global $session;
+    global $session, $disqus_host;
+
+    $curl_url = strpos($url, 'https') !== false ? $url : 'https://'.$disqus_host.$url;
+    $curl_host = strpos($url, 'https') !== false ? 'uploads.services.disqus.com' : 'disqus.com';
 
     $options = array(
-        CURLOPT_URL => $url,
+        CURLOPT_URL => $curl_url,
+        CURLOPT_HTTPHEADER => array('Host: '.$curl_host),
         CURLOPT_COOKIE => $session,
         CURLOPT_HEADER => false,
         CURLOPT_ENCODING => 'gzip, deflate',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $data,
-        CURLOPT_SSL_VERIFYPEER => false
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false
     );
     $curl = curl_init();
     curl_setopt_array($curl, $options);
@@ -111,10 +114,10 @@ function curl_post($url, $data){
 }
 
 function post_format( $post ){
-    global $client;
+    global $client, $gravatar_cdn, $gravatar_default;
 
     // 访客指定 Gravatar 头像
-    $avatar_url = '//cdn.v2ex.com/gravatar/'.md5($post->author->email).'?d=https://a.disquscdn.com/images/noavatar92.png';
+    $avatar_url = $gravatar_cdn.md5($post->author->email).'?d='.$gravatar_default;
     $post->author->avatar->cache = $post->author->isAnonymous ? $avatar_url : $post->author->avatar->cache;
 
     // 表情

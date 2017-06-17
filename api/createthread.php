@@ -1,7 +1,7 @@
 <?php
     namespace Emojione;
     require_once('init.php');
-    $curl_url = 'https://disqus.com/api/3.0/threads/create.json';
+    $curl_url = '/api/3.0/threads/create.json';
     $post_data = array(
         'api_key' => $public_key,
         'forum' => $forum,

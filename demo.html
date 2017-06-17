@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>disqus-php-api 示例</title>
+        <link rel="stylesheet" href="./dist/iDisqus.min.css" />
+        <style>
+            body{
+                width: 700px;
+                margin: 0 auto;
+                > * {
+                    width: 100%;
+                }
+            }
+        </style>
+        <script src="./dist/iDisqus.min.js"></script>
+    <body>
+        <div id="comment"></div>
+        <p>本页共有 <span data-disqus-url="/disqus-php-api.html"></span> 条评论</p>
+        <ul id="popular-posts"></ul>
+        <script>
+            var disq = new iDisqus('comment', {
+                forum: 'fooleap',
+                api: 'http://api.fooleap.org/disqus',
+                site: 'http://blog.fooleap.org',
+                url: '/disqus-php-api.html',
+                mode: 2,
+                timeout: 3000,
+                popular: document.getElementById('popular-posts'),
+                slug: location.pathname.slice(1).split('.')[0],
+                init: true,
+            });
+            disq.popular();
+            disq.count();
+        </script>
+    </body>
+</html>

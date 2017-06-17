@@ -8,7 +8,7 @@
         'api_key' => $public_key,
         'post' => $_POST['parent']
     );
-    $curl_url = 'https://disqus.com/api/3.0/posts/details.json?'.http_build_query($fields_data);
+    $curl_url = '/api/3.0/posts/details.json?'.http_build_query($fields_data);
     $data = curl_get($curl_url);
     $post = post_format($data->response);
     $parent_isanon = $data->response->author->isAnonymous; //是否为访客
@@ -21,7 +21,7 @@
         'api_key' => $public_key,
         'post' => $_POST['id']
     );
-    $curl_url = 'https://disqus.com/api/3.0/posts/details.json?'.http_build_query($fields_data);
+    $curl_url = '/api/3.0/posts/details.json?'.http_build_query($fields_data);
     $data = curl_get($curl_url);
     $post = post_format($data->response);
     $reply_name    = $post['name']; //回复者人名

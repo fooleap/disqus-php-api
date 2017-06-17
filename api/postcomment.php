@@ -2,7 +2,7 @@
     namespace Emojione;
     require_once('init.php');
 
-    $curl_url = 'https://disqus.com/api/3.0/posts/create.json';
+    $curl_url = '/api/3.0/posts/create.json';
     $author_name = $_POST['name'] == $username ? null : $_POST['name'];
     $author_email = $_POST['email'] == $email ? null : $_POST['email'];
     $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null: $_POST['url'];
@@ -37,8 +37,9 @@
             'title'=> $_POST['title']
         );
         $mail = curl_init();
+        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
         $curl_opt = array(
-            CURLOPT_URL => 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/sendemail.php',
+            CURLOPT_URL => $protocol.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/sendemail.php',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $mail_query,

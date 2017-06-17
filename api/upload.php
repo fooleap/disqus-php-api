@@ -1,8 +1,8 @@
 <?php
     namespace Emojione;
     require_once('init.php');
-
-    $curl_url = 'https://uploads.services.disqus.com/api/3.0/media/create.json';
+    $media_host = $gfw_inside ? 'https://'.$disqus_media_ip : 'https://uploads.services.disqus.com';
+    $curl_url = $media_host.'/api/3.0/media/create.json';
     $cfile = curl_file_create($_FILES['file']['tmp_name'],$_FILES['file']['type'],$_FILES['file']['name']);
     $filename = $_FILES['file']['name'];
     $filedata = $_FILES['file']['tmp_name'];
