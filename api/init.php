@@ -53,6 +53,7 @@ if ( $day < date('Ymd') ){
     curl_setopt($ch, CURLOPT_REFERER, 'https://disqus.com/profile/login/');
     curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_temp);
     curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
     $result = curl_exec($ch);
 

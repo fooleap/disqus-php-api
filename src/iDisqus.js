@@ -203,7 +203,7 @@
         _.opts = typeof(arguments[1]) == 'object' ? arguments[1] : arguments[0];
         _.dom =  d.getElementById(typeof(arguments[0]) == 'string' ? arguments[0] : 'comment');
         _.opts.site = !!_.opts.site ? _.opts.site : location.origin;
-        _.opts.url = !!_.opts.site ? _.opts.site : location.pathname;
+        _.opts.url = !!_.opts.url ? _.opts.url : location.pathname;
         _.opts.title = !!_.opts.title ? _.opts.title : d.title;
         _.opts.desc =  !!_.opts.desc ? _.opts.desc : (!!d.querySelector('[name="description"]') ? d.querySelector('[name="description"]').content : '');
         _.opts.mode = !!_.opts.mode ? _.opts.mode : 1;
@@ -241,8 +241,8 @@
                 _.dom.querySelector('#idisqus').style.display = 'none';
                 _.dom.querySelector('#disqus_thread').style.display = 'block';
                 if( _.opts.mode == 3 && !!_.opts.toggle) {
+                    _.opts.toggle.disabled = '';
                     _.opts.toggle.checked = true;
-                    _.opts.toggle.disabled = false;
                     _.opts.toggle.addEventListener('change', _.toggle.bind(_), false);
                 }
             });

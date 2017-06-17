@@ -441,6 +441,12 @@
         font: 18px/30px "Helvetica Neue", Helvetica, Arial,"微软雅黑", "Microsoft YaHei";
         padding: 7px;
         transition: all .2s ease-in-out;
+        &::-webkit-input-placeholder {
+            color: #7f919e;
+        }
+        &::-moz-placeholder {
+            color: #7f919e;
+        }
     }
 }
 
@@ -545,6 +551,12 @@
     width: 30px; 
     line-height: 32px;
     flex: auto;
+    &::-webkit-input-placeholder {
+        color: #7f919e;
+    }
+    &::-moz-placeholder {
+        color: #7f919e;
+    }
     &:focus {
         border: 2px solid #c2c6cc;
     }
@@ -595,10 +607,7 @@
     }
     .comment-item {
         display: flex;
-        margin-bottom: 10px;
-        .comment-item {
-            margin-bottom: 0;
-        }
+        margin: 8px 0;
     }
     .comment-item-header {
         line-height: 1.2;
@@ -659,7 +668,7 @@
         }
     }
     .comment-box{
-        margin: 6px 0;
+        margin: 8px 0;
     }
     .comment-item-children .comment-item-avatar,
     .comment-item-children .comment-item-avatar img,

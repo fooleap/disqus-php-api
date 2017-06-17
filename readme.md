@@ -10,7 +10,7 @@ disqus-php-api
 
 ## 后端
 
-### 后端配置说明
+### 配置说明
 
 配置文件为 `config.php`
 
@@ -65,7 +65,6 @@ var disq = new iDisqus('comment', {
     forum: 'fooleap',
     api: 'http://api.fooleap.org/disqus',
     site: 'http://blog.fooleap.org',
-    url: '/disqus-php-api.html',
     mode: 2,
     timeout: 3000,
     popular: document.getElementById('popular-posts'),
@@ -90,7 +89,7 @@ var disq = new iDisqus('comment', {
 
 ##### api
 
-* API 地址，PHP 代码部署的网址如：'http://api.fooleap.org/disqus'
+* API 地址，PHP 代码部署的网址如：`http://api.fooleap.org/disqus`
 * {String}
 * **必填**，无默认值
 
@@ -102,13 +101,13 @@ var disq = new iDisqus('comment', {
 
 ##### site
 
-* 网站域名，如：`http://blog.fooleap.org`
+* 网站域名，建议填写，如：`http://blog.fooleap.org`
 * {String}
 * 默认：`location.origin`
 
 ##### url
 
-* 页面链接，可调用网站模板设置，如：{{ page.url }} （Jekyll）
+* 页面链接，一般无需填写，可调用网站模板设置，如：`{{ page.url }}` （Jekyll）
 * {String}
 * 默认：`location.pathname`
 
