@@ -3,9 +3,16 @@
     require_once('init.php');
 
     $curl_url = '/api/3.0/posts/create.json';
-    $author_name = $_POST['name'] == $username ? null : $_POST['name'];
-    $author_email = $_POST['email'] == $email ? null : $_POST['email'];
-    $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null: $_POST['url'];
+    $author_name = $_POST['name'];
+    $author_email = $_POST['email'];
+    $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
+
+    if( $author_name == $username && $author_email == $email && strpos($session, 'session') !== false ){
+        $author_name = null;
+        $author_email = null;
+        $author_url = null;
+    }
+
     $post_message = $client->shortnameToUnicode($_POST['message']);
 
     $post_data = array(

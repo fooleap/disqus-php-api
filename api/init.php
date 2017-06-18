@@ -49,11 +49,10 @@ if ( $day < date('Ymd') ){
         'username' => $email,
         'password' => $password 
     );
-    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_REFERER, 'https://disqus.com/profile/login/');
     curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_temp);
     curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
     $result = curl_exec($ch);
 
@@ -62,11 +61,13 @@ if ( $day < date('Ymd') ){
 
     curl_close($ch);
 
-    //写入文件
-    $output_date = date('Ymd');
-    $output_data = array('day' => $output_date, 'session' => $session);
-    $output_string = json_encode($output_data);
-    file_put_contents(sys_get_temp_dir().'/session.json', $output_string);
+    if( strpos($session, 'session') !== false ){
+        //写入文件
+        $output_date = date('Ymd');
+        $output_data = array('day' => $output_date, 'session' => $session);
+        $output_string = json_encode($output_data);
+        file_put_contents(sys_get_temp_dir().'/session.json', $output_string);
+    }
 }
 
 function curl_get($url){

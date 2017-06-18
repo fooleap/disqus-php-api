@@ -6,7 +6,6 @@
     font: 14px/1.6 "Helvetica Neue", Helvetica, Arial, "微软雅黑", "Microsoft YaHei", sans-serif;
     margin: 5px auto;
     word-wrap: break-word;
-    margin: 0;
     padding: 0;
     box-sizing: border-box;
     a{
@@ -607,7 +606,7 @@
     }
     .comment-item {
         display: flex;
-        margin: 8px 0;
+        margin-top: 6px;
     }
     .comment-item-header {
         line-height: 1.2;
@@ -668,7 +667,7 @@
         }
     }
     .comment-box{
-        margin: 8px 0;
+        margin-top: 6px;
     }
     .comment-item-children .comment-item-avatar,
     .comment-item-children .comment-item-avatar img,
