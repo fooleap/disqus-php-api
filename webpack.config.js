@@ -32,7 +32,7 @@ module.exports = {
         new ExtractTextPlugin('iDisqus.min.css'),
         new webpack.optimize.UglifyJsPlugin({
             beautify: false,
-            comments: false,
+            comments: true,
             compress: {
                 warnings: false,
                 drop_console: true

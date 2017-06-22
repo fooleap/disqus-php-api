@@ -5,7 +5,7 @@
 
     // 获取被回复人信息
     $fields_data = array(
-        'api_key' => $public_key,
+        'api_key' => DISQUS_PUBKEY,
         'post' => $_POST['parent']
     );
     $curl_url = '/api/3.0/posts/details.json?'.http_build_query($fields_data);
@@ -18,7 +18,7 @@
 
     // 获取回复信息
     $fields_data = array(
-        'api_key' => $public_key,
+        'api_key' => DISQUS_PUBKEY,
         'post' => $_POST['id']
     );
     $curl_url = '/api/3.0/posts/details.json?'.http_build_query($fields_data);
@@ -27,29 +27,29 @@
     $reply_name    = $post['name']; //回复者人名
     $reply_message = $post['message']; //回复者留言
 
-    $content = '<p>' . $parent_name . '，您在<a href="'.$origin.'" target="_blank">「'.$site_name.'」</a>的评论：</p>';
+    $content = '<p>' . $parent_name . '，您在<a target="_blank" href="'.DISQUS_WEBSITE.'">「'.SITE_NAME.'」</a>的评论：</p>';
     $content .= $parent_message;
     $content .= '<p>' . $reply_name . ' 的回复如下：</p>';
     $content .= $reply_message;
-    $content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$origin. $_POST['link'] . '#comment-' . $_POST['parent'] . '">' . $_POST['title'] . '</a></p>';
+    $content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.DISQUS_WEBSITE. $_POST['link'] . '#comment-' . $_POST['parent'] . '">' . $_POST['title'] . '</a></p>';
 
     use PHPMailer;
     if( $parent_isanon ){
 
         // 发送邮件
-        require_once('class.phpmailer.php');
-        require_once('class.smtp.php');
+        require_once('PHPMailer/class.phpmailer.php');
+        require_once('PHPMailer/class.smtp.php');
         $mail          = new PHPMailer();
         $mail->CharSet = "UTF-8"; 
         $mail->IsSMTP();
         $mail->SMTPAuth   = true;
-        $mail->SMTPSecure = $smtp_secure;
-        $mail->Host       = $smtp_host;
-        $mail->Port       = $smtp_port;
-        $mail->Username   = $smtp_username;
-        $mail->Password   = $smtp_password;
-        $mail->SetFrom($smtp_username, $site_name); 
-        $mail->Subject = '您在「'.$site_name.'」的评论有了新回复';
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Host       = SMTP_HOST;
+        $mail->Port       = SMTP_PORT;
+        $mail->Username   = SMTP_USERNAME;
+        $mail->Password   = SMTP_PASSWORD;
+        $mail->SetFrom(SMTP_USERNAME, SITE_NAME); 
+        $mail->Subject = '您在「'.SITE_NAME.'」的评论有了新回复';
         $mail->MsgHTML($content);
         $mail->AddAddress($parent_email, $parent_name);
         if(!$mail->Send()) {

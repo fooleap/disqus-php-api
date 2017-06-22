@@ -1,5 +1,4 @@
 <?php
     require_once('init.php');
-    $avatar_url = $gravatar_cdn.md5($_GET['email']).'?d='.$gravatar_default;
-    $output = checkdnsrr(array_pop(explode("@",$_GET['email'])),"MX") ? $avatar_url : 'false';
+    $output = checkdnsrr(array_pop(explode("@",$_GET['email'])),"MX") ? GRAVATAR_CDN.md5($_GET['email']).'?d='.GRAVATAR_DEFAULT : 'false';
     print_r($output);

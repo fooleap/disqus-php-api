@@ -3,12 +3,13 @@ namespace Emojione;
 header('Content-type:text/json');
 header('Access-Control-Allow-Origin: *');
 require_once('config.php');
-require_once( dirname(__FILE__) . '/emojione/autoload.php');
+require_once('emojione/autoload.php');
 $client = new Client(new Ruleset());
 $client->imageType = 'png';
-$client->imagePathPNG = $emoji_path;
+$client->imagePathPNG = EMOJI_PATH;
 
-$disqus_host = $gfw_inside ? $disqus_ip : 'disqus.com';
+$disqus_host = GFW_INSIDE == 1 ? DISQUS_IP : 'disqus.com';
+$media_host = GFW_INSIDE == 1 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
 
 //读取文件
 $session_data = json_decode(file_get_contents(sys_get_temp_dir().'/session.json'));
@@ -36,18 +37,13 @@ if ( $day < date('Ymd') ){
     $response = curl_exec($ch);
 
     preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
-    $cookies = array();
-    foreach($matches[1] as $item) {
-        parse_str($item, $cookie_temp);
-        $cookies = array_merge($cookies, $cookie_temp);
-    }
     $token = str_replace("Set-Cookie: csrftoken=", "", $matches[0][0]);
 
     // 登录并取得 session
     $params = array(
         'csrfmiddlewaretoken' => $token,
-        'username' => $email,
-        'password' => $password 
+        'username' => DISQUS_EMAIL,
+        'password' => DISQUS_PASSWORD 
     );
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_REFERER, 'https://disqus.com/profile/login/');
@@ -63,10 +59,8 @@ if ( $day < date('Ymd') ){
 
     if( strpos($session, 'session') !== false ){
         //写入文件
-        $output_date = date('Ymd');
-        $output_data = array('day' => $output_date, 'session' => $session);
-        $output_string = json_encode($output_data);
-        file_put_contents(sys_get_temp_dir().'/session.json', $output_string);
+        $output_data = array('day' => date('Ymd'), 'session' => $session);
+        file_put_contents(sys_get_temp_dir().'/session.json', json_encode($output_data));
     }
 }
 
@@ -91,10 +85,10 @@ function curl_get($url){
 }
 
 function curl_post($url, $data){
-    global $session, $disqus_host;
+    global $session, $disqus_host, $media_host;
 
-    $curl_url = strpos($url, 'https') !== false ? $url : 'https://'.$disqus_host.$url;
-    $curl_host = strpos($url, 'https') !== false ? 'uploads.services.disqus.com' : 'disqus.com';
+    $curl_url = strpos($url, 'media') !== false ? 'https://'.$media_host.$url : 'https://'.$disqus_host.$url;
+    $curl_host = strpos($url, 'media') !== false ? 'uploads.services.disqus.com' : 'disqus.com';
 
     $options = array(
         CURLOPT_URL => $curl_url,
@@ -119,7 +113,7 @@ function post_format( $post ){
     global $client, $gravatar_cdn, $gravatar_default;
 
     // 访客指定 Gravatar 头像
-    $avatar_url = $gravatar_cdn.md5($post->author->email).'?d='.$gravatar_default;
+    $avatar_url = GRAVATAR_CDN.md5($post->author->email).'?d='.GRAVATAR_DEFAULT;
     $post->author->avatar->cache = $post->author->isAnonymous ? $avatar_url : $post->author->avatar->cache;
 
     // 表情

@@ -4,48 +4,11 @@ disqus-php-api
 
 > Disqus 被墙，故做几个简单的接口，用于墙内环境访问 Disqus。
 
-### 依赖
-
-* PHP
-
 ## 后端
 
-### 配置说明
-
-配置文件为 `config.php`
-
-#### $public_key
-
-* 无需修改
-
-#### $origin 
-
-* 网站域名
-
-#### $forum
-
-* Disqus forum 的 shortname
-
-#### $username
-
-* Disqus 用户名
-
-#### $email
-
-* Disqus 登录邮箱
-
-#### $password
-
-* Disqus 登录密码
-
-#### $gfw_inside
-
-* 部署的服务器是否在墙内
-
-**注意：** 
-
-* 填写正确的邮箱、密码之后，将以网站管理员的身份去获取评论数据。
-* 站长在评论框评论时，请填在此设置的用户名、邮箱信息，将以登录身份发表评论。
+* 依赖于 PHP，采用 PHP cURL 请求 Disqus API，以获取评论数据，发送访客评论等操作。
+* 需在 Disqus 网站设置开启访客评论功能（Allow guests to comment），方可正常使用。
+* 配置文件为 `config.php`，有简单说明。
 
 ## 前端
 
@@ -53,15 +16,21 @@ DEMO: http://blog.fooleap.org/disqus-php-api.html
 
 ### 引入 CSS
 
-    <link rel="stylesheet" href="path/to/iDisqus.min.css" />
+```html
+<link rel="stylesheet" href="path/to/iDisqus.min.css" />
+```
 
 ### 创建容器
 
-    <div id="comment"></div>
+```html
+<div id="comment"></div>
+```
 
 ### 引入 JS
 
-    <script src="path/to/iDisqus.min.js"></script>
+```html
+<script src="path/to/iDisqus.min.js"></script>
+```
 
 ### 创建实例
 
@@ -85,7 +54,7 @@ var disq = new iDisqus('comment', {
 * new iDisqus(`ID`, OPTIONS);
 * DOM 节点的 id 属性
 * {String}
-* 默认："comment"
+* 默认：`"comment"`
 
 #### OPTIONS
 
@@ -122,25 +91,25 @@ var disq = new iDisqus('comment', {
 * `2` 仅加载简易评论框
 * `3` 同时加载两种评论框，先显示简易评论框，Disqus 加载完成则切换至 Disqus 评论框
 * {Number}
-* 默认：1 
+* 默认：`1`
 
 ##### timeout
 
 * 超时时间
 * {Number}
-* 默认：3000 
+* 默认：`3000`
 
 ##### init
 
 * 是否自动初始化
 * {Boolean}
-* 默认：false
+* 默认：`false`
 
 ##### emoji_path
 
 * emoji 表情 PNG 图片路径
 * {String}
-* 默认："https://assets-cdn.github.com/images/icons/emoji/unicode"
+* 默认：`"https://assets-cdn.github.com/images/icons/emoji/unicode/"`
 
 ### 实例方法
 

@@ -2,11 +2,11 @@
 namespace Emojione;
 require_once('init.php');
 
-$links = '&thread=link:'.$origin.preg_replace('/,/i','&thread=link:'.$origin, $_GET['link']);
+$links = '&thread=link:'.DISQUS_WEBSITE.preg_replace('/,/i','&thread=link:'.DISQUS_WEBSITE, $_GET['link']);
 
 $fields_data = array(
-    'api_key' => $public_key,
-    'forum' => $forum
+    'api_key' => DISQUS_PUBKEY,
+    'forum' => DISQUS_SHORTNAME
 );
 
 $curl_url = '/api/3.0/threads/list.json?'.http_build_query($fields_data).$links;

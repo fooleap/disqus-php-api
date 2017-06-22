@@ -18,10 +18,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fooleap/disqus-php-api.git"
-  },
+  "repository": "git+https://github.com/fooleap/disqus-php-api.git",
   "author": "fooleap",
   "license": "MIT",
   "bugs": {

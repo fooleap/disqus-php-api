@@ -1,27 +1,69 @@
 <?php
 namespace Emojione;
 
-$public_key = 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F';
-$origin = '网站域名';
-$forum = 'Disqus forum';
-$username = 'Disqus 用户名';
-$email = 'Disqus 邮箱';
-$password = 'Disqus 密码';
+/*
+ * Disqus 设置
+ *
+ * DISQUS_PUBKEY    Disqus 公钥，无需修改
+ * DISQUS_NAME      Disqus 用户名
+ * DISQUS_EMAIL     Disqus 注册邮箱
+ * DISQUS_PASSWORD  Disqus 密码
+ * DISQUS_WEBSITE   网站域名，如：'http://blog.fooleap.org'
+ * DISQUS_SHORTNAME 网站在 Disqus 对应的 Short name
+ *
+ * 填写正确的邮箱、密码之后，将以网站管理员的身份去获取评论数据。
+ * 发送评论请求时，请填写在此设置的用户名、邮箱信息，将以登录身份发表评论。
+ *
+ */
 
-$gfw_inside = 0;
-$disqus_ip = '151.101.0.134';
-$disqus_media_ip = '151.101.40.64';
+define('DISQUS_PUBKEY', 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F');
+define('DISQUS_NAME', '');
+define('DISQUS_EMAIL', '');
+define('DISQUS_PASSWORD', '');
+define('DISQUS_WEBSITE', '');
+define('DISQUS_SHORTNAME', '');
 
-$gravatar_cdn = '//cn.gravatar.com/avatar/';
-$gravatar_default = 'https://a.disquscdn.com/images/noavatar92.png';
-$emoji_path = 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
+/*
+ * 网络设置
+ *
+ * GFW_INSIDE     服务器是否在墙内，在墙内则为 true，将指定 IP
+ * DISQUS_IP      disqus.com IP 地址，可选：151.101.0.134, 151.101.64.134, 151.101.128.134, 151.101.192.134
+ * DISQUS_MEDIAIP uploads.services.disqus.com IP 地址，可选：151.101.24.64, 151.101.40.64, 151.101.52.64
+ *
+ */
 
-// PHP Mailer 设置
-$site_name = '网站名';
-$smtp_secure = 'ssl';
-$smtp_host = 'smtp.exmail.qq.com';
-$smtp_port = 465;
-$smtp_username = '邮箱';
-$smtp_password = '密码';
+define('GFW_INSIDE', false);
+define('DISQUS_IP', '151.101.0.134'); 
+define('DISQUS_MEDIAIP', '151.101.24.64');
 
-$max_posts = 50;
+/*
+ * 图片设置
+ *
+ * GRAVATAR_CDN     Gravatar 头像 CDN
+ * GRAVATAR_DEFAULT 默认头像 URL
+ * EMOJI_PATH       Emoji 表情 PNG 资源路径
+ *
+ */
+ 
+define('GRAVATAR_CDN', '//cn.gravatar.com/avatar/');
+define('GRAVATAR_DEFAULT', 'https://a.disquscdn.com/images/noavatar92.png');
+define('EMOJI_PATH', 'https://assets-cdn.github.com/images/icons/emoji/unicode/');
+
+/*
+ * PHP Mailer 设置
+ *
+ * SITE_NAME      网站名
+ * SMTP_SECURE    安全协议
+ * SMTP_HOST      邮箱服务器
+ * SMTP_PORT      端口号
+ * SMTP_USERNAME  SMTP 登录的账号，即邮箱号
+ * SMTP_PASSWORD  SMTP 登录的账号，即邮箱密码
+ *
+ */
+
+define('SITE_NAME', '');
+define('SMTP_SECURE', 'ssl');
+define('SMTP_HOST', '');
+define('SMTP_PORT', 465);
+define('SMTP_USERNAME', '');
+define('SMTP_PASSWORD', '');

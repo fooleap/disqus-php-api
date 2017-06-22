@@ -7,7 +7,7 @@
     $author_email = $_POST['email'];
     $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
 
-    if( $author_name == $username && $author_email == $email && strpos($session, 'session') !== false ){
+    if( $author_name == DISQUS_NAME && $author_email == DISQUS_EMAIL && strpos($session, 'session') !== false ){
         $author_name = null;
         $author_email = null;
         $author_url = null;
@@ -16,7 +16,7 @@
     $post_message = $client->shortnameToUnicode($_POST['message']);
 
     $post_data = array(
-        'api_key' => $public_key,
+        'api_key' => DISQUS_PUBKEY,
         'thread' => $_POST['thread'],
         'parent' => $_POST['parent'],
         'message' => $post_message,

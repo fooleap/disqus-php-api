@@ -3,9 +3,9 @@
     require_once('init.php');
 
     $fields_data = array(
-        'api_key' => $public_key,
+        'api_key' => DISQUS_PUBKEY,
         'limit' => 5,
-        'forum' => $forum,
+        'forum' => DISQUS_SHORTNAME,
         'interval' => '30d'
     );
     $curl_url = '/api/3.0/threads/listPopular.json?'.http_build_query($fields_data);

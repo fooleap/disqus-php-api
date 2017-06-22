@@ -1,3 +1,10 @@
+/*!
+ * v 0.1.0
+ * https://github.com/fooleap/disqus-php-api
+ *
+ * Copyright 2017 fooleap
+ * Released under the MIT license
+ */
 (function (global) {
     'use strict';
 
@@ -211,7 +218,7 @@
         _.opts.toggle = !!_.opts.toggle ? d.getElementById(_.opts.toggle) : null;
 
         // emoji 表情
-        _.opts.emoji_path = !!_.opts.emoji_path ? _.opts.emoji_path : 'https://assets-cdn.github.com/images/icons/emoji/unicode';
+        _.opts.emoji_path = !!_.opts.emoji_path ? _.opts.emoji_path : 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
         _.emoji = _._emoji();
 
         // 默认状态
@@ -431,7 +438,10 @@
                     var data  = JSON.parse(resp);
                     var posts = data.response;
                     posts.forEach(function(item){
-                        d.querySelector('[data-disqus-url="'+getLocation(item.link).pathname+'"]').innerHTML = item.posts;
+                        var el = d.querySelector('[data-disqus-url="'+getLocation(item.link).pathname+'"]')
+                        if(!!el ){
+                            el.innerHTML = item.posts;
+                        }
                     });
                 }, function(){
                     alert('获取数据失败！')
@@ -469,67 +479,67 @@
             {
                 code:':smile:',
                 title:'笑脸',
-                url:path+'/1f604.png'
+                url:path+'1f604.png'
             },{
                 code:':mask:',
                 title:'生病',
-                url:path+'/1f637.png'
+                url:path+'1f637.png'
             },{
                 code:':joy:',
                 title:'破涕为笑',
-                url:path+'/1f602.png'
+                url:path+'1f602.png'
             },{
                 code:':stuck_out_tongue_closed_eyes:',
                 title:'吐舌',
-                url:path+'/1f61d.png'
+                url:path+'1f61d.png'
             },{
                 code:':flushed:',
                 title:'脸红',
-                url:path+'/1f633.png'
+                url:path+'1f633.png'
             },{
                 code:':scream:',
                 title:'恐惧',
-                url:path+'/1f631.png'
+                url:path+'1f631.png'
             },{
                 code:':pensive:',
                 title:'失望',
-                url:path+'/1f614.png'
+                url:path+'1f614.png'
             },{
                 code:':unamused:',
                 title:'无语',
-                url:path+'/1f612.png'
+                url:path+'1f612.png'
             },{
                 code:':grin:',
                 title:'露齿笑',
-                url:path+'/1f601.png'
+                url:path+'1f601.png'
             },{
                 code:':heart_eyes:',
                 title:'色',
-                url:path+'/1f60d.png'
+                url:path+'1f60d.png'
             },{
                 code:':sweat:',
                 title:'汗',
-                url:path+'/1f613.png'
+                url:path+'1f613.png'
             },{
                 code:':smirk:',
                 title:'得意',
-                url:path+'/1f60f.png'
+                url:path+'1f60f.png'
             },{
                 code:':relieved:',
                 title:'满意',
-                url:path+'/1f60c.png'
+                url:path+'1f60c.png'
             },{
                 code:':rolling_eyes:',
                 title:'翻白眼',
-                url:path+'/1f644.png'
+                url:path+'1f644.png'
             },{
                 code:':ok_hand:',
                 title:'OK',
-                url:path+'/1f44c.png'
+                url:path+'1f44c.png'
             },{
                 code:':v:',
                 title:'胜利',
-                url:path+'/270c.png'
+                url:path+'270c.png'
             }
         ];
     }
