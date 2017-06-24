@@ -5,6 +5,7 @@ header('Access-Control-Allow-Origin: *');
 require_once('config.php');
 require_once('emojione/autoload.php');
 $client = new Client(new Ruleset());
+$client->ignoredRegexp = '<code[^>]*>.*?<\/code>|<object[^>]*>.*?<\/object>|<span[^>]*>.*?<\/span>|<(?:object|embed|svg|img|div|span|p|a)[^>]*>';
 $client->imageType = 'png';
 $client->imagePathPNG = EMOJI_PATH;
 

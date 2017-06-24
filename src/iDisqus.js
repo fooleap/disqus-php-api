@@ -209,6 +209,7 @@
         // 配置
         _.opts = typeof(arguments[1]) == 'object' ? arguments[1] : arguments[0];
         _.dom =  d.getElementById(typeof(arguments[0]) == 'string' ? arguments[0] : 'comment');
+        _.opts.api = _.opts.api.slice(-1) == '/' ? _.opts.api.slice(0,-1) : _.opts.api;
         _.opts.site = !!_.opts.site ? _.opts.site : location.origin;
         _.opts.url = !!_.opts.url ? _.opts.url : location.pathname;
         _.opts.title = !!_.opts.title ? _.opts.title : d.title;
