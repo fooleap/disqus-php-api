@@ -196,7 +196,7 @@
                     this.init();
                     return true;
                 } else {
-                    alert('请正确填写必填项');
+                    console.log('请正确填写必填项');
                     return false;
                 }
             }
@@ -434,7 +434,7 @@
                 commentArr[i] = counts[i].dataset.disqusUrl;
             }
             getAjax(
-                _.opts.api + '/count.php?link=' + commentArr.join(','), 
+                _.opts.api + '/count.php?links=' + commentArr.join(','), 
                 function(resp) {
                     var data  = JSON.parse(resp);
                     var posts = data.response;
@@ -445,7 +445,7 @@
                         }
                     });
                 }, function(){
-                    alert('获取数据失败！')
+                    console.log('获取数据失败！')
                 }
             );
         }
@@ -468,7 +468,7 @@
                         _.opts.popular.innerHTML = postsHtml;
                     }
                 },function(){
-                    alert('获取数据失败！')
+                    console.log('获取数据失败！')
                 }
             );
         }
@@ -612,7 +612,7 @@
                     _.create();
                 }
             },function(){
-                alert('获取数据失败！')
+                console.log('获取数据失败！')
             }
         );
     }
@@ -731,7 +731,7 @@
                 _.opts.api + '/getgravatar.php?email=' + email.value,
                 function(resp) {
                     if (resp == 'false') {
-                        alert('您所填写的邮箱地址有误！');
+                        console.log('您所填写的邮箱地址有误！');
                     } else {
                         avatar.src = resp;
                     }
@@ -755,7 +755,7 @@
         if( _.stat.imageSize.indexOf(size) == -1 ){
             progress.style.width = '80px';
         } else {
-            alert('请勿选择已存在的图片！');
+            console.log('请勿选择已存在的图片！');
             return;
         }
 
@@ -786,7 +786,7 @@
                         item.querySelector('[data-image-size="'+size+'"]').addEventListener('click', _.remove.bind(_), false);
                     }
                 } else {
-                    alert('图片上传失败');
+                    console.log('图片上传失败');
                 }
             }
         };
@@ -872,7 +872,7 @@
         }
 
         if( media.length == 0 && message == '' ){
-            alert('无法发送空消息');
+            console.log('无法发送空消息');
             item.querySelector('.comment-form-textarea').focus();
             return;
         };
@@ -934,15 +934,15 @@
                 timeAgo();
             } else if (data.code === 2) {
                 if (data.response.indexOf('email') > -1) {
-                    alert('请输入正确的名字或邮箱！');
+                    console.log('请输入正确的名字或邮箱！');
                     return;
                 } else if (data.response.indexOf('message') > -1) {
-                    alert('评论不能为空！');
+                    console.log('评论不能为空！');
                     return;
                 }
             }
         }, function(){
-            alert('提交出错，请稍后重试！');
+            console.log('提交出错，请稍后重试！');
             _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
             if( parentId ){
                 item.querySelector('.comment-item-reply').click();
@@ -986,12 +986,22 @@
         postAjax( _.opts.api + '/createthread.php', postData, function(resp){
             var data = JSON.parse(resp);
             if( data.code === 0 ) {
-                alert('创建 Thread 成功，刷新后便可愉快地评论了！');
+                console.log('创建 Thread 成功，刷新后便可愉快地评论了！');
                 setTimeout(function(){location.reload();},2000);
             }
         }, function(){
-            alert('创建 Thread 出错，请稍后重试！');
+            console.log('创建 Thread 出错，请稍后重试！');
         })
+    }
+
+    // 销毁评论框
+    iDisqus.prototype.destroy = function(){
+        var _ = this;
+        _.dom.innerHTML = '';
+        delete _.dom;
+        delete _.opts;
+        delete _.stat;
+        delete _.guest;
     }
 
     /* CommonJS */

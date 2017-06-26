@@ -1,4 +1,14 @@
 <?php
-    require_once('init.php');
-    $output = checkdnsrr(array_pop(explode("@",$_GET['email'])),"MX") ? GRAVATAR_CDN.md5($_GET['email']).'?d='.GRAVATAR_DEFAULT : 'false';
-    print_r($output);
+/**
+ * 获取 Gravatar 头像
+ *
+ * @param email 邮箱号
+ *
+ * @author   fooleap <fooleap@gmail.com>
+ * @version  2017-06-27 09:07:07
+ * @link     https://github.com/fooleap/disqus-php-api
+ *
+ */
+require_once('init.php');
+$output = checkdnsrr(array_pop(explode("@",$_GET['email'])),"MX") ? GRAVATAR_CDN.md5($_GET['email']).'?d='.GRAVATAR_DEFAULT : 'false';
+print_r($output);

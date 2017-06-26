@@ -1,15 +1,23 @@
 <?php
+/**
+ * 配置文件
+ *
+ * @author   fooleap <fooleap@gmail.com>
+ * @version  2017-06-27 09:07:07
+ * @link     https://github.com/fooleap/disqus-php-api
+ *
+ */
 namespace Emojione;
 
 /*
  * Disqus 设置
  *
  * DISQUS_PUBKEY    Disqus 公钥，无需修改
- * DISQUS_NAME      Disqus 用户名
+ * DISQUS_USERNAME  Disqus 用户名
  * DISQUS_EMAIL     Disqus 注册邮箱
  * DISQUS_PASSWORD  Disqus 密码
  * DISQUS_WEBSITE   网站域名，如：'http://blog.fooleap.org'
- * DISQUS_SHORTNAME 网站在 Disqus 对应的 Short name
+ * DISQUS_SHORTNAME 网站在 Disqus 对应的 Shortname
  *
  * 填写正确的邮箱、密码之后，将以网站管理员的身份去获取评论数据。
  * 发送评论请求时，请填写在此设置的用户名、邮箱信息，将以登录身份发表评论。
@@ -17,7 +25,7 @@ namespace Emojione;
  */
 
 define('DISQUS_PUBKEY', 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F');
-define('DISQUS_NAME', '');
+define('DISQUS_USERNAME', '');
 define('DISQUS_EMAIL', '');
 define('DISQUS_PASSWORD', '');
 define('DISQUS_WEBSITE', '');

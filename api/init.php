@@ -1,4 +1,12 @@
 <?php
+/**
+ * 获取权限，简单封装常用函数
+ *
+ * @author   fooleap <fooleap@gmail.com>
+ * @version  2017-06-27 09:07:07
+ * @link     https://github.com/fooleap/disqus-php-api
+ *
+ */
 namespace Emojione;
 header('Content-type:text/json');
 header('Access-Control-Allow-Origin: *');
