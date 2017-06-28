@@ -1,5 +1,5 @@
 /*!
- * v 0.1.0
+ * v 0.1.1
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -48,9 +48,15 @@
         return xhr;
     }
     
-    function arrayListener(els, evt, func){
+    function addListener(els, evt, func){
         [].forEach.call(els, function(item){
             item.addEventListener(evt, func, false);
+        });
+    }
+
+    function removeListener(els, evt, func){
+        [].forEach.call(els, function(item){
+            item.removeEventListener(evt, func, false);
         });
     }
 
@@ -251,7 +257,7 @@
                 if( _.opts.mode == 3 && !!_.opts.toggle) {
                     _.opts.toggle.disabled = '';
                     _.opts.toggle.checked = true;
-                    _.opts.toggle.addEventListener('change', _.toggle.bind(_), false);
+                    _.opts.toggle.addEventListener('change', _.handle.toggle, false);
                 }
             });
         }
@@ -335,7 +341,19 @@
 
         _.guest = new Guest(_.dom);
         _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/,'').replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
-
+        _.handle = {
+            guestReset: _.guest.reset.bind(_.guest),
+            loadMore: _.loadMore.bind(_),
+            post: _.post.bind(_),
+            postThread: _.postThread.bind(_),
+            remove: _.remove.bind(_),
+            show: _.show.bind(_),
+            toggle: _.toggle.bind(_),
+            upload: _.upload.bind(_),
+            verify: _.verify.bind(_),
+            field: _.field,
+            focus: _.focus
+        };
 
         switch(_.opts.mode){
             case 1:
@@ -578,14 +596,14 @@
                             _.dom.querySelector('.comment-list').appendChild(_.dom.querySelector('#comment-' + item));
                         })
                     } else {
-                        loadmore.addEventListener('click', _.loadMore.bind(_), false);
-                        _.dom.querySelector('.exit').addEventListener('click', _.guest.reset.bind(_.guest), false);
-                        _.dom.querySelector('.comment-form-textarea').addEventListener('blur', _.focus, false);
-                        _.dom.querySelector('.comment-form-textarea').addEventListener('focus', _.focus, false);
-                        _.dom.querySelector('.comment-form-email').addEventListener('blur', _.verify.bind(_), false);
-                        _.dom.querySelector('.comment-form-submit').addEventListener('click', _.post.bind(_), false);
-                        _.dom.querySelector('.comment-image-input').addEventListener('change', _.upload.bind(_), false);
-                        arrayListener(_.dom.getElementsByClassName('emojione-item'), 'click', _.field);
+                        loadmore.addEventListener('click', _.handle.loadMore, false);
+                        _.dom.querySelector('.exit').addEventListener('click', _.handle.guestReset, false);
+                        _.dom.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
+                        _.dom.querySelector('.comment-form-textarea').addEventListener('focus',_.handle.focus, false);
+                        _.dom.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
+                        _.dom.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
+                        _.dom.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
+                        addListener(_.dom.getElementsByClassName('emojione-item'), 'click', _.handle.field);
                     }
                     if ( data.cursor.hasNext ){
                         _.stat.next = data.cursor.next;
@@ -635,7 +653,7 @@
         if (!!parentPost.dom) {
             var mediaHTML = '';
             post.media.forEach(function(item){
-                mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '?imageView2/2/h/200"></a>';
+                mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '"></a>';
             })
             mediaHTML = '<div class="comment-item-images">' + mediaHTML + '</div>';
 
@@ -648,7 +666,7 @@
                 '</div>'+
                 '</li>';
             parentPost.dom.insertAdjacentHTML(parentPost.insert, html);
-            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.show.bind(_), false);
+            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
         } else {
             _.stat.unload.push(post);
         }
@@ -693,7 +711,7 @@
             box.parentNode.removeChild(box);
             var cancel = $show.querySelector('.comment-item-cancel')
             cancel.outerHTML = cancel.outerHTML.replace('cancel','reply');
-            $show.querySelector('.comment-item-reply').addEventListener('click', _.show.bind(_), false);
+            $show.querySelector('.comment-item-reply').addEventListener('click', _.handle.show, false);
         }
 
         // 显示回复框
@@ -704,19 +722,19 @@
         $this.outerHTML = $this.outerHTML.replace('reply','cancel');
         _.guest.init();
 
-        item.querySelector('.comment-form-textarea').addEventListener('blur', _.focus, false);
-        item.querySelector('.comment-form-textarea').addEventListener('focus', _.focus, false);
-        item.querySelector('.comment-form-email').addEventListener('blur', _.verify.bind(_), false);
-        item.querySelector('.comment-form-submit').addEventListener('click', _.post.bind(_), false);
-        item.querySelector('.comment-image-input').addEventListener('change', _.upload.bind(_), false);
-        arrayListener(item.getElementsByClassName('emojione-item'), 'click', _.field);
+        item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
+        item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
+        item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
+        item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
+        item.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
+        addListener(item.getElementsByClassName('emojione-item'), 'click', _.handle.field);
         item.querySelector('.comment-form-textarea').focus();
 
         // 取消回复
         item.querySelector('.comment-item-cancel').addEventListener('click', function(){
             item.querySelector('.comment-box').outerHTML = '';
             this.outerHTML = this.outerHTML.replace('cancel','reply');
-            item.querySelector('.comment-item-reply').addEventListener('click', _.show.bind(_), false);
+            item.querySelector('.comment-item-reply').addEventListener('click', _.handle.show, false);
         }, false);
     }
 
@@ -783,7 +801,7 @@
                         item.querySelector('[data-image-size="'+size+'"]').innerHTML = '<img class="comment-image-object" src="'+imageUrl+'">';
                         item.querySelector('[data-image-size="'+size+'"]').dataset.imageUrl = imageUrl;
                         item.querySelector('[data-image-size="'+size+'"]').classList.remove('loading');
-                        item.querySelector('[data-image-size="'+size+'"]').addEventListener('click', _.remove.bind(_), false);
+                        item.querySelector('[data-image-size="'+size+'"]').addEventListener('click', _.handle.remove, false);
                     }
                 } else {
                     console.log('图片上传失败');
@@ -953,7 +971,7 @@
             if(!!_.stat.mediaHtml){
                 item.querySelector('.comment-form-wrapper').classList.add('expanded');
                 item.querySelector('.comment-image-list').innerHTML = _.stat.mediaHtml;
-                arrayListener(item.getElementsByClassName('comment-image-item'), 'click', _.remove.bind(_));
+                addListener(item.getElementsByClassName('comment-image-item'), 'click', _.remove.bind(_));
             }
         })
     }
@@ -971,7 +989,7 @@
             '<div class="comment-form-item"><label class="comment-form-label">slug:<\/label><input class="comment-form-input" id="thread-slug" name="slug" value="' + _.opts.slug + '" \/><\/div>'+
             '<div class="comment-form-item"><label class="comment-form-label">message:<\/label><textarea class="comment-form-textarea" id="thread-message" name="message">'+_.opts.desc+'<\/textarea><\/div>'+
             '<button id="thread-submit" class="comment-form-submit">提交<\/button><\/div>';
-        _.dom.querySelector('#thread-submit').addEventListener('click', _.postThread.bind(_), false);
+        _.dom.querySelector('#thread-submit').addEventListener('click', _.handle.postThread, false);
     }
 
     // 创建 Thread 事件
@@ -997,11 +1015,23 @@
     // 销毁评论框
     iDisqus.prototype.destroy = function(){
         var _ = this;
+        _.dom.querySelector('.exit').removeEventListener('click', _.handle.guestReset, false);
+        removeListener(_.dom.getElementsByClassName('comment-form-textarea'), 'blur', _.handle.focus);
+        removeListener(_.dom.getElementsByClassName('comment-form-textarea'), 'focus', _.handle.focus);
+        removeListener(_.dom.getElementsByClassName('comment-form-email'), 'blur', _.handle.verify);
+        removeListener(_.dom.getElementsByClassName('comment-form-submit'), 'click', _.handle.post);
+        removeListener(_.dom.getElementsByClassName('comment-image-input'), 'change', _.handle.upload);
+        removeListener(_.dom.getElementsByClassName('comment-item-reply'), 'click', _.handle.show);
+        removeListener(_.dom.getElementsByClassName('comment-loadmore'), 'click', _.handle.loadMore);
+        removeListener(_.dom.getElementsByClassName('emojione-item'), 'click', _.handle.field);
         _.dom.innerHTML = '';
+        delete _.box;
         delete _.dom;
+        delete _.emoji;
+        delete _.guest;
+        delete _.handle;
         delete _.opts;
         delete _.stat;
-        delete _.guest;
     }
 
     /* CommonJS */

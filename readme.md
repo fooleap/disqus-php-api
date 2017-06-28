@@ -39,10 +39,8 @@ var disq = new iDisqus('comment', {
     forum: 'fooleap',
     api: 'http://api.fooleap.org/disqus',
     site: 'http://blog.fooleap.org',
-    mode: 2,
+    mode: 1,
     timeout: 3000,
-    popular: document.getElementById('popular-posts'),
-    slug: location.pathname.slice(1).split('.')[0],
     init: true
 });
 ```
@@ -87,7 +85,7 @@ var disq = new iDisqus('comment', {
 
 ##### mode
 
-* `1` 加载 Disqus 原生评论框，超时则加载简易评论框
+* `1` 检测能否访问 Disqus，若能则加载 Disqus 原生评论框，超时则加载简易评论框
 * `2` 仅加载简易评论框
 * `3` 同时加载两种评论框，先显示简易评论框，Disqus 加载完成则切换至 Disqus 评论框
 * {Number}
@@ -116,6 +114,10 @@ var disq = new iDisqus('comment', {
 #### init
 
 * 初始化评论框
+
+#### destroy
+
+* 销毁评论框 
 
 #### count
 
