@@ -1,5 +1,5 @@
 /*!
- * v 0.1.1
+ * v 0.1.2
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -217,7 +217,8 @@
         _.dom =  d.getElementById(typeof(arguments[0]) == 'string' ? arguments[0] : 'comment');
         _.opts.api = _.opts.api.slice(-1) == '/' ? _.opts.api.slice(0,-1) : _.opts.api;
         _.opts.site = !!_.opts.site ? _.opts.site : location.origin;
-        _.opts.url = !!_.opts.url ? _.opts.url : location.pathname;
+        _.opts.url = !!_.opts.url ? _.opts.url : location.pathname + location.search;
+        _.opts.link = _.opts.site + _.opts.url; 
         _.opts.title = !!_.opts.title ? _.opts.title : d.title;
         _.opts.desc =  !!_.opts.desc ? _.opts.desc : (!!d.querySelector('[name="description"]') ? d.querySelector('[name="description"]').content : '');
         _.opts.mode = !!_.opts.mode ? _.opts.mode : 1;
@@ -247,8 +248,9 @@
 
         // Disqus 评论框设置
         window.disqus_config = function () {
-            this.page.url = _.opts.site + _.opts.url;
+            this.page.identifier =  _.opts.url;
             this.page.title = _.opts.title;
+            this.page.url = _.opts.link;
             this.callbacks.onReady.push(function() {
                 _.stat.current = 'disqus';
                 _.stat.disqusLoaded = true;
@@ -653,7 +655,7 @@
         if (!!parentPost.dom) {
             var mediaHTML = '';
             post.media.forEach(function(item){
-                mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '"></a>';
+                mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '?imageView2/2/h/200"></a>';
             })
             mediaHTML = '<div class="comment-item-images">' + mediaHTML + '</div>';
 
@@ -976,7 +978,6 @@
         })
     }
 
-
     // 创建 Thread 表单
     iDisqus.prototype.create = function(){
         var _ = this;
@@ -984,7 +985,8 @@
         _.dom.querySelector('#idisqus').innerHTML  = '<div class="comment-header"><span class="comment-header-item">创建 Thread<\/span><\/div>'+
             '<div class="comment-thread-form">'+
             '<p>由于 Disqus 没有本页面的相关 Thread，故需先创建 Thread<\/p>'+
-            '<div class="comment-form-item"><label class="comment-form-label">url:<\/label><input class="comment-form-input" id="thread-url" name="url" value="' + _.opts.site + _.opts.url + '" \/><\/div>'+
+            '<div class="comment-form-item"><label class="comment-form-label">url:<\/label><input class="comment-form-input" id="thread-url" name="url" value="' + _.opts.link + '" \/><\/div>'+
+            '<div class="comment-form-item"><label class="comment-form-label">identifier:<\/label><input class="comment-form-input" id="thread-identifier" name="identifier" value="'+_.opts.url+'" \/><\/div>'+
             '<div class="comment-form-item"><label class="comment-form-label">title:<\/label><input class="comment-form-input" id="thread-title" name="title" value="'+_.opts.title+'" \/><\/div>'+
             '<div class="comment-form-item"><label class="comment-form-label">slug:<\/label><input class="comment-form-input" id="thread-slug" name="slug" value="' + _.opts.slug + '" \/><\/div>'+
             '<div class="comment-form-item"><label class="comment-form-label">message:<\/label><textarea class="comment-form-textarea" id="thread-message" name="message">'+_.opts.desc+'<\/textarea><\/div>'+
@@ -997,6 +999,7 @@
         var _ = this;
         var postData = {
             url: _.dom.querySelector('#thread-url').value,
+            identifier: _.dom.querySelector('#thread-identifier').value,
             title: _.dom.querySelector('#thread-title').value,
             slug: _.dom.querySelector('#thread-slug').value,
             message: _.dom.querySelector('#thread-message').value

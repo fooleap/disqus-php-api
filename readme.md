@@ -14,6 +14,14 @@ disqus-php-api
 
 DEMO: http://blog.fooleap.org/disqus-php-api.html
 
+项目将 Disqus 原生评论框打包在内，若使用本评论框，需将网页上所有与 Disqus 相关的元素清除，例如 id 为 `disqus_thread` 的容器、`disqus_config` 函数等。
+
+项目内的 `disqus_config` 设置如下：
+
+* `this.page.identifier` 默认为 `location.pathname + location.search`
+* `this.page.title` 默认为 `document.title`
+* `this.page.url` 默认为 `location.origin + location.pathname + location.search`
+
 ### 引入 CSS
 
 ```html
@@ -79,9 +87,16 @@ var disq = new iDisqus('comment', {
 
 ##### url
 
-* 页面链接，一般无需填写，可调用网站模板设置，如：`{{ page.url }}` （Jekyll）
+* 页面链接，一般不需要填写
 * {String}
-* 默认：`location.pathname`
+* 默认：`location.pathname + location.search`
+
+**注：**
+
+Disqus 评论框的相关配置`disqus_config`：
+
+* `this.page.identifier` 为 url
+* `this.page.url` 为 site + url
 
 ##### mode
 
