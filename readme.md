@@ -4,11 +4,15 @@ disqus-php-api
 
 > Disqus 被墙，故做几个简单的接口，用于墙内环境访问 Disqus。
 
+## Disqus 设置
+
+* 使用 API 实现匿名评论功能，需在 Disqus 后台[网站设置](https://disqus.com/admin/settings/community/)，开启访客评论功能（Allow guests to comment）。
+* 建议将评论审核（Pre-moderation）设置为 `None`。
+
 ## 后端
 
 * 依赖于 PHP，采用 PHP cURL 请求 Disqus API，以获取评论数据，发送访客评论等操作。
-* 需在 Disqus 网站设置开启访客评论功能（Allow guests to comment），方可正常使用。
-* 配置文件为 `config.php`，有简单说明。
+* 配置文件为 `config.php`，有简单说明。 
 
 ## 前端
 
@@ -16,11 +20,13 @@ DEMO: http://blog.fooleap.org/disqus-php-api.html
 
 项目将 Disqus 原生评论框打包在内，若使用本评论框，需将网页上所有与 Disqus 相关的元素清除，例如 id 为 `disqus_thread` 的容器、`disqus_config` 函数等。
 
-项目内的 `disqus_config` 设置如下：
+Disqus 评论框的相关配置`disqus_config`：
 
-* `this.page.identifier` 默认为 `location.pathname + location.search`
-* `this.page.title` 默认为 `document.title`
-* `this.page.url` 默认为 `location.origin + location.pathname + location.search`
+* `this.page.identifier`: [identifier](#user-content-identifier)，若无设置则为 [url](#user-content-url)
+* `this.page.title`: [title](#user-content-title)
+* `this.page.url`: [site](#user-content-site) + [url](#user-content-url)
+
+关于 Disqus 原生评论框配置的说明，可以看此页面：https://help.disqus.com/customer/portal/articles/472098-javascript-configuration-variables
 
 ### 引入 CSS
 
@@ -91,12 +97,16 @@ var disq = new iDisqus('comment', {
 * {String}
 * 默认：`location.pathname + location.search`
 
-**注：**
+##### identifier
 
-Disqus 评论框的相关配置`disqus_config`：
+* 页面标识，按需填写
+* {String}
 
-* `this.page.identifier` 为 url
-* `this.page.url` 为 site + url
+##### title
+
+* 页面标题
+* {String}
+* 默认：`document.title`
 
 ##### mode
 

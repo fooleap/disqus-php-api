@@ -517,7 +517,7 @@
         line-height: 32px;
         font-size: 14px;
         color: #656c7a;
-        width: 80px;
+        width: 100px;
         text-align: right;
         font-weight: bold;
     }
@@ -558,6 +558,9 @@
     }
     &:focus {
         border: 2px solid #c2c6cc;
+    }
+    &[disabled] {
+        color: #656c7a;
     }
 }
 .comment-list,
