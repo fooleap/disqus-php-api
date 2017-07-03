@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-03 12:53:52
+ * @version  2017-07-03 17:29:55
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -63,6 +63,7 @@ if ( $_POST['parent'] != '' && $data -> code == 0 ){
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $mail_query,
+        CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_TIMEOUT => 1
     );
     curl_setopt_array($mail, $curl_opt);
