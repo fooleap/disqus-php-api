@@ -6,8 +6,7 @@ disqus-php-api
 
 ## Disqus 设置
 
-* 使用 API 实现匿名评论功能，需在 Disqus 后台[网站设置](https://disqus.com/admin/settings/community/)，开启访客评论功能（Allow guests to comment）。
-* 建议将评论审核（Pre-moderation）设置为 `None`。
+* 使用 API 实现匿名评论功能，需在 Disqus 后台[网站设置](https://disqus.com/admin/settings/community/)，开启访客评论功能（Guest Commenting 项中勾选 Allow guests to comment）。
 
 ## 后端
 

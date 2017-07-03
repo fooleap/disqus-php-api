@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-06-27 09:07:07
+ * @version  2017-07-03 12:53:52
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -37,7 +37,8 @@ $post_data = array(
     'message' => $post_message,
     'author_name' => $author_name,
     'author_email' => $author_email,
-    'author_url' => $author_url
+    'author_url' => $author_url,
+    'state' => $approved
     //'ip_address' => $_SERVER["REMOTE_ADDR"]
 );
 $data = curl_post($curl_url, $post_data);

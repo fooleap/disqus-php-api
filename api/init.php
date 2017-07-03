@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-06-27 09:07:07
+ * @version  2017-07-03 12:53:52
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -17,6 +17,7 @@ $client->ignoredRegexp = '<code[^>]*>.*?<\/code>|<object[^>]*>.*?<\/object>|<spa
 $client->imageType = 'png';
 $client->imagePathPNG = EMOJI_PATH;
 
+$approved = DISQUS_APPROVED == 1 ? 'approved' : null;
 $disqus_host = GFW_INSIDE == 1 ? DISQUS_IP : 'disqus.com';
 $media_host = GFW_INSIDE == 1 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
 
