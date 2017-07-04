@@ -58,7 +58,7 @@
             </div>
             <script>
                 var api = './api';
-                function postAjax(url, data, success, error) {
+                function postAjax(url, data, success) {
                     var params = typeof data == 'string' ? data : Object.keys(data).map(
                         function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) }
                     ).join('&');

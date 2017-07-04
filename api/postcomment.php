@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-03 17:29:55
+ * @version  2017-07-04 10:29:42
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -54,20 +54,25 @@ if ( $_POST['parent'] != '' && $data -> code == 0 ){
         'parent'=> $_POST['parent'],
         'id'=> $data -> response -> id,
         'link'=> $_POST['link'],
-        'title'=> $_POST['title']
+        'title'=> $_POST['title'],
+        'session'=> $session
     );
     $mail = curl_init();
-    $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+    $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
     $curl_opt = array(
         CURLOPT_URL => $protocol.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/sendemail.php',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $mail_query,
-        CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_TIMEOUT => 1
     );
     curl_setopt_array($mail, $curl_opt);
     curl_exec($mail);
+    $errno = curl_errno($mail);
+    if ($errno == 60 || $errno == 77) {
+        curl_setopt($mail, CURLOPT_SSL_VERIFYPEER, false); 
+        curl_exec($mail);
+    }
     curl_close($mail);
 }
 print_r(json_encode($output));

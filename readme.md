@@ -100,6 +100,7 @@ var disq = new iDisqus('comment', {
 
 * 页面标识，按需填写
 * {String}
+* 默认：[url](#user-content-url)
 
 ##### title
 
@@ -117,9 +118,16 @@ var disq = new iDisqus('comment', {
 
 ##### timeout
 
-* 超时时间
+* 当 mode 为 1 时的超时时间
 * {Number}
 * 默认：`3000`
+
+##### toggle
+
+* 当 mode 为 3 时可用，作用是切换评论框
+* 具体用法是在网页中放置一个 Checkbox，如 `<input type="checkbox" id="comment-toggle" disabled />`，此项则设置为 `"comment-toggle"`，当 Disqus 加载完时，选择框可用。
+* {String}
+* 无默认值
 
 ##### init
 

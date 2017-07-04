@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-03 12:53:52
+ * @version  2017-07-04 10:29:42
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -40,11 +40,14 @@ if ( $day < date('Ymd') ){
         CURLOPT_COOKIEJAR => $cookie_temp,
         CURLOPT_HEADER => true,
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false
     );
     curl_setopt_array($ch, $options);
     $response = curl_exec($ch);
+    $errno = curl_errno($ch);
+    if ($errno == 60 || $errno == 77) {
+        curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
+        $response = curl_exec($ch);
+    }
 
     preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
     $token = str_replace("Set-Cookie: csrftoken=", "", $matches[0][0]);
@@ -83,15 +86,18 @@ function curl_get($url){
         CURLOPT_HTTPHEADER => array('Host: disqus.com'),
         CURLOPT_COOKIE => $session,
         CURLOPT_HEADER => false,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false
+        CURLOPT_RETURNTRANSFER => true
     );
     $curl = curl_init();
     curl_setopt_array($curl, $options);
-    $data = json_decode(curl_exec($curl));
+    $data = curl_exec($curl);
+    $errno = curl_errno($curl);
+    if ($errno == 60 || $errno == 77) {
+        curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
+        $data = curl_exec($curl);
+    }
     curl_close($curl);
-    return $data;
+    return json_decode($data);
 }
 
 function curl_post($url, $data){
@@ -109,14 +115,17 @@ function curl_post($url, $data){
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $data,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false
     );
     $curl = curl_init();
     curl_setopt_array($curl, $options);
-    $data = json_decode(curl_exec($curl));
+    $data = curl_exec($curl);
+    $errno = curl_errno($curl);
+    if ($errno == 60 || $errno == 77) {
+        curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
+        $data = curl_exec($curl);
+    }
     curl_close($curl);
-    return $data;
+    return json_decode($data);
 }
 
 function post_format( $post ){
