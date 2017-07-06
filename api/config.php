@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-03 12:53:52
+ * @version  2017-07-06 13:54:46
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -16,7 +16,7 @@ namespace Emojione;
  * DISQUS_USERNAME  Disqus 用户名
  * DISQUS_EMAIL     Disqus 注册邮箱，重要
  * DISQUS_PASSWORD  Disqus 密码，重要
- * DISQUS_WEBSITE   网站域名，如：'http://blog.fooleap.org'
+ * DISQUS_WEBSITE   网站域名，如：'http://blog.fooleap.org'，Access-Control-Allow-Origin 包含此域名
  * DISQUS_SHORTNAME 网站在 Disqus 对应的 Shortname
  * DISQUS_APPROVED  评论是否免审核，true 即跳过评论预审核，false 则按后台设置
  *

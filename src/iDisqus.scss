@@ -161,7 +161,7 @@
 .comment-form {
     display: flex;
     flex-direction: column;
-    flex: auto;
+    flex: 1;
 }
 
 .placeholder {
@@ -733,5 +733,14 @@
             display: none;
         }
     }
-
+    .comment-form-input{
+        margin: 5px;
+        width: 100%;
+    }
+    .comment-form-wrapper.editing .comment-actions-form{
+        margin: 180px 0 0;
+    }
+    .comment-form-wrapper.logged-in .comment-actions-form{
+        margin: 0;
+    }
 }

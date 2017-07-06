@@ -4,6 +4,16 @@ disqus-php-api
 
 > Disqus 被墙，故做几个简单的接口，用于墙内环境访问 Disqus。
 
+## 实现功能
+
+* 评论列表
+* 评论回复
+* 图片上传
+* Gravatar 头像
+* Emoji 表情
+* 邮件通知
+* ……
+
 ## Disqus 设置
 
 * 使用 API 实现匿名评论功能，需在 Disqus 后台[网站设置](https://disqus.com/admin/settings/community/)，开启访客评论功能（Guest Commenting 项中勾选 Allow guests to comment）。

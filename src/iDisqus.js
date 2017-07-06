@@ -1,5 +1,5 @@
 /*!
- * v 0.1.2
+ * v 0.1.3
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -577,6 +577,9 @@
             _.opts.api + '/getcomments.php?link=' + _.opts.url + (!!_.stat.next ? '&cursor=' + _.stat.next : ''),
             function(resp){
                 var data = JSON.parse(resp);
+                if (!data.auth){
+                    alert('认证出错，请查看后端配置中，Disqus 帐号密码是否填写有误。');
+                }
                 if (data.code === 0) {
                     _.stat.offsetTop = d.documentElement.scrollTop || d.body.scrollTop;
                     _.stat.thread = data.thread;

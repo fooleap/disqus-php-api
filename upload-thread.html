@@ -70,7 +70,6 @@
                             success(xhr.responseText); 
                         }
                     };
-                    xhr.onerror = error; 
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                     xhr.send(params);
                     return xhr;

@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-06-27 09:07:07
+ * @version  2017-07-06 12:59:48
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -37,7 +37,10 @@ foreach ( $data -> response as $key => $post ) {
     $posts[$key] = post_format($post);
 }
 
+$isauth = strpos($session, 'session') !== false ? true : false;
+
 $output = $data -> code == 0 ? array(
+    'auth' => $isauth,
     'code' => $detail -> code,
     'cursor' => $data -> cursor,
     'link' => 'https://disqus.com/home/discussion/'.DISQUS_SHORTNAME.'/'.$detail -> response -> slug.'/?l=zh',

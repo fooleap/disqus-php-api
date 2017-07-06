@@ -3,15 +3,18 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-04 10:29:42
+ * @version  2017-07-06 12:59:30
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 namespace Emojione;
-header('Content-type:text/json');
-header('Access-Control-Allow-Origin: *');
 require_once('config.php');
 require_once('emojione/autoload.php');
+header('Content-type:text/json');
+$origin = isset($_SERVER['HTTP_ORIGIN'])? $_SERVER['HTTP_ORIGIN'] : '';  
+if(preg_match('(localhost|127\.0\.0\.1|'.DISQUS_WEBSITE.')', $origin)){
+    header('Access-Control-Allow-Origin: '.$origin);
+}
 $client = new Client(new Ruleset());
 $client->ignoredRegexp = '<code[^>]*>.*?<\/code>|<object[^>]*>.*?<\/object>|<span[^>]*>.*?<\/span>|<(?:object|embed|svg|img|div|span|p|a)[^>]*>';
 $client->imageType = 'png';
@@ -133,7 +136,7 @@ function post_format( $post ){
 
     // 访客指定 Gravatar 头像
     $avatar_url = GRAVATAR_CDN.md5($post->author->email).'?d='.GRAVATAR_DEFAULT;
-    $post->author->avatar->cache = $post->author->isAnonymous ? $avatar_url : $post->author->avatar->cache;
+    $post->author->avatar->permalink = $post->author->isAnonymous ? $avatar_url : $post->author->avatar->permalink;
 
     // 表情
     $post->message = $client->unicodeToImage($post->message);
@@ -159,7 +162,7 @@ function post_format( $post ){
     };
 
     $data = array( 
-        'avatar' => $post -> author -> avatar -> cache,
+        'avatar' => $post -> author -> avatar -> permalink,
         'createdAt' => $post -> createdAt.'+00:00',
         'id'=> $post -> id,
         'media' => $imgArr,
