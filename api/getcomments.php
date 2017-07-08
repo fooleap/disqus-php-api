@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-06 12:59:48
+ * @version  2017-07-09 05:44:35
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -33,6 +33,7 @@ $fields_data = array(
 $curl_url = '/api/3.0/threads/details.json?'.http_build_query($fields_data);
 $detail = curl_get($curl_url);
 
+$posts = array();
 foreach ( $data -> response as $key => $post ) {
     $posts[$key] = post_format($post);
 }

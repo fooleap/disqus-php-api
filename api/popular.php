@@ -4,7 +4,7 @@
  * 暂时设置为 30 天，5 条
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-06-27 09:07:07
+ * @version  2017-07-09 05:51:51
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -20,6 +20,7 @@ $fields_data = array(
 $curl_url = '/api/3.0/threads/listPopular.json?'.http_build_query($fields_data);
 $data = curl_get($curl_url);
 
+$posts = array();
 foreach ( $data -> response as $key => $post ) {
     $posts[$key] = array( 
         'link'=> $post->link,

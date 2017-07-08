@@ -461,7 +461,7 @@
                     var data  = JSON.parse(resp);
                     var posts = data.response;
                     posts.forEach(function(item){
-                        var el = d.querySelector('[data-disqus-url="'+getLocation(item.link).pathname+'"]')
+                        var el = d.querySelector('[data-disqus-url="'+item.link.replace(_.opts.site, '')+'"]')
                         if(!!el ){
                             el.innerHTML = item.posts;
                         }
@@ -485,7 +485,7 @@
                         var posts = data.response;
                         var postsHtml = '';
                         posts.forEach(function(item){
-                            postsHtml += '<li><a href="' + getLocation(item.link).pathname + '" title="' + item.title + '">' + item.title + '</a></li>';
+                            postsHtml += '<li><a href="' + item.link.replace(_.opts.site, '') + '" title="' + item.title + '">' + item.title + '</a></li>';
                         });
                         _.opts.popular.innerHTML = postsHtml;
                     }
