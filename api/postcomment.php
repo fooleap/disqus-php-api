@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-04 10:29:42
+ * @version  2017-07-13 14:16:49
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -29,6 +29,7 @@ if( $author_name == DISQUS_USERNAME && $author_email == DISQUS_EMAIL && strpos($
 }
 
 $post_message = $client->shortnameToUnicode($_POST['message']);
+//$post_message = $client->unifyUnicode($_POST['message']);
 
 $post_data = array(
     'api_key' => DISQUS_PUBKEY,

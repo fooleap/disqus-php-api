@@ -265,8 +265,8 @@
         }
     }
     .emojione-item-image {
-        height: 22px;
-        width: 22px;
+        height: 24px;
+        width: 24px;
     }
     .comment-actions-input[type="checkbox"]:checked + .emojione .emojione-list {
         opacity: 1;
@@ -656,6 +656,7 @@
     .comment-item-content {
         min-height: 40px;
         padding: 5px 0;
+        line-height: 24px;
         font-size: 14px;
         .at{
             padding-right: 4px;
@@ -664,8 +665,9 @@
             min-height: 20px;
         }
         img.emojione {
-            width: 22px;
-            height: 22px;
+            vertical-align: top;
+            width: 24px;
+            height: 24px;
             margin: 0 3px;
         }
     }
