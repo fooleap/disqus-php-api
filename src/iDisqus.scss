@@ -32,51 +32,26 @@
     .hide {
         display: none;
     }
+    .loading-bg{
+        display: none;
+    }
     &.loading{
         & > * {
             display: none;
         }
-        position: relative;
         display: block;
-        height: 52px;
-        width: 52px;
-        border: 5px solid rgb(157,158,161);
-        border-radius: 50%;
-        margin: 20px auto 40px;
-        &:before, &:after{
-            box-sizing: border-box;
-            display: block;
-            content: "";
-            position: absolute;
-        }
-        &:before{
-            top: 35px;
-            left: -10px;
-            width: 0;
-            height: 0;
-            border-width: 11px 7px;
-            border-style: solid ;
-            border-color: rgb(157,158,161) transparent transparent;
-            transform: rotate(45deg);
-        }
-        &:after{
-            top: 32px;
-            left: -2px;
-            width: 0;
-            height: 0;
-            border-width: 9px 4px;
-            border-style: solid;
-            border-color: #fff transparent transparent;
-            transform: rotate(45deg);
-        }
         .loading-container{
+            .loading-bg{
+                display: block;
+                transform: rotate(-135deg);
+                margin: 0 auto;
+            }
+            margin: 20px auto 40px;
             color: rgb(157,158,161);
             text-align: center;
             display: block;
-            position: absolute;
-            left: -97px;
-            top: 100%;
-            height: 40px;
+            position: relative;
+            height: 100px;
             line-height: 40px;
             width: 250px;
             &:before,&:after{
@@ -85,18 +60,20 @@
             }
             &:before{
                 content: attr(data-tip);
-                top: 0;
+                top: 72px;
                 left: 0;
                 width: 100%;
-                height: 100%;
+                height: 30px;
+                line-height: 30px;
+
             }
             &:after{
                 content: "";
                 box-sizing: border-box;
                 width: 26px;
                 height: 26px;
-                top: -34px;
-                left: 105px;
+                top: 20px;
+                left: 115px;
                 border-width: 3px;
                 border-style: solid;
                 border-color: rgb(157,158,161) transparent;

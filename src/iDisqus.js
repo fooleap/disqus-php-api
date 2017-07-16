@@ -1,5 +1,5 @@
 /*!
- * v 0.1.3
+ * v 0.1.4
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -221,7 +221,7 @@
         _.opts.identifier = !!_.opts.identifier ? _.opts.identifier : _.opts.url;
         _.opts.link = _.opts.site + _.opts.url; 
         _.opts.title = !!_.opts.title ? _.opts.title : d.title;
-        _.opts.slug = !!_.opts.slug ? _.opts.slug : '';
+        _.opts.slug = !!_.opts.slug ? _.opts.slug.replace(/\//g,'') : '';
         _.opts.desc =  !!_.opts.desc ? _.opts.desc : (!!d.querySelector('[name="description"]') ? d.querySelector('[name="description"]').content : '');
         _.opts.mode = !!_.opts.mode ? _.opts.mode : 1;
         _.opts.timeout = !!_.opts.timeout ? _.opts.timeout : 3000;
@@ -287,7 +287,7 @@
             emojiList += '<li class="emojione-item" title="'+ item.title+'" data-code="'+item.code+'"><img class="emojione-item-image" src="'+item.url+'" /></li>';
         })
         _.dom.innerHTML = '<div class="comment loading" id="idisqus">\n'+
-            '    <div class="loading-container" data-tip="正在加载评论……"></div>\n'+
+            '    <div class="loading-container" data-tip="正在加载评论……"><svg class="loading-bg" width="72" height="72" viewBox="0 0 720 720" version="1.1" xmlns="http://www.w3.org/2000/svg"><path class="ring" fill="none" stroke="#9d9ea1" d="M 0 -260 A 260 260 0 1 1 -80 -260" transform="translate(400,400)" stroke-width="50" /><polygon transform="translate(305,20)" points="50,0 0,100 18,145 50,82 92,145 100,100" style="fill:#9d9ea1"/></svg></div>\n'+
             '    <div class="comment-header"><span class="comment-header-item" id="comment-count">评论</span><a target="_blank" class="comment-header-item" id="comment-link">Disqus 讨论区</a></div>\n'+
             '    <div class="comment-box">\n'+
             '        <div class="comment-avatar avatar"><img class="comment-avatar-image" src="https://a.disquscdn.com/images/noavatar92.png"></div>\n'+
@@ -453,7 +453,7 @@
         if(qty > 0){
             var commentArr = [];
             for( var i = 0; i < qty; i++){
-                commentArr[i] = counts[i].dataset.disqusUrl;
+                commentArr[i] = counts[i].dataset.disqusUrl.replace(_.opts.site, '');
             }
             getAjax(
                 _.opts.api + '/count.php?links=' + commentArr.join(','), 
@@ -461,7 +461,7 @@
                     var data  = JSON.parse(resp);
                     var posts = data.response;
                     posts.forEach(function(item){
-                        var el = d.querySelector('[data-disqus-url="'+item.link.replace(_.opts.site, '')+'"]')
+                        var el = d.querySelector('[data-disqus-url$="'+item.link.replace(_.opts.site, '')+'"]')
                         if(!!el ){
                             el.innerHTML = item.posts;
                         }
@@ -1006,7 +1006,7 @@
             url: _.dom.querySelector('#thread-url').value,
             identifier: _.dom.querySelector('#thread-identifier').value,
             title: _.dom.querySelector('#thread-title').value,
-            slug: _.dom.querySelector('#thread-slug').value,
+            slug: _.dom.querySelector('#thread-slug').value.replace(/\//g,''),
             message: _.dom.querySelector('#thread-message').value
         }
         postAjax( _.opts.api + '/createthread.php', postData, function(resp){

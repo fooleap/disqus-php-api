@@ -1,4 +1,4 @@
-disqus-php-api
+Disqus PHP API
 ===========
 利用 PHP cURL 转发 Disqus API 请求
 
@@ -7,7 +7,7 @@ disqus-php-api
 ## 实现功能
 
 * 评论列表
-* 评论回复
+* 评论发表
 * 图片上传
 * Gravatar 头像
 * Emoji 表情
@@ -164,6 +164,7 @@ var disq = new iDisqus('comment', {
 #### count
 
 * 加载评论数
+* 用法：创建容器（可多个），加属性 data-disqus-url 值放页面链接，创建实例后执行则可显示评论数，具体可查看DEMO 页面
 
 #### popular
 
