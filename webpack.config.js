@@ -35,7 +35,7 @@ module.exports = {
             comments: true,
             compress: {
                 warnings: false,
-                drop_console: true
+                drop_console: false
             },
             mangle: {
                 except: ['$'],

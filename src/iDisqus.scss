@@ -3,6 +3,7 @@
     &#disqus_thread{
         display: none;
     }
+    position: relative;
     font: 14px/1.6 "Helvetica Neue", Helvetica, Arial, "微软雅黑", "Microsoft YaHei", sans-serif;
     margin: 5px auto;
     word-wrap: break-word;
@@ -424,8 +425,18 @@
             color: #7f919e;
         }
     }
+    .comment-form-alert:not(:empty) {
+        background-color: #f05f70;
+        padding: 10px;
+        line-height: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 -2px;
+        border-top: 2px solid #dbdfe4;
+    }
 }
-
+    
 .comment-actions-form{
     display: flex;
     .comment-form-submit{
@@ -581,6 +592,23 @@
         color: #000;
         cursor: default;
     }
+    pre{
+        font-size: 12px;
+        font-family: monaco,menlo,monospace;
+        overflow: hidden;
+        line-height: 20px;
+        margin: 0 0 15px;
+        border-left: 4px solid #7f919e;
+        padding: 0 0 0 12px;
+    }
+    code{
+        line-height: 20px;
+        font-family: monaco,menlo,monospace;
+        padding: 0 .3em;
+        display: inline-block;
+        vertical-align: top;
+        margin: 0 .1em;
+    }
     #comment-preview {
         opacity: .6;
     }
@@ -693,6 +721,41 @@
         background-color: #edeff2;
         color: #444!important;
         cursor: wait;
+    }
+}
+
+.comment-form-error{
+    position: absolute;
+    background-color: #fff;
+    font-size: 14px;
+    padding: 10px;
+    line-height: 20px;
+    border-radius: 3px;
+    box-shadow: 0 0 5px 1px rgba(0,0,0,.3);
+    margin-top: 40px;
+    margin-left: 2px;
+    z-index: 10;
+    &:before{
+        content: "";
+        display: block;
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        transform: rotate(45deg);
+        background-color: #fff;
+        box-shadow: 0 0 5px 1px rgba(0,0,0,.3);
+        top: -4px;
+        left: 15px;
+    }
+    &:after{
+        content: "";
+        display: block;
+        position: absolute;
+        width: 20px;
+        height: 10px;
+        top: 0;
+        left: 10px;
+        background-color: #fff;
     }
 }
 

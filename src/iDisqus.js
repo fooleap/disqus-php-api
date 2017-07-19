@@ -1,5 +1,5 @@
 /*!
- * v 0.1.4
+ * v 0.1.5
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -193,18 +193,12 @@
         // 提交访客信息
         submit: function(g){
             if( this.logged_in == 'false' ){
-                if (/\S/i.test(g.name) && /^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i.test(g.email)){
-                    l.setItem('name', g.name);
-                    l.setItem('email', g.email);
-                    l.setItem('url', g.url);
-                    l.setItem('avatar', g.avatar);
-                    l.setItem('logged_in', 'true');
-                    this.init();
-                    return true;
-                } else {
-                    console.log('请正确填写必填项');
-                    return false;
-                }
+                l.setItem('name', g.name);
+                l.setItem('email', g.email);
+                l.setItem('url', g.url);
+                l.setItem('avatar', g.avatar);
+                l.setItem('logged_in', 'true');
+                this.init();
             }
         }
     }
@@ -300,6 +294,7 @@
             '                        <div class="comment-image-loaded"></div>\n'+
             '                    </div>\n'+
             '                </div>\n'+
+            '                <div class="comment-form-alert"></div>\n'+
             '                <div class="comment-actions">\n'+
             '                    <div class="comment-actions-group">\n'+
             '                        <input id="emoji-input" class="comment-actions-input" type="checkbox"> \n'+
@@ -356,7 +351,8 @@
             upload: _.upload.bind(_),
             verify: _.verify.bind(_),
             field: _.field,
-            focus: _.focus
+            focus: _.focus,
+            input: _.input
         };
 
         switch(_.opts.mode){
@@ -467,7 +463,7 @@
                         }
                     });
                 }, function(){
-                    console.log('获取数据失败！')
+                    alert('获取数据失败！')
                 }
             );
         }
@@ -490,7 +486,7 @@
                         _.opts.popular.innerHTML = postsHtml;
                     }
                 },function(){
-                    console.log('获取数据失败！')
+                    alert('获取数据失败！')
                 }
             );
         }
@@ -607,6 +603,7 @@
                         _.dom.querySelector('.exit').addEventListener('click', _.handle.guestReset, false);
                         _.dom.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
                         _.dom.querySelector('.comment-form-textarea').addEventListener('focus',_.handle.focus, false);
+                        _.dom.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
                         _.dom.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
                         _.dom.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
                         _.dom.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
@@ -637,7 +634,7 @@
                     _.create();
                 }
             },function(){
-                console.log('获取数据失败！')
+                alert('获取数据失败，请检查服务器设置。')
             }
         );
     }
@@ -699,10 +696,17 @@
         }
     }
 
+    // 输入事件
+    iDisqus.prototype.input = function(e){
+        var form = e.currentTarget.closest('.comment-form');
+        var alertmsg = form.querySelector('.comment-form-alert');
+        alertmsg.innerHTML = '';
+    }
+
     // 点选表情
     iDisqus.prototype.field = function(e){
-        var item = e.currentTarget;
-        var textarea = item.closest('.comment-form').querySelector('.comment-form-textarea');
+        var form = e.currentTarget.closest('.comment-form');
+        var textarea = form.querySelector('.comment-form-textarea');
         textarea.value += item.dataset.code;
         textarea.focus();
     }
@@ -731,6 +735,7 @@
 
         item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
         item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
+        item.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
         item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
         item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
         item.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
@@ -751,12 +756,13 @@
         var box  = e.currentTarget.closest('.comment-box');
         var avatar = box.querySelector('.comment-avatar-image');
         var email = box.querySelector('.comment-form-email');
+        var alertmsg = box.querySelector('.comment-form-alert');
         if (/^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i.test(email.value)) {
             getAjax(
                 _.opts.api + '/getgravatar.php?email=' + email.value,
                 function(resp) {
                     if (resp == 'false') {
-                        console.log('您所填写的邮箱地址有误！');
+                        _.errorTips('您所填写的邮箱地址有误。', email);
                     } else {
                         avatar.src = resp;
                     }
@@ -770,22 +776,28 @@
     iDisqus.prototype.upload = function(e){
         var _ = this;
         var file = e.currentTarget;
-        var item = file.closest('.comment-box');
-        var progress = item.querySelector('.comment-image-progress');
-        var loaded = item.querySelector('.comment-image-loaded');
-        var wrapper = item.querySelector('.comment-form-wrapper');
+        var form = file.closest('.comment-form');
+        var progress = form.querySelector('.comment-image-progress');
+        var loaded = form.querySelector('.comment-image-loaded');
+        var wrapper = form.querySelector('.comment-form-wrapper');
+        var alertmsg = form.querySelector('.comment-form-alert');
+        alertmsg.innerHTML = '';
         if(file.files.length === 0){
             return;
         }
+
+        // 以文件大小识别是否为同张图片
+        var size = file.files[0].size;
+
         if( _.stat.imageSize.indexOf(size) == -1 ){
             progress.style.width = '80px';
         } else {
-            console.log('请勿选择已存在的图片！');
+            alertmsg.innerHTML = '请勿选择已存在的图片。';
+            setTimeout(function(){
+                alertmsg.innerHTML = '';
+            }, 3000);
             return;
         }
-
-        //以文件大小识别是否为同张图片
-        var size = file.files[0].size;
 
         // 展开图片上传界面
         wrapper.classList.add('expanded');
@@ -805,13 +817,16 @@
                     var image = new Image();
                     image.src = imageUrl;
                     image.onload = function(){
-                        item.querySelector('[data-image-size="'+size+'"]').innerHTML = '<img class="comment-image-object" src="'+imageUrl+'">';
-                        item.querySelector('[data-image-size="'+size+'"]').dataset.imageUrl = imageUrl;
-                        item.querySelector('[data-image-size="'+size+'"]').classList.remove('loading');
-                        item.querySelector('[data-image-size="'+size+'"]').addEventListener('click', _.handle.remove, false);
+                        form.querySelector('[data-image-size="'+size+'"]').innerHTML = '<img class="comment-image-object" src="'+imageUrl+'">';
+                        form.querySelector('[data-image-size="'+size+'"]').dataset.imageUrl = imageUrl;
+                        form.querySelector('[data-image-size="'+size+'"]').classList.remove('loading');
+                        form.querySelector('[data-image-size="'+size+'"]').addEventListener('click', _.handle.remove, false);
                     }
                 } else {
-                    console.log('图片上传失败');
+                    alertmsg.innerHTML = '图片上传失败。';
+                    setTimeout(function(){
+                        alertmsg.innerHTML = '';
+                    }, 3000);
                 }
             }
         };
@@ -841,7 +856,7 @@
                 '        </rect>\n'+
                 '    </svg>\n'+
                 '</li>\n';
-            item.querySelector('.comment-image-list').insertAdjacentHTML('beforeend', imageItem);
+            form.querySelector('.comment-image-list').insertAdjacentHTML('beforeend', imageItem);
         }, false);
         xhrUpload.open('POST', _.opts.api + '/upload.php', true);
         xhrUpload.send(data);
@@ -863,21 +878,68 @@
         }
     }
 
+    // 错误提示
+    iDisqus.prototype.errorTips = function(Text, Dom){
+        var _ = this;
+        if( _.guest.logged_in == 'true' ){
+            _.guest.reset();
+        }
+        var idisqus = _.dom.querySelector('#idisqus');
+        var errorDom = _.dom.querySelector('.comment-form-error');
+        if(!!errorDom){
+            errorDom.outerHTML = '';
+        }
+        var Top = Dom.offsetTop;
+        var Left = Dom.offsetLeft;
+        var errorHtml = '<div class="comment-form-error" style="top:'+Top+'px;left:'+Left+'px;">'+Text+'</div>';
+        idisqus.insertAdjacentHTML('beforeend', errorHtml);
+        errorDom
+        setTimeout(function(){
+            var errorDom = _.dom.querySelector('.comment-form-error');
+            if(!!errorDom){
+                errorDom.outerHTML = '';
+            }
+        }, 3000);
+    }
+
     // 发表/回复评论
     iDisqus.prototype.post = function(e){
         var _ = this;
         var item = e.currentTarget.closest('.comment-item') || e.currentTarget.closest('.comment-box');
+        var elName = item.querySelector('.comment-form-name');
+        var elEmail = item.querySelector('.comment-form-email');
+        var elUrl = item.querySelector('.comment-form-url');
         var guest = {
-            name: item.querySelector('.comment-form-name').value,
-            email: item.querySelector('.comment-form-email').value,
-            url: item.querySelector('.comment-form-url').value,
+            name: elName.value,
+            email: elEmail.value,
+            url: elUrl.value.replace(/\s/g,''),
             avatar: item.querySelector('.comment-avatar-image').src
         }
-        if ( _.guest.logged_in == 'false' ){
-            if(_.guest.submit(guest) == false){
-                return;
-            }
+        var alertmsg = item.querySelector('.comment-form-alert');
+        function alertClear(){
+            setTimeout(function(){
+                alertmsg.innerHTML = '';
+            }, 3000);
         }
+
+        if(/^\s*$/i.test(guest.name)){
+            _.errorTips('名字不能为空。', elName);
+            return;
+        }
+        if(/^\s*$/i.test(guest.email)){
+            _.errorTips('邮箱不能为空。', elEmail);
+            return;
+        }
+        if(!/^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i.test(guest.email)){
+            _.errorTips('请正确填写邮箱。', elEmail);
+            return;
+        }
+        if(!/^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$|^\s*$/i.test(guest.url)){
+            _.errorTips('请正确填写网址。', elUrl);
+            return;
+        }
+        _.guest.submit(guest);
+
         if(!_.stat.message && !_.stat.mediaHtml){
             _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/,'').replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
         }
@@ -896,8 +958,8 @@
             return;
         }
 
-        if( media.length == 0 && message == '' ){
-            console.log('无法发送空消息');
+        if( media.length == 0 && /^\s*$/i.test(message)){
+            alertmsg.innerHTML = '评论不能为空或空格。';
             item.querySelector('.comment-form-textarea').focus();
             return;
         };
@@ -960,14 +1022,22 @@
             } else if (data.code === 2) {
                 if (data.response.indexOf('email') > -1) {
                     console.log('请输入正确的名字或邮箱！');
+                    alertClear();
                     return;
-                } else if (data.response.indexOf('message') > -1) {
-                    console.log('评论不能为空！');
+                }
+                if (data.response.indexOf('message') > -1) {
+                    alertmsg.innerHTML = '评论不能为空或空格。';
+                    return;
+                }
+                if (data.response.indexOf('Invalid URL') > -1) {
+                    _.errorTips('请输入正确网址。', elUrl);
                     return;
                 }
             }
         }, function(){
-            console.log('提交出错，请稍后重试！');
+            alertmsg.innerHTML = '提交出错，请稍后重试。';
+            alertClear();
+
             _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
             if( parentId ){
                 item.querySelector('.comment-item-reply').click();
