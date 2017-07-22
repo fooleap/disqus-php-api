@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>disqus-php-api 示例</title>
-        <link rel="stylesheet" href="./dist/iDisqus.min.css" />
+        <title>DEMO</title>
+        <link rel="stylesheet" href="path/to/iDisqus.min.css" />
         <style>
             body{
                 width: 700px;
@@ -14,24 +14,18 @@
                 }
             }
         </style>
-        <script src="./dist/iDisqus.min.js"></script>
+        <script src="path/to/iDisqus.min.js"></script>
     <body>
         <div id="comment"></div>
-        <p>本页共有 <span data-disqus-url="/disqus-php-api.html"></span> 条评论</p>
-        <ul id="popular-posts"></ul>
         <script>
             var disq = new iDisqus('comment', {
-                forum: 'fooleap',
-                api: 'http://api.fooleap.org/disqus',
-                site: 'http://blog.fooleap.org',
-                url: '/disqus-php-api.html',
+                forum: '',
+                api: '',
+                site: '',
                 mode: 2,
                 timeout: 3000,
-                popular: document.getElementById('popular-posts'),
-                init: true,
+                init: true
             });
-            disq.popular();
-            disq.count();
         </script>
     </body>
 </html>

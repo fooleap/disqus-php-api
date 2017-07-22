@@ -211,7 +211,12 @@
         _.dom =  d.getElementById(typeof(arguments[0]) == 'string' ? arguments[0] : 'comment');
         _.opts.api = _.opts.api.slice(-1) == '/' ? _.opts.api.slice(0,-1) : _.opts.api;
         _.opts.site = !!_.opts.site ? _.opts.site : location.origin;
-        _.opts.url = !!_.opts.url ? _.opts.url : location.pathname + location.search;
+        if(!!_.opts.url){
+            var optsUrl = _.opts.url.replace(_.opts.site, '');
+            _.opts.url = optsUrl.slice(0, 1) != '/' ? '/' + optsUrl : optsUrl;
+        } else {
+            _.opts.url = location.pathname + location.search;
+        }
         _.opts.identifier = !!_.opts.identifier ? _.opts.identifier : _.opts.url;
         _.opts.link = _.opts.site + _.opts.url; 
         _.opts.title = !!_.opts.title ? _.opts.title : d.title;
@@ -457,7 +462,9 @@
                     var data  = JSON.parse(resp);
                     var posts = data.response;
                     posts.forEach(function(item){
-                        var el = d.querySelector('[data-disqus-url$="'+item.link.replace(_.opts.site, '')+'"]')
+                        var link = item.link.replace(_.opts.site, '');
+                        var itemLink = link.slice(0, 1) != '/' ? '/' + link : link;
+                        var el = d.querySelector('[data-disqus-url$="'+itemLink+'"]')
                         if(!!el ){
                             el.innerHTML = item.posts;
                         }
@@ -1021,8 +1028,7 @@
                 timeAgo();
             } else if (data.code === 2) {
                 if (data.response.indexOf('email') > -1) {
-                    console.log('请输入正确的名字或邮箱！');
-                    alertClear();
+                    _.errorTips('请输入正确的名字或邮箱。', elName);
                     return;
                 }
                 if (data.response.indexOf('message') > -1) {
@@ -1082,11 +1088,11 @@
         postAjax( _.opts.api + '/createthread.php', postData, function(resp){
             var data = JSON.parse(resp);
             if( data.code === 0 ) {
-                console.log('创建 Thread 成功，刷新后便可愉快地评论了！');
+                alert('创建 Thread 成功，刷新后便可愉快地评论了！');
                 setTimeout(function(){location.reload();},2000);
             }
         }, function(){
-            console.log('创建 Thread 出错，请稍后重试！');
+            alert('创建 Thread 出错，请稍后重试！');
         })
     }
 
