@@ -1,5 +1,5 @@
 /*!
- * v 0.1.5
+ * v 0.1.6
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -1090,6 +1090,21 @@
             if( data.code === 0 ) {
                 alert('创建 Thread 成功，刷新后便可愉快地评论了！');
                 setTimeout(function(){location.reload();},2000);
+            } else if( data.code === 2 ) {
+                if (data.response.indexOf('A thread already exists with link') > -1) {
+                    alert(data.response.replace('A thread already exists with link,', '已存在此链接的相关 Thread，'));
+                    return;
+                }
+                if (data.response.indexOf('Invalid URL') > -1) {
+                    alert('参数错误，无效的\'URL\'');
+                    return;
+                }
+                if (data.response.indexOf('Invalid slug') > -1) {
+                    alert('参数错误，无效的\'slug\'');
+                    return;
+                }
+                alert(data.response);
+                return;
             }
         }, function(){
             alert('创建 Thread 出错，请稍后重试！');
