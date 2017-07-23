@@ -18,7 +18,7 @@ module.exports = {
                     use:[ 'css-loader','sass-loader','postcss-loader'],
                     fallback: 'style-loader',
                 }),
-            },
+            }
         ],
     },
     plugins: [

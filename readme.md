@@ -151,6 +151,12 @@ var disq = new iDisqus('comment', {
 * {String}
 * 默认：`"https://assets-cdn.github.com/images/icons/emoji/unicode/"`
 
+##### emoji_preview
+
+* 评论预览是否支持 Emoji 短代码
+* {Boolean}
+* 默认：`false`;
+
 ### 实例方法
 
 #### init

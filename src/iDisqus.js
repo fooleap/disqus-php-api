@@ -1,5 +1,5 @@
 /*!
- * v 0.1.6
+ * v 0.1.7
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -229,6 +229,16 @@
         // emoji 表情
         _.opts.emoji_path = !!_.opts.emoji_path ? _.opts.emoji_path : 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
         _.emoji = _._emoji();
+        
+        if(!!_.opts.emoji_preview){
+            var js = d.scripts;
+            var url = js[js.length - 1].src;
+            url = url.substring(0, url.lastIndexOf('/'));
+            getAjax(url +'/eac.json', function(resp){
+                _.eac = JSON.parse(resp);
+            }, function(){
+            })
+        }
 
         // 默认状态
         _.stat = {
@@ -970,10 +980,21 @@
             item.querySelector('.comment-form-textarea').focus();
             return;
         };
+
         var preMessage = message;
-        _.emoji.forEach(function(item){
-            preMessage = preMessage.replace(item.code, '<img class="emojione" src="' + item.url + '" />');
-        });
+
+        if( !!_.opts.emoji_preview ){
+            preMessage = preMessage.replace(/:([-+\w]+):/g, function (match){
+                var emojiShort = match.replace(/:/g,'');
+                var emojiImage = !!_.eac[emojiShort] ? '<img class="emojione" width="24" height="24" alt="'+emojiShort+'" title=":'+emojiShort+':" src="'+_.opts.emoji_path+_.eac[emojiShort]+'.png">' : match;
+                return emojiImage;
+            });
+        } else {
+            _.emoji.forEach(function(item){
+                preMessage = preMessage.replace(item.code, '<img class="emojione" width="24" height="24" src="' + item.url + '" />');
+            });
+        }
+
         var post = {
             'url': !!_.guest.url ? _.guest.url : '',
             'name': _.guest.name,
