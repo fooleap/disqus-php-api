@@ -666,7 +666,7 @@
             dom: _.dom.querySelector('.comment-list'),
             insert: 'afterbegin'
         } : {
-            name: !!_.dom.querySelector('.comment-item[data-id="'+post.parent+'"]') ? '<a class="at" href="#'+_.dom.querySelector('.comment-item[data-id="'+post.parent+'"]').id+'">@' + _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]').dataset.name + '</a>': '',
+            name: !!_.dom.querySelector('.comment-item[data-id="'+post.parent+'"]') ? '<a class="comment-item-pname" href="#'+_.dom.querySelector('.comment-item[data-id="'+post.parent+'"]').id+'"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1.664 902.144s97.92-557.888 596.352-557.888V129.728L1024 515.84l-425.984 360.448V628.8c-270.464 0-455.232 23.872-596.352 273.28"></path></svg>' + _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]').dataset.name + '</a>': '',
             dom: _.dom.querySelector('.comment-item[data-id="'+post.parent+'"] .comment-item-children'),
             insert: 'beforeend'
         };
@@ -681,7 +681,7 @@
             var html = '<li class="comment-item" data-id="' + post.id + '" data-name="'+ post.name + '" id="comment-' + post.id + '">' +
                 '<div class="comment-item-avatar"><img src="' + post.avatar + '"></div>'+
                 '<div class="comment-item-main">'+
-                '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a><span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span><span class="comment-item-bullet"> • </span><a class="comment-item-reply" href="javascript:;">回复</a></div>'+
+                '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+parentPost.name+'<span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span><span class="comment-item-bullet"> • </span><a class="comment-item-reply" href="javascript:;">回复</a></div>'+
                 '<div class="comment-item-content">' + post.message + mediaHTML + '</div>'+
                 '<ul class="comment-item-children"></ul>'+
                 '</div>'+
@@ -722,7 +722,8 @@
 
     // 点选表情
     iDisqus.prototype.field = function(e){
-        var form = e.currentTarget.closest('.comment-form');
+        var item = e.currentTarget;
+        var form = item.closest('.comment-form');
         var textarea = form.querySelector('.comment-form-textarea');
         textarea.value += item.dataset.code;
         textarea.focus();
@@ -910,7 +911,6 @@
         var Left = Dom.offsetLeft;
         var errorHtml = '<div class="comment-form-error" style="top:'+Top+'px;left:'+Left+'px;">'+Text+'</div>';
         idisqus.insertAdjacentHTML('beforeend', errorHtml);
-        errorDom
         setTimeout(function(){
             var errorDom = _.dom.querySelector('.comment-form-error');
             if(!!errorDom){
