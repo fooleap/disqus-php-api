@@ -157,6 +157,12 @@ var disq = new iDisqus('comment', {
 * {Boolean}
 * 默认：`false`;
 
+##### badge
+
+* 管理员徽章文本
+* {String}
+* 默认：`"管理员"`
+
 ### 实例方法
 
 #### init

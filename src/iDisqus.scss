@@ -637,6 +637,17 @@
                 }
             }
         }
+        .comment-item-badge {
+            color: #fff;
+            background: #7f919e;
+            padding: 1px 3px;
+            margin: 0 2px;
+            font-size: 10px;
+            line-height: 1.1;
+            font-weight: 700;
+            border-radius: 3px;
+            display: inline-block;
+        }
         .comment-item-time {
             font-size: 12px;
             color: #7f919e;
@@ -646,7 +657,7 @@
         .comment-item-name,
         .comment-item-cancel{
             color: rgb(0, 149, 221);
-            font-weight: 500;
+            font-weight: 700;
             border-bottom: none;
         }
         .comment-item-name[href^="javascript"] {

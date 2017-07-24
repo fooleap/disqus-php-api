@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-16 20:45:01
+ * @version  2017-07-24 12:57:37
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -20,6 +20,7 @@ namespace Emojione;
  * DISQUS_SHORTNAME 网站在 Disqus 对应的 Shortname
  * DISQUS_APPROVED  评论是否免审核，true 即跳过评论预审核，false 则按后台设置
  *
+ * 留言者的名字为 DISQUS_USERNAME 或邮箱号为 DISQUS_EMAIL 皆视为管理员
  * 填写正确的邮箱、密码之后，将以网站管理员的身份去获取评论数据。
  * 发送评论请求时，请填写在此设置的用户名、邮箱信息，将以登录身份发表评论。
  *

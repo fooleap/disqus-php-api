@@ -1,5 +1,5 @@
 /*!
- * v 0.1.7
+ * v 0.1.8
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -225,6 +225,7 @@
         _.opts.mode = !!_.opts.mode ? _.opts.mode : 1;
         _.opts.timeout = !!_.opts.timeout ? _.opts.timeout : 3000;
         _.opts.toggle = !!_.opts.toggle ? d.getElementById(_.opts.toggle) : null;
+        _.opts.badge = !!_.opts.badge ? _.opts.badge : '管理员';
 
         // emoji 表情
         _.opts.emoji_path = !!_.opts.emoji_path ? _.opts.emoji_path : 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
@@ -661,12 +662,13 @@
 
         var _ = this;
 
+        var parentPostDom = _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]');
         var parentPost = !post.parent ? {
             name: '',
             dom: _.dom.querySelector('.comment-list'),
             insert: 'afterbegin'
         } : {
-            name: !!_.dom.querySelector('.comment-item[data-id="'+post.parent+'"]') ? '<a class="comment-item-pname" href="#'+_.dom.querySelector('.comment-item[data-id="'+post.parent+'"]').id+'"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1.664 902.144s97.92-557.888 596.352-557.888V129.728L1024 515.84l-425.984 360.448V628.8c-270.464 0-455.232 23.872-596.352 273.28"></path></svg>' + _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]').dataset.name + '</a>': '',
+            name: !!parentPostDom ? '<a class="comment-item-pname" href="#'+parentPostDom.id+'"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1.664 902.144s97.92-557.888 596.352-557.888V129.728L1024 515.84l-425.984 360.448V628.8c-270.464 0-455.232 23.872-596.352 273.28"></path></svg>' + parentPostDom.dataset.name + '</a>': '',
             dom: _.dom.querySelector('.comment-item[data-id="'+post.parent+'"] .comment-item-children'),
             insert: 'beforeend'
         };
@@ -681,7 +683,7 @@
             var html = '<li class="comment-item" data-id="' + post.id + '" data-name="'+ post.name + '" id="comment-' + post.id + '">' +
                 '<div class="comment-item-avatar"><img src="' + post.avatar + '"></div>'+
                 '<div class="comment-item-main">'+
-                '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+parentPost.name+'<span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span><span class="comment-item-bullet"> • </span><a class="comment-item-reply" href="javascript:;">回复</a></div>'+
+                '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+ (post.isMod ?'<span class="comment-item-badge">'+_.opts.badge+'</span>' :'')+parentPost.name+'<span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span><span class="comment-item-bullet"> • </span><a class="comment-item-reply" href="javascript:;">回复</a></div>'+
                 '<div class="comment-item-content">' + post.message + mediaHTML + '</div>'+
                 '<ul class="comment-item-children"></ul>'+
                 '</div>'+
