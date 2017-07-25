@@ -5,7 +5,7 @@
  * @param links  页面链接，以“,”分隔
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-09 05:52:52
+ * @version  2017-07-26 06:38:55
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -16,7 +16,8 @@ $links = '&thread=link:'.DISQUS_WEBSITE.preg_replace('/,/i','&thread=link:'.DISQ
 
 $fields_data = array(
     'api_key' => DISQUS_PUBKEY,
-    'forum' => DISQUS_SHORTNAME
+    'forum' => DISQUS_SHORTNAME,
+    'limit' => 100
 );
 
 $curl_url = '/api/3.0/threads/list.json?'.http_build_query($fields_data).$links;

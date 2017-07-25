@@ -1,5 +1,5 @@
 /*!
- * v 0.1.8
+ * v 0.1.9
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -246,6 +246,7 @@
             current: 'idisqus', // 当前显示评论框
             loaded: false,      // 评论框已加载
             loading: false,     // 评论加载中
+            editing: false,     // 评论编辑中
             offsetTop: 0,       // 高度位置
             thread: null,       // 本页 thread id
             next: null,         // 下条评论
@@ -255,7 +256,7 @@
             root: [],           // 根评论
             count: 0,           // 评论数
             imageSize: [],      // 已上传图片大小
-            disqusLoaded: false,// Disqus 已加载
+            disqusLoaded: false // Disqus 已加载
         };
 
         // Disqus 评论框设置
@@ -481,7 +482,7 @@
                         }
                     });
                 }, function(){
-                    alert('获取数据失败！')
+                    console.log('获取数据失败！')
                 }
             );
         }
@@ -504,7 +505,7 @@
                         _.opts.popular.innerHTML = postsHtml;
                     }
                 },function(){
-                    alert('获取数据失败！')
+                    console.log('获取数据失败！')
                 }
             );
         }
@@ -663,6 +664,7 @@
         var _ = this;
 
         var parentPostDom = _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]');
+        
         var parentPost = !post.parent ? {
             name: '',
             dom: _.dom.querySelector('.comment-list'),
@@ -683,8 +685,9 @@
             var html = '<li class="comment-item" data-id="' + post.id + '" data-name="'+ post.name + '" id="comment-' + post.id + '">' +
                 '<div class="comment-item-avatar"><img src="' + post.avatar + '"></div>'+
                 '<div class="comment-item-main">'+
-                '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+ (post.isMod ?'<span class="comment-item-badge">'+_.opts.badge+'</span>' :'')+parentPost.name+'<span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span><span class="comment-item-bullet"> • </span><a class="comment-item-reply" href="javascript:;">回复</a></div>'+
+                '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+ (post.isMod ?'<span class="comment-item-badge">'+_.opts.badge+'</span>' :'')+parentPost.name+'<span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span></div>'+
                 '<div class="comment-item-content">' + post.message + mediaHTML + '</div>'+
+                '<div class="comment-item-footer">' + (!!post.isPost ? '<span class="comment-item-manage"><a class="comment-item-delete" href="javascript:;">删除</a><span class="comment-item-bullet"> • </span></span>' : '') + '<a class="comment-item-reply" href="javascript:;">回复</a> </div>'+
                 '<ul class="comment-item-children"></ul>'+
                 '</div>'+
                 '</li>';
@@ -692,6 +695,53 @@
             _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
         } else {
             _.stat.unload.push(post);
+        }
+
+        // 发布留言，可编辑删除
+        if(!!post.isPost){
+            var $this = _.dom.querySelector('.comment-item[data-id="' + post.id + '"]');
+            $this.querySelector('.comment-item-footer').insertAdjacentHTML('beforeend','<span class="comment-item-tips">页面刷新前，十分钟内可删除</span>');
+            setTimeout(function(){
+                $this.querySelector('.comment-item-tips').outerHTML = '';
+            }, 5000);
+
+            var postEdit = setTimeout(function(){
+                $this.querySelector('.comment-item-manage').outerHTML = '';
+                // 十分钟后
+            }, 600000);
+
+            // 删除
+            $this.querySelector('.comment-item-delete').addEventListener('click',function(e){
+                var postData = {
+                    id: post.id
+                }
+                var delDom = e.currentTarget;
+                delDom.innerHTML = '删除中';
+                postAjax( _.opts.api + '/removecomment.php', postData, function(resp){
+                    var data = JSON.parse(resp);
+                    if (data.code === 0) {
+                        if(data.response.isDeleted == true){
+                            $this.outerHTML = '';
+                        } else {
+                            alert(data.response.message);
+                            $this.querySelector('.comment-item-manage').outerHTML = '';
+                        }
+                    } else if (data.code === 2) {
+                        alert(data.response);
+                        $this.querySelector('.comment-item-manage').outerHTML = '';
+                    }
+                }, function(){
+                    alert('删除出错，请稍后重试');
+                })
+                clearTimeout(postEdit);
+            }, false)
+
+            /* 编辑
+            $this.querySelector('.comment-item-edit').addEventListener('click',function(){
+                $this.style.display = 'none';
+                _.stat.editing = true;
+                _.reEdit(!!post.parent?parentPostDom:_.dom.querySelector('.comment-box'));
+            }, false)*/
         }
     }
 
@@ -731,43 +781,49 @@
         textarea.focus();
     }
 
-    // 回复框
+    // 显示回复框 or 取消回复框
     iDisqus.prototype.show = function(e){
         var _ = this;
 
-        // 移除已显示回复框
+        var $this = e.currentTarget;
+        var item = $this.closest('.comment-item');
+
+        // 无论取消还是回复，移除已显示回复框
         var box = _.dom.querySelector('.comment-item .comment-box');
         if( box ){
             var $show = box.closest('.comment-item');
-            box.parentNode.removeChild(box);
             var cancel = $show.querySelector('.comment-item-cancel')
             cancel.outerHTML = cancel.outerHTML.replace('cancel','reply');
-            $show.querySelector('.comment-item-reply').addEventListener('click', _.handle.show, false);
+            box.outerHTML = '';
+
+            // 编辑时取消回复，显示出隐藏的
+            if( _.stat.editing ){
+                _.dom.querySelector('.comment-item[style*="display: none"]').style.display = '';
+                _.stat.editing = false;
+            }
         }
 
-        // 显示回复框
-        var $this = e.currentTarget;
-        var item = $this.closest('.comment-item');
-        var commentBox = _.box.replace(/emoji-input/g,'emoji-input-'+item.dataset.id).replace(/upload-input/g,'upload-input-'+item.dataset.id);
-        item.querySelector('.comment-item-children').insertAdjacentHTML('beforebegin', commentBox);
-        $this.outerHTML = $this.outerHTML.replace('reply','cancel');
-        _.guest.init();
+        // 回复时，显示评论框
+        if( $this.className == 'comment-item-reply' ){
+            $this.outerHTML = $this.outerHTML.replace('reply','cancel');
+            var commentBox = _.box.replace(/emoji-input/g,'emoji-input-'+item.dataset.id).replace(/upload-input/g,'upload-input-'+item.dataset.id);
+            item.querySelector('.comment-item-children').insertAdjacentHTML('beforebegin', commentBox);
+            _.guest.init();
 
-        item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
-        item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
-        item.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
-        item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
-        item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
-        item.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
-        addListener(item.getElementsByClassName('emojione-item'), 'click', _.handle.field);
-        item.querySelector('.comment-form-textarea').focus();
+            item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
+            item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
+            item.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
+            item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
+            item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
+            item.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
+            addListener(item.getElementsByClassName('emojione-item'), 'click', _.handle.field);
+            item.querySelector('.comment-form-textarea').focus();
+        }
 
-        // 取消回复
-        item.querySelector('.comment-item-cancel').addEventListener('click', function(){
-            item.querySelector('.comment-box').outerHTML = '';
-            this.outerHTML = this.outerHTML.replace('cancel','reply');
-            item.querySelector('.comment-item-reply').addEventListener('click', _.handle.show, false);
-        }, false);
+        // 监听事件
+        addListener(_.dom.getElementsByClassName('comment-item-reply'), 'click', _.handle.show);
+        addListener(_.dom.getElementsByClassName('comment-item-cancel'), 'click', _.handle.show);
+
     }
 
     // 验证表单
@@ -1010,14 +1066,13 @@
 
         _.load(post);
 
+        timeAgo();
+
+        // 清空或移除评论框
+        
         _.stat.message = message;
         _.stat.mediaHtml = item.querySelector('.comment-image-list').innerHTML;
 
-        timeAgo();
-
-        message += mediaStr;
-
-        // 清空或移除评论框
         if( parentId ){
             item.querySelector('.comment-item-cancel').click();
         } else {
@@ -1026,60 +1081,81 @@
             item.querySelector('.comment-form-wrapper').classList.remove('expanded','editing');
         }
 
+        message += mediaStr;
+
         // POST 操作
-        var postData = {
-            thread:  _.stat.thread,
-            parent: parentId,
-            message: message,
-            name: _.guest.name,
-            email: _.guest.email,
-            url:  _.guest.url,
-            link: _.opts.url,
-            title: _.opts.title
+
+        if( _.stat.editing ){
+            var editing = _.dom.querySelector('.comment-item[style*="display: none"]');
+            var postData = {
+                id: editing.dataset.id,
+                message: message,
+            }
+            postAjax( _.opts.api + '/updatecomment.php', postData, function(resp){
+
+            }, function(){
+
+            })
+        } else {
+            var postData = {
+                thread:  _.stat.thread,
+                parent: parentId,
+                message: message,
+                name: _.guest.name,
+                email: _.guest.email,
+                url:  _.guest.url,
+                link: _.opts.url,
+                title: _.opts.title
+            }
+            postAjax( _.opts.api + '/postcomment.php', postData, function(resp){
+                var data = JSON.parse(resp);
+                if (data.code === 0) {
+                    var preview = _.dom.querySelector('.comment-item[data-id="preview"]');
+                    preview.parentNode.removeChild(preview);
+                    _.stat.count += 1;
+                    _.dom.querySelector('#comment-count').innerHTML = _.stat.count + ' 条评论';
+                    var post = data.response;
+                    post.isPost = true;
+                    _.load(post);
+                    _.stat.message = null;
+                    _.stat.mediaHtml = null;
+                    timeAgo();
+                } else if (data.code === 2) {
+                    alertmsg.innerHTML = data.response;
+                    alertClear();
+
+                    _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
+                    _.reEdit(item);
+                }
+            }, function(){
+                alertmsg.innerHTML = '提交出错，请稍后重试。';
+                alertClear();
+
+                _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
+                _.reEdit(item);
+            })
+        }
+    }
+
+    // 重新编辑
+    iDisqus.prototype.reEdit = function(item){
+        var _ = this;
+
+        if( !!item.dataset.id ){
+            item.querySelector('.comment-item-reply').click();
+        } else {
+            item.querySelector('.comment-form-wrapper').classList.add('editing');
         }
 
-        postAjax( _.opts.api + '/postcomment.php', postData, function(resp){
-            var data = JSON.parse(resp);
-            if (data.code === 0) {
-                var preview = _.dom.querySelector('.comment-item[data-id="preview"]');
-                preview.parentNode.removeChild(preview);
-                _.stat.count += 1;
-                _.dom.querySelector('#comment-count').innerHTML = _.stat.count + ' 条评论';
-                _.load(data.response);
-                _.stat.message = null;
-                _.stat.mediaHtml = null;
-                timeAgo();
-            } else if (data.code === 2) {
-                if (data.response.indexOf('email') > -1) {
-                    _.errorTips('请输入正确的名字或邮箱。', elName);
-                    return;
-                }
-                if (data.response.indexOf('message') > -1) {
-                    alertmsg.innerHTML = '评论不能为空或空格。';
-                    return;
-                }
-                if (data.response.indexOf('Invalid URL') > -1) {
-                    _.errorTips('请输入正确网址。', elUrl);
-                    return;
-                }
-            }
-        }, function(){
-            alertmsg.innerHTML = '提交出错，请稍后重试。';
-            alertClear();
-
-            _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
-            if( parentId ){
-                item.querySelector('.comment-item-reply').click();
-            } else {
-                item.querySelector('.comment-form-wrapper').classList.add('editing');
-            }
+        // 重新填充文本图片
+        if(!!_.stat.message){
             item.querySelector('.comment-form-textarea').value = _.stat.message;
-            if(!!_.stat.mediaHtml){
-                item.querySelector('.comment-form-wrapper').classList.add('expanded');
-                item.querySelector('.comment-image-list').innerHTML = _.stat.mediaHtml;
-                addListener(item.getElementsByClassName('comment-image-item'), 'click', _.remove.bind(_));
-            }
-        })
+        }
+        if(!!_.stat.mediaHtml){
+            item.querySelector('.comment-form-wrapper').classList.add('expanded');
+            item.querySelector('.comment-image-list').innerHTML = _.stat.mediaHtml;
+            addListener(item.getElementsByClassName('comment-image-item'), 'click', _.handle.remove);
+        }
     }
 
     // 创建 Thread 表单
