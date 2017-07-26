@@ -1,5 +1,5 @@
 /*!
- * v 0.1.9
+ * v 0.1.10
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -229,7 +229,71 @@
 
         // emoji 表情
         _.opts.emoji_path = !!_.opts.emoji_path ? _.opts.emoji_path : 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
-        _.emoji = _._emoji();
+        _.emoji_list =!!_.opts.emoji_list ? _.opts.emoji_list : [{
+            code:'smile',
+            title:'笑脸',
+            unicode:'1f604'
+        },{
+            code:'mask',
+            title:'生病',
+            unicode:'1f637'
+        },{
+            code:'joy',
+            title:'破涕为笑',
+            unicode:'1f602'
+        },{
+            code:'stuck_out_tongue_closed_eyes',
+            title:'吐舌',
+            unicode:'1f61d'
+        },{
+            code:'flushed',
+            title:'脸红',
+            unicode:'1f633'
+        },{
+            code:'scream',
+            title:'恐惧',
+            unicode:'1f631'
+        },{
+            code:'pensive',
+            title:'失望',
+            unicode:'1f614'
+        },{
+            code:'unamused',
+            title:'无语',
+            unicode:'1f612'
+        },{
+            code:'grin',
+            title:'露齿笑',
+            unicode:'1f601'
+        },{
+            code:'heart_eyes',
+            title:'色',
+            unicode:'1f60d'
+        },{
+            code:'sweat',
+            title:'汗',
+            unicode:'1f613'
+        },{
+            code:'smirk',
+            title:'得意',
+            unicode:'1f60f'
+        },{
+            code:'relieved',
+            title:'满意',
+            unicode:'1f60c'
+        },{
+            code:'rolling_eyes',
+            title:'翻白眼',
+            unicode:'1f644'
+        },{
+            code:'ok_hand',
+            title:'OK',
+            unicode:'1f44c'
+        },{
+            code:'v',
+            title:'胜利',
+            unicode:'270c'
+        }];
         
         if(!!_.opts.emoji_preview){
             var js = d.scripts;
@@ -284,7 +348,6 @@
         }
     }
 
-
     // 初始化评论框
     iDisqus.prototype.init = function(){
         var _ = this;
@@ -294,8 +357,8 @@
         }
         // 表情
         var emojiList = '';
-        _.emoji.forEach(function(item){
-            emojiList += '<li class="emojione-item" title="'+ item.title+'" data-code="'+item.code+'"><img class="emojione-item-image" src="'+item.url+'" /></li>';
+        _.emoji_list.forEach(function(item){
+            emojiList += '<li class="emojione-item" title="'+ item.title+'" data-code=":'+item.code+':"><img class="emojione-item-image" src="'+_.opts.emoji_path + item.unicode+'.png" /></li>';
         })
         _.dom.innerHTML = '<div class="comment loading" id="idisqus">\n'+
             '    <div class="loading-container" data-tip="正在加载评论……"><svg class="loading-bg" width="72" height="72" viewBox="0 0 720 720" version="1.1" xmlns="http://www.w3.org/2000/svg"><path class="ring" fill="none" stroke="#9d9ea1" d="M 0 -260 A 260 260 0 1 1 -80 -260" transform="translate(400,400)" stroke-width="50" /><polygon transform="translate(305,20)" points="50,0 0,100 18,145 50,82 92,145 100,100" style="fill:#9d9ea1"/></svg></div>\n'+
@@ -511,77 +574,6 @@
         }
     }
 
-    iDisqus.prototype._emoji = function() {
-        var path = this.opts.emoji_path;
-        return [
-            {
-                code:':smile:',
-                title:'笑脸',
-                url:path+'1f604.png'
-            },{
-                code:':mask:',
-                title:'生病',
-                url:path+'1f637.png'
-            },{
-                code:':joy:',
-                title:'破涕为笑',
-                url:path+'1f602.png'
-            },{
-                code:':stuck_out_tongue_closed_eyes:',
-                title:'吐舌',
-                url:path+'1f61d.png'
-            },{
-                code:':flushed:',
-                title:'脸红',
-                url:path+'1f633.png'
-            },{
-                code:':scream:',
-                title:'恐惧',
-                url:path+'1f631.png'
-            },{
-                code:':pensive:',
-                title:'失望',
-                url:path+'1f614.png'
-            },{
-                code:':unamused:',
-                title:'无语',
-                url:path+'1f612.png'
-            },{
-                code:':grin:',
-                title:'露齿笑',
-                url:path+'1f601.png'
-            },{
-                code:':heart_eyes:',
-                title:'色',
-                url:path+'1f60d.png'
-            },{
-                code:':sweat:',
-                title:'汗',
-                url:path+'1f613.png'
-            },{
-                code:':smirk:',
-                title:'得意',
-                url:path+'1f60f.png'
-            },{
-                code:':relieved:',
-                title:'满意',
-                url:path+'1f60c.png'
-            },{
-                code:':rolling_eyes:',
-                title:'翻白眼',
-                url:path+'1f644.png'
-            },{
-                code:':ok_hand:',
-                title:'OK',
-                url:path+'1f44c.png'
-            },{
-                code:':v:',
-                title:'胜利',
-                url:path+'270c.png'
-            }
-        ];
-    }
-
     // 获取评论列表
     iDisqus.prototype.getlist = function(){
         var _ = this;
@@ -770,6 +762,14 @@
         var form = e.currentTarget.closest('.comment-form');
         var alertmsg = form.querySelector('.comment-form-alert');
         alertmsg.innerHTML = '';
+    }
+
+    // 高亮
+    iDisqus.prototype.highlight = function(e){
+        var _ = this;
+        var $this = e.currentTarget;
+        //_.dom.querySelector(getLocation($this.href).hash);
+        e.preventDefault();
     }
 
     // 点选表情
@@ -1048,8 +1048,8 @@
                 return emojiImage;
             });
         } else {
-            _.emoji.forEach(function(item){
-                preMessage = preMessage.replace(item.code, '<img class="emojione" width="24" height="24" src="' + item.url + '" />');
+            _.emoji_list.forEach(function(item){
+                preMessage = preMessage.replace(':'+item.code+':', '<img class="emojione" width="24" height="24" src="' + _.opts.emoji_path + item.unicode + '.png" />');
             });
         }
 
@@ -1225,7 +1225,7 @@
         _.dom.innerHTML = '';
         delete _.box;
         delete _.dom;
-        delete _.emoji;
+        delete _.emoji_list;
         delete _.guest;
         delete _.handle;
         delete _.opts;

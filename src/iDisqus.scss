@@ -215,12 +215,11 @@
         visibility: hidden;
         list-style: none;
         width: 125px;
-        height: 125px;
         background-color: rgb(255, 255, 255);
         padding: 5px 0 0 5px;
         border-radius: 2px;
         border: 2px solid #c2c6cc;
-        top: -125px;
+        bottom: 100%;
         left: -2px;
         margin-left: 0;
         display: flex;
