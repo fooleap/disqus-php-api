@@ -1122,10 +1122,12 @@
                     timeAgo();
                 } else if (data.code === 2) {
                     alertmsg.innerHTML = data.response;
-                    alertClear();
-
                     _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
                     _.reEdit(item);
+
+                    if( data.response.indexOf('author') > -1){
+                        _.dom.querySelector('.exit').click();
+                    }
                 }
             }, function(){
                 alertmsg.innerHTML = '提交出错，请稍后重试。';

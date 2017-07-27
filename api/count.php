@@ -5,14 +5,14 @@
  * @param links  页面链接，以“,”分隔
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-26 06:38:55
+ * @version  2017-07-27 20:31:04
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 namespace Emojione;
 require_once('init.php');
 
-$links = '&thread=link:'.DISQUS_WEBSITE.preg_replace('/,/i','&thread=link:'.DISQUS_WEBSITE, $_GET['links']);
+$links = '&thread=link:'.$website.preg_replace('/,/i','&thread=link:'.$website, $_GET['links']);
 
 $fields_data = array(
     'api_key' => DISQUS_PUBKEY,

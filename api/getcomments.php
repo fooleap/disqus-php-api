@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-09 05:44:35
+ * @version  2017-07-27 20:31:19
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -20,7 +20,7 @@ $fields_data = array(
     'limit' => 50,
     'forum' => DISQUS_SHORTNAME,
     'order' => 'desc',
-    'thread' => 'link:'.DISQUS_WEBSITE.$_GET['link']
+    'thread' => 'link:'.$website.$_GET['link']
 );
 $curl_url = '/api/3.0/posts/list.json?'.http_build_query($fields_data);
 $data = curl_get($curl_url);
@@ -28,7 +28,7 @@ $data = curl_get($curl_url);
 $fields_data = array(
     'api_key' => DISQUS_PUBKEY,
     'forum' => DISQUS_SHORTNAME,
-    'thread' => 'link:'.DISQUS_WEBSITE.$_GET['link'],
+    'thread' => 'link:'.$website.$_GET['link']
 );
 $curl_url = '/api/3.0/threads/details.json?'.http_build_query($fields_data);
 $detail = curl_get($curl_url);

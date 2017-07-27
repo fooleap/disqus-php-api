@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-24 12:54:39
+ * @version  2017-07-27 21:06:13
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -11,10 +11,16 @@ namespace Emojione;
 require_once('config.php');
 require_once('emojione/autoload.php');
 header('Content-type:text/json');
-$origin = isset($_SERVER['HTTP_ORIGIN'])? $_SERVER['HTTP_ORIGIN'] : '';  
-if(preg_match('(localhost|127\.0\.0\.1|'.DISQUS_WEBSITE.')', $origin)){
+$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';  
+$ipRegex = '((2[0-4]|1\d|[1-9])?\d|25[0-5])(\.(?1)){3}';
+function domain($url){
+    preg_match('/[a-z0-9\-]{1,63}\.[a-z\.]{2,6}$/', parse_url($url, PHP_URL_HOST), $_domain_tld);
+    return $_domain_tld[0];
+}
+if(preg_match('(localhost|'.$ipRegex.'|'.domain(DISQUS_WEBSITE).')', $origin)){
     header('Access-Control-Allow-Origin: '.$origin);
 }
+
 $client = new Client(new Ruleset());
 $client->ignoredRegexp = '<code[^>]*>.*?<\/code>|<object[^>]*>.*?<\/object>|<span[^>]*>.*?<\/span>|<(?:object|embed|svg|img|div|span|p|a)[^>]*>';
 $client->unicodeRegexp = '(?:\x{1F3F3}\x{FE0F}?\x{200D}?\x{1F308}|\x{1F441}\x{FE0F}?\x{200D}?\x{1F5E8}\x{FE0F}?)|[\x{0023}-\x{0039}]\x{FE0F}?\x{20e3}|[\x{1F1E0}-\x{1F1FF}]{2}|(?:[\x{1F468}\x{1F469}])\x{FE0F}?[\x{1F3FA}-\x{1F3FF}]?\x{200D}?(?:[\x{2695}\x{2696}\x{2708}\x{1F4BB}\x{1F4BC}\x{1F527}\x{1F52C}\x{1F680}\x{1F692}\x{1F33E}-\x{1F3ED}])|(?:[\x{2764}\x{1F466}-\x{1F469}\x{1F48B}][\x{200D}\x{FE0F}]+){1,3}[\x{2764}\x{1F466}-\x{1F469}\x{1F48B}]|(?:[\x{2764}\x{1F466}-\x{1F469}\x{1F48B}]\x{FE0F}?){2,4}|(?:[\x{1f46e}\x{1F468}\x{1F469}\x{1f575}\x{1f471}-\x{1f487}\x{1F645}-\x{1F64E}\x{1F926}\x{1F937}]|[\x{1F460}-\x{1F482}\x{1F3C3}-\x{1F3CC}\x{26F9}\x{1F486}\x{1F487}\x{1F6A3}-\x{1F6B6}\x{1F938}-\x{1F93E}]|\x{1F46F})\x{FE0F}?[\x{1F3FA}-\x{1F3FF}]?\x{200D}?[\x{2640}\x{2642}]?\x{FE0F}?|(?:[\x{26F9}\x{261D}\x{270A}-\x{270D}\x{1F385}-\x{1F3CC}\x{1F442}-\x{1F4AA}\x{1F574}-\x{1F596}\x{1F645}-\x{1F64F}\x{1F6A3}-\x{1F6CC}\x{1F918}-\x{1F93E}]\x{FE0F}?[\x{1F3FA}-\x{1F3FF}])|(?:[\x{2194}-\x{2199}\x{21a9}-\x{21aa}]\x{FE0F}?|[\x{3030}\x{303d}]\x{FE0F}?|(?:[\x{1F170}-\x{1F171}]|[\x{1F17E}-\x{1F17F}]|\x{1F18E}|[\x{1F191}-\x{1F19A}]|[\x{1F1E6}-\x{1F1FF}])\x{FE0F}?|\x{24c2}\x{FE0F}?|[\x{3297}\x{3299}]\x{FE0F}?|(?:[\x{1F201}-\x{1F202}]|\x{1F21A}|\x{1F22F}|[\x{1F232}-\x{1F23A}]|[\x{1F250}-\x{1F251}])\x{FE0F}?|[\x{203c}\x{2049}]\x{FE0F}?|[\x{25aa}-\x{25ab}\x{25b6}\x{25c0}\x{25fb}-\x{25fe}]\x{FE0F}?|[\x{00a9}\x{00ae}]\x{FE0F}?|[\x{2122}\x{2139}]\x{FE0F}?|\x{1F004}\x{FE0F}?|[\x{2b05}-\x{2b07}\x{2b1b}-\x{2b1c}\x{2b50}\x{2b55}]\x{FE0F}?|[\x{231a}-\x{231b}\x{2328}\x{23cf}\x{23e9}-\x{23f3}\x{23f8}-\x{23fa}]\x{FE0F}?|\x{1F0CF}|[\x{2934}\x{2935}]\x{FE0F}?)|[\x{2700}-\x{27bf}]\x{FE0F}?|[\x{1F000}-\x{1F6FF}\x{1F900}-\x{1F9FF}]\x{FE0F}?|[\x{2600}-\x{26ff}]\x{FE0F}?|[\x{0030}-\x{0039}]\x{FE0F}';
@@ -24,9 +30,11 @@ $client->imagePathPNG = EMOJI_PATH;
 $approved = DISQUS_APPROVED == 1 ? 'approved' : null;
 $disqus_host = GFW_INSIDE == 1 ? DISQUS_IP : 'disqus.com';
 $media_host = GFW_INSIDE == 1 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
+$url = parse_url(DISQUS_WEBSITE);
+$website = $url['scheme'].'://'.$url['host'];
 
 //读取文件
-$session_data = json_decode(file_get_contents(sys_get_temp_dir().'/session.json'));
+$session_data = json_decode(file_get_contents(sys_get_temp_dir().'/session-'.DISQUS_SHORTNAME.'.json'));
 $session = $session_data -> session;
 $day = date('Ymd', strtotime('+20 day', strtotime($session_data -> day)));
 
@@ -77,7 +85,7 @@ if ( $day < date('Ymd') ){
     if( strpos($session, 'session') !== false ){
         //写入文件
         $output_data = array('day' => date('Ymd'), 'session' => $session);
-        file_put_contents(sys_get_temp_dir().'/session.json', json_encode($output_data));
+        file_put_contents(sys_get_temp_dir().'/session-'.DISQUS_SHORTNAME.'.json', json_encode($output_data));
     }
 }
 
@@ -136,7 +144,7 @@ function post_format( $post ){
     global $client, $gravatar_cdn, $gravatar_default;
 
     // 是否是管理员
-    $isMod = $post->author->name == DISQUS_USERNAME || $post->author->email == DISQUS_EMAIL ? true : false;
+    $isMod = ($post->author->name == DISQUS_USERNAME || $post->author->email == DISQUS_EMAIL ) && $post->author->isAnonymous == false ? true : false;
 
     // 访客指定 Gravatar 头像
     $avatar_url = GRAVATAR_CDN.md5($post->author->email).'?d='.GRAVATAR_DEFAULT;
@@ -158,7 +166,7 @@ function post_format( $post ){
     }
 
     // 去掉图片链接
-    $imgpat = '/<a(.*?)href="(.*?\.(jpg|gif|png))"(.*?)>(.*?)<\/a>/i';
+    $imgpat = '/<a(.*?)href="(.*?disquscdn.com.*?\.(jpg|gif|png))"(.*?)>(.*?)<\/a>/i';
     $post->message = preg_replace($imgpat,'',$post->message);
 
     $imgArr = array();

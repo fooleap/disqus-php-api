@@ -10,7 +10,7 @@
  * @param id      该评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-04 10:29:42
+ * @version  2017-07-27 20:32:12
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -46,11 +46,11 @@ $post = post_format($data->response);
 $reply_name    = $post['name']; //回复者人名
 $reply_message = $post['message']; //回复者留言
 
-$content = '<p>' . $parent_name . '，您在<a target="_blank" href="'.DISQUS_WEBSITE.'">「'.SITE_NAME.'」</a>的评论：</p>';
+$content = '<p>' . $parent_name . '，您在<a target="_blank" href="'.$website.'">「'.SITE_NAME.'」</a>的评论：</p>';
 $content .= $parent_message;
 $content .= '<p>' . $reply_name . ' 的回复如下：</p>';
 $content .= $reply_message;
-$content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.DISQUS_WEBSITE. $_POST['link'] . '#comment-' . $_POST['parent'] . '">' . $_POST['title'] . '</a></p>';
+$content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$website. $_POST['link'] . '#comment-' . $_POST['parent'] . '">' . $_POST['title'] . '</a></p>';
 
 use PHPMailer;
 if( $parent_isanon ){

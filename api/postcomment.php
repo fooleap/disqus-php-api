@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-13 14:16:49
+ * @version  2017-07-27 20:40:08
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -22,10 +22,12 @@ $author_name = $_POST['name'];
 $author_email = $_POST['email'];
 $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
 
-if( $author_name == DISQUS_USERNAME && $author_email == DISQUS_EMAIL && strpos($session, 'session') !== false ){
+if( $author_name == DISQUS_USERNAME ){
     $author_name = null;
-    $author_email = null;
-    $author_url = null;
+    if( $author_email == DISQUS_EMAIL && strpos($session, 'session') !== false ){
+        $author_email = null;
+        $author_url = null;
+    } 
 }
 
 $post_message = $client->shortnameToUnicode($_POST['message']);
