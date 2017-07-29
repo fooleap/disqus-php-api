@@ -1,5 +1,5 @@
 /*!
- * v 0.1.10
+ * v 0.1.11
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -430,6 +430,7 @@
             toggle: _.toggle.bind(_),
             upload: _.upload.bind(_),
             verify: _.verify.bind(_),
+            jump: _.jump.bind(_),
             field: _.field,
             focus: _.focus,
             input: _.input
@@ -635,8 +636,9 @@
 
                     timeAgo();
 
-                    if (/^#disqus|^#comment/.test(location.hash) && !data.cursor.hasPrev ) {
-                        window.scrollTo(0, _.dom.querySelector(location.hash).offsetTop);
+                    if (/^#disqus|^#comment/.test(location.hash) && !data.cursor.hasPrev && !_.stat.disqusLoaded ) {
+                        var el = _.dom.querySelector('#idisqus ' + location.hash)
+                        window.scrollBy(0, el.getBoundingClientRect().top);
                     }
 
                     _.stat.loading = false;
@@ -685,6 +687,9 @@
                 '</li>';
             parentPost.dom.insertAdjacentHTML(parentPost.insert, html);
             _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
+            if( !!post.parent ) {
+                _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-pname').addEventListener('click', _.handle.jump, false);
+            }
         } else {
             _.stat.unload.push(post);
         }
@@ -764,11 +769,14 @@
         alertmsg.innerHTML = '';
     }
 
-    // 高亮
-    iDisqus.prototype.highlight = function(e){
+    // 跳到评论
+    iDisqus.prototype.jump = function(e){
         var _ = this;
         var $this = e.currentTarget;
-        //_.dom.querySelector(getLocation($this.href).hash);
+        var hash = getLocation($this.href).hash;
+        var el = _.dom.querySelector('#idisqus ' + hash);
+        history.replaceState(undefined, undefined, hash);
+        window.scrollBy(0, el.getBoundingClientRect().top);
         e.preventDefault();
     }
 

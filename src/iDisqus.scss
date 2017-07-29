@@ -5,6 +5,7 @@
     }
     position: relative;
     font: 14px/1.6 "Helvetica Neue", Helvetica, Arial, "微软雅黑", "Microsoft YaHei", sans-serif;
+    color: #2a2e2e;
     margin: 5px auto;
     word-wrap: break-word;
     padding: 0;
@@ -553,6 +554,13 @@
 
 .comment-list {
     font-size: 14px;
+    &:empty:after{
+        content: "来做第一个留言的人吧！";
+        display: block;
+        opacity: .6;
+        line-height: 80px;
+        text-align: center;
+    }
     p {
         margin: 0;
     }
@@ -587,7 +595,7 @@
     }
     .comment-item {
         display: flex;
-        margin-top: 6px;
+        padding-top: 6px;
     }
     .comment-item-header,
     .comment-item-footer {
@@ -786,12 +794,11 @@
     width: 48px;
     height: 48px;
     margin-right: 12px;
-}
-.comment-avatar img,
-.comment-item-avatar img {
-    border-radius: 3px;
-    width: 48px;
-    height: 48px;
+    img{
+        border-radius: 3px;
+        width: 48px;
+        height: 48px;
+    }
 }
 
 @keyframes disqus-loader-spinner-animation{
