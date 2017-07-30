@@ -1,5 +1,5 @@
 /*!
- * v 0.1.11
+ * v 0.1.12
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -368,13 +368,13 @@
             '        <div class="comment-form">\n'+
             '            <div class="comment-form-wrapper">\n'+
             '                <textarea class="comment-form-textarea" placeholder="加入讨论……"></textarea>\n'+
+            '                <div class="comment-form-alert"></div>\n'+
             '                <div class="comment-image">\n'+
             '                    <ul class="comment-image-list"></ul>\n'+
             '                    <div class="comment-image-progress">\n'+
             '                        <div class="comment-image-loaded"></div>\n'+
             '                    </div>\n'+
             '                </div>\n'+
-            '                <div class="comment-form-alert"></div>\n'+
             '                <div class="comment-actions">\n'+
             '                    <div class="comment-actions-group">\n'+
             '                        <input id="emoji-input" class="comment-actions-input" type="checkbox"> \n'+
@@ -873,6 +873,14 @@
         // 以文件大小识别是否为同张图片
         var size = file.files[0].size;
 
+        if( size > 5000000 ){
+            alertmsg.innerHTML = '请选择 5M 以下图片。';
+            setTimeout(function(){
+                alertmsg.innerHTML = '';
+            }, 3000);
+            return;
+        }
+
         if( _.stat.imageSize.indexOf(size) == -1 ){
             progress.style.width = '80px';
         } else {
@@ -891,6 +899,8 @@
         data.append('file', file.files[0] );
         var filename = file.files[0].name;
 
+        var $item;
+
         var xhrUpload = new XMLHttpRequest();
         xhrUpload.onreadystatechange = function(){
             if(xhrUpload.readyState == 4 && xhrUpload.status == 200){
@@ -901,13 +911,17 @@
                     var image = new Image();
                     image.src = imageUrl;
                     image.onload = function(){
-                        form.querySelector('[data-image-size="'+size+'"]').innerHTML = '<img class="comment-image-object" src="'+imageUrl+'">';
-                        form.querySelector('[data-image-size="'+size+'"]').dataset.imageUrl = imageUrl;
-                        form.querySelector('[data-image-size="'+size+'"]').classList.remove('loading');
-                        form.querySelector('[data-image-size="'+size+'"]').addEventListener('click', _.handle.remove, false);
+                        $item.innerHTML = '<img class="comment-image-object" src="'+imageUrl+'">';
+                        $item.dataset.imageUrl = imageUrl;
+                        $item.classList.remove('loading');
+                        $item.addEventListener('click', _.handle.remove, false);
                     }
                 } else {
-                    alertmsg.innerHTML = '图片上传失败。';
+                    alertmsg.innerHTML = '图片上传出错。';
+                    $item.innerHTML = '';
+                    if( !!form.getElementsByClassName('comment-image-item').length){
+                        wrapper.classList.remove('expanded');
+                    }
                     setTimeout(function(){
                         alertmsg.innerHTML = '';
                     }, 3000);
@@ -941,6 +955,7 @@
                 '    </svg>\n'+
                 '</li>\n';
             form.querySelector('.comment-image-list').insertAdjacentHTML('beforeend', imageItem);
+            $item = form.querySelector('[data-image-size="'+size+'"]');
         }, false);
         xhrUpload.open('POST', _.opts.api + '/upload.php', true);
         xhrUpload.send(data);
@@ -949,9 +964,9 @@
     // 移除图片
     iDisqus.prototype.remove = function(e){
         var _ = this;
-        var item = e.currentTarget.closest('.comment-image-item');
+        var $item = e.currentTarget.closest('.comment-image-item');
         var wrapper = e.currentTarget.closest('.comment-form-wrapper');
-        item.parentNode.removeChild(item);
+        $item.outerHTML = '';
         _.stat.imageSize = [];
         var imageArr = wrapper.getElementsByClassName('comment-image-item');
         [].forEach.call(imageArr, function(item, i){
@@ -960,13 +975,14 @@
         if(_.stat.imageSize.length == 0){
             wrapper.classList.remove('expanded');
         }
+        wrapper.querySelector('.comment-image-input').value = '';
     }
 
     // 错误提示
     iDisqus.prototype.errorTips = function(Text, Dom){
         var _ = this;
         if( _.guest.logged_in == 'true' ){
-            _.guest.reset();
+            _.handle.guestReset();
         }
         var idisqus = _.dom.querySelector('#idisqus');
         var errorDom = _.dom.querySelector('.comment-form-error');
@@ -1134,7 +1150,7 @@
                     _.reEdit(item);
 
                     if( data.response.indexOf('author') > -1){
-                        _.dom.querySelector('.exit').click();
+                        _.handle.guestReset();
                     }
                 }
             }, function(){
@@ -1166,6 +1182,11 @@
             item.querySelector('.comment-image-list').innerHTML = _.stat.mediaHtml;
             addListener(item.getElementsByClassName('comment-image-item'), 'click', _.handle.remove);
         }
+    }
+
+    // 编辑
+    iDisqus.prototype.edit = function(item){
+
     }
 
     // 创建 Thread 表单

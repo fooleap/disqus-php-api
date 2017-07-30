@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-27 21:06:13
+ * @version  2017-07-30 15:09:11
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -152,6 +152,9 @@ function post_format( $post ){
 
     // 表情
     $post->message = str_replace('<img class="emojione"','<img class="emojione" width="24" height="24"',$client->toImage($post->message));
+
+    // 链接
+    $post->author->url = !!$post->author->url  ? $post->author->url : $post->author->profileUrl;
 
     // 去除链接重定向
     $urlPat = '/<a.*?href="(.*?disq\.us.*?)".*?>(.*?)<\/a>/i';
