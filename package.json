@@ -1,6 +1,6 @@
 {
   "name": "disqus-php-api",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "disqus-php-api 利用 PHP cURL 转发 Disqus API 请求",
   "main": "index.js",
   "dependencies": {},
@@ -9,7 +9,13 @@
     "css-loader": "^0.28.4",
     "extract-text-webpack-plugin": "^2.1.2",
     "file-loader": "^0.11.2",
-    "json-loader": "^0.5.7",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^4.0.0",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-jsonminify": "^1.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-uglify": "^3.0.0",
     "node-sass": "^4.5.3",
     "postcss": "^5.2.17",
     "postcss-loader": "^1.3.3",
@@ -18,7 +24,8 @@
     "webpack": "^3.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "webpack": "webpack -p",
+    "gulp": "gulp"
   },
   "repository": "git+https://github.com/fooleap/disqus-php-api.git",
   "author": "fooleap",

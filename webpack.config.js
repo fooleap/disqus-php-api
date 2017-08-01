@@ -2,12 +2,14 @@ const webpack = require('webpack');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const autoprefixer = require('autoprefixer'); 
 module.exports = {
-    entry: './index.js',
+    entry: {
+        'iDisqus': './index.js',
+    },
     output: {
         path: __dirname + '/dist',
-        filename: 'iDisqus.min.js',
+        filename: '[name].min.js',
         libraryTarget: 'umd',
-        library: 'iDisqus'
+        library: '[name]'
     },
 
     module: {
@@ -18,6 +20,10 @@ module.exports = {
                     use:[ 'css-loader','sass-loader','postcss-loader'],
                     fallback: 'style-loader',
                 }),
+            },
+            {
+                test: /\.json$/,
+                use:[ 'file-loader?name=[name].min.json', require.resolve('./src/jsonminify')],
             }
         ],
     },

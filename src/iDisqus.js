@@ -1,5 +1,5 @@
 /*!
- * v 0.1.13
+ * v 0.1.14
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -9,7 +9,10 @@
     'use strict';
 
     var d = document,
-        l = localStorage;
+        l = localStorage,
+        scripts = d.scripts,
+        lasturl = scripts[scripts.length - 1].src,
+        filepath = lasturl.substring(0, lasturl.lastIndexOf('/'));
 
     function getLocation(href) {
         var link = d.createElement('a');
@@ -296,10 +299,7 @@
         }];
         
         if(!!_.opts.emoji_preview){
-            var js = d.scripts;
-            var url = js[js.length - 1].src;
-            url = url.substring(0, url.lastIndexOf('/'));
-            getAjax(url +'/eac.json', function(resp){
+            getAjax(filepath +'/eac.min.json', function(resp){
                 _.eac = JSON.parse(resp);
             }, function(){
             })
