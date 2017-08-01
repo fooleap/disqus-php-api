@@ -439,6 +439,11 @@
     
 .comment-actions-form{
     display: flex;
+    .comment-form-cancel{
+        line-height: 36px;
+        padding: 0 15px;
+        font-size: 12px;
+    }
     .comment-form-submit{
         z-index: 1;
         border: none;
@@ -594,8 +599,10 @@
         opacity: .6;
     }
     .comment-item {
-        display: flex;
         padding-top: 6px;
+    }
+    .comment-item-body {
+        display: flex;
     }
     .comment-item-header,
     .comment-item-footer {
@@ -697,12 +704,12 @@
             margin: 0 3px;
         }
     }
-    .comment-box{
-        margin-top: 6px;
-    }
     .comment-item-children .comment-item-avatar,
     .comment-item-children .comment-item-avatar img,
-    .comment-avatar, .comment-avatar-image {
+    .comment-item-children .comment-box .comment-avatar,
+    .comment-item-children .comment-box .comment-avatar-image,
+    .comment-item-body + .comment-box .comment-avatar,
+    .comment-item-body + .comment-box .comment-avatar-image{
         width: 36px;
         height: 36px;
         margin-right: 6px;
@@ -716,10 +723,23 @@
     .comment-item-main{
         flex: 1;
     }
-    
-    .comment-item-children .comment-item-children .comment-item-children .comment-item-children,
-    .comment-item-children .comment-item-children .comment-item-children .comment-box {
-        margin-left: -42px;
+    .comment-box{
+        margin: 0;
+    }
+    .comment-item-body + .comment-box{
+        padding-left: 60px;
+        margin-top: 6px;
+    }
+    .comment-item-children {
+        padding-left: 60px;
+        .comment-item-children, .comment-item-body + .comment-box{
+            padding-left: 42px; 
+            .comment-item-children{
+                .comment-item-children,.comment-box {
+                    padding-left: 0;
+                }
+            }
+        }
     }
 }
 
@@ -783,7 +803,6 @@
 .comment-item-children {
     text-align: left;
     list-style: none;
-    padding-left: 0;
     margin-left: 0;
     line-height: 20px;
 }
@@ -810,7 +829,7 @@
     .comment-item{
         .comment-item-children .comment-item-children,
         .comment-item-children .comment-box {
-            margin-left: 0!important;
+            padding-left: 0!important;
         }
         .at{
             display: none;

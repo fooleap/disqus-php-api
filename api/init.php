@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-30 15:09:11
+ * @version  2017-07-30 15:43:58
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -141,7 +141,7 @@ function curl_post($url, $data){
 }
 
 function post_format( $post ){
-    global $client, $gravatar_cdn, $gravatar_default;
+    global $client;
 
     // 是否是管理员
     $isMod = ($post->author->name == DISQUS_USERNAME || $post->author->email == DISQUS_EMAIL ) && $post->author->isAnonymous == false ? true : false;

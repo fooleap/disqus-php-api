@@ -1,5 +1,5 @@
 /*!
- * v 0.1.12
+ * v 0.1.13
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -677,34 +677,46 @@
             mediaHTML = '<div class="comment-item-images">' + mediaHTML + '</div>';
 
             var html = '<li class="comment-item" data-id="' + post.id + '" data-name="'+ post.name + '" id="comment-' + post.id + '">' +
+                '<div class="comment-item-body">'+
                 '<div class="comment-item-avatar"><img src="' + post.avatar + '"></div>'+
                 '<div class="comment-item-main">'+
                 '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+ (post.isMod ?'<span class="comment-item-badge">'+_.opts.badge+'</span>' :'')+parentPost.name+'<span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span></div>'+
                 '<div class="comment-item-content">' + post.message + mediaHTML + '</div>'+
-                '<div class="comment-item-footer">' + (!!post.isPost ? '<span class="comment-item-manage"><a class="comment-item-delete" href="javascript:;">删除</a><span class="comment-item-bullet"> • </span></span>' : '') + '<a class="comment-item-reply" href="javascript:;">回复</a> </div>'+
+                '<div class="comment-item-footer">' + (!!post.isPost ? '<span class="comment-item-manage"><a class="comment-item-edit" href="javascript:;">编辑</a><span class="comment-item-bullet"> • </span><a class="comment-item-delete" href="javascript:;">删除</a><span class="comment-item-bullet"> • </span></span>' : '') + '<a class="comment-item-reply" href="javascript:;">回复</a> </div>'+
+                '</div></div>'+
                 '<ul class="comment-item-children"></ul>'+
-                '</div>'+
                 '</li>';
-            parentPost.dom.insertAdjacentHTML(parentPost.insert, html);
+            // 更新 or 创建
+            if(!!_.dom.querySelector('.comment-item[data-id="' + post.id + '"]')){
+                _.dom.querySelector('.comment-item[data-id="' + post.id + '"]').outerHTML = html;
+            } else {
+                parentPost.dom.insertAdjacentHTML(parentPost.insert, html);
+            }
             _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
             if( !!post.parent ) {
                 _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-pname').addEventListener('click', _.handle.jump, false);
             }
         } else {
             _.stat.unload.push(post);
+            return;
         }
 
         // 发布留言，可编辑删除
-        if(!!post.isPost){
+        if(!!post.isPost && !_.stat.editing){
             var $this = _.dom.querySelector('.comment-item[data-id="' + post.id + '"]');
-            $this.querySelector('.comment-item-footer').insertAdjacentHTML('beforeend','<span class="comment-item-tips">页面刷新前，十分钟内可删除</span>');
+            $this.querySelector('.comment-item-footer').insertAdjacentHTML('beforeend','<span class="comment-item-tips">页面刷新前，十分钟内可编辑或删除</span>');
             setTimeout(function(){
-                $this.querySelector('.comment-item-tips').outerHTML = '';
+                // 五秒后
+                if(!!$this.querySelector('.comment-item-tips')){
+                    $this.querySelector('.comment-item-tips').outerHTML = '';
+                }
             }, 5000);
 
             var postEdit = setTimeout(function(){
-                $this.querySelector('.comment-item-manage').outerHTML = '';
                 // 十分钟后
+                if(!!$this.querySelector('.comment-item-manage')){
+                    $this.querySelector('.comment-item-manage').outerHTML = '';
+                }
             }, 600000);
 
             // 删除
@@ -733,12 +745,11 @@
                 clearTimeout(postEdit);
             }, false)
 
-            /* 编辑
+            // 编辑
             $this.querySelector('.comment-item-edit').addEventListener('click',function(){
-                $this.style.display = 'none';
-                _.stat.editing = true;
-                _.reEdit(!!post.parent?parentPostDom:_.dom.querySelector('.comment-box'));
-            }, false)*/
+                _.stat.editing = post;
+                _.edit(post);
+            }, false)
         }
     }
 
@@ -797,18 +808,12 @@
         var item = $this.closest('.comment-item');
 
         // 无论取消还是回复，移除已显示回复框
-        var box = _.dom.querySelector('.comment-item .comment-box');
+        var box = _.dom.querySelector('.comment-item .comment-box:not([data-current-id])');
         if( box ){
             var $show = box.closest('.comment-item');
             var cancel = $show.querySelector('.comment-item-cancel')
             cancel.outerHTML = cancel.outerHTML.replace('cancel','reply');
             box.outerHTML = '';
-
-            // 编辑时取消回复，显示出隐藏的
-            if( _.stat.editing ){
-                _.dom.querySelector('.comment-item[style*="display: none"]').style.display = '';
-                _.stat.editing = false;
-            }
         }
 
         // 回复时，显示评论框
@@ -1004,45 +1009,7 @@
     // 发表/回复评论
     iDisqus.prototype.post = function(e){
         var _ = this;
-        var item = e.currentTarget.closest('.comment-item') || e.currentTarget.closest('.comment-box');
-        var elName = item.querySelector('.comment-form-name');
-        var elEmail = item.querySelector('.comment-form-email');
-        var elUrl = item.querySelector('.comment-form-url');
-        var guest = {
-            name: elName.value,
-            email: elEmail.value,
-            url: elUrl.value.replace(/\s/g,''),
-            avatar: item.querySelector('.comment-avatar-image').src
-        }
-        var alertmsg = item.querySelector('.comment-form-alert');
-        function alertClear(){
-            setTimeout(function(){
-                alertmsg.innerHTML = '';
-            }, 3000);
-        }
-
-        if(/^\s*$/i.test(guest.name)){
-            _.errorTips('名字不能为空。', elName);
-            return;
-        }
-        if(/^\s*$/i.test(guest.email)){
-            _.errorTips('邮箱不能为空。', elEmail);
-            return;
-        }
-        if(!/^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i.test(guest.email)){
-            _.errorTips('请正确填写邮箱。', elEmail);
-            return;
-        }
-        if(!/^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$|^\s*$/i.test(guest.url)){
-            _.errorTips('请正确填写网址。', elUrl);
-            return;
-        }
-        _.guest.submit(guest);
-
-        if(!_.stat.message && !_.stat.mediaHtml){
-            _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/,'').replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
-        }
-
+        var item =  e.currentTarget.closest('.comment-box[data-current-id]') || e.currentTarget.closest('.comment-item') || e.currentTarget.closest('.comment-box');
         var message = item.querySelector('.comment-form-textarea').value;
         var parentId = !!item.dataset.id ? item.dataset.id : '';
         var imgArr = item.getElementsByClassName('comment-image-item');
@@ -1053,72 +1020,128 @@
             mediaStr += ' ' + image.dataset.imageUrl;
         });
 
-        if( !_.guest.name && !_.guest.email ){
-            return;
+        // 不是编辑框需预览
+        if( !item.dataset.currentId ){
+            var elName = item.querySelector('.comment-form-name');
+            var elEmail = item.querySelector('.comment-form-email');
+            var elUrl = item.querySelector('.comment-form-url');
+            var guest = {
+                name: elName.value,
+                email: elEmail.value,
+                url: elUrl.value.replace(/\s/g,''),
+                avatar: item.querySelector('.comment-avatar-image').src
+            }
+            var alertmsg = item.querySelector('.comment-form-alert');
+            function alertClear(){
+                setTimeout(function(){
+                    alertmsg.innerHTML = '';
+                }, 3000);
+            }
+
+            if(/^\s*$/i.test(guest.name)){
+                _.errorTips('名字不能为空。', elName);
+                return;
+            }
+            if(/^\s*$/i.test(guest.email)){
+                _.errorTips('邮箱不能为空。', elEmail);
+                return;
+            }
+            if(!/^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i.test(guest.email)){
+                _.errorTips('请正确填写邮箱。', elEmail);
+                return;
+            }
+            if(!/^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$|^\s*$/i.test(guest.url)){
+                _.errorTips('请正确填写网址。', elUrl);
+                return;
+            }
+            _.guest.submit(guest);
+
+            if(!_.stat.message && !_.stat.mediaHtml){
+                _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/,'').replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
+            }
+
+            if( !_.guest.name && !_.guest.email ){
+                return;
+            }
+
+            if( media.length == 0 && /^\s*$/i.test(message)){
+                alertmsg.innerHTML = '评论不能为空或空格。';
+                item.querySelector('.comment-form-textarea').focus();
+                return;
+            };
+
+            var preMessage = message;
+
+            if( !!_.opts.emoji_preview ){
+                preMessage = preMessage.replace(/:([-+\w]+):/g, function (match){
+                    var emojiShort = match.replace(/:/g,'');
+                    var emojiImage = !!_.eac[emojiShort] ? '<img class="emojione" width="24" height="24" alt="'+emojiShort+'" title=":'+emojiShort+':" src="'+_.opts.emoji_path+_.eac[emojiShort]+'.png">' : match;
+                    return emojiImage;
+                });
+            } else {
+                _.emoji_list.forEach(function(item){
+                    preMessage = preMessage.replace(':'+item.code+':', '<img class="emojione" width="24" height="24" src="' + _.opts.emoji_path + item.unicode + '.png" />');
+                });
+            }
+
+            var post = {
+                'url': !!_.guest.url ? _.guest.url : '',
+                'name': _.guest.name,
+                'avatar': _.guest.avatar,
+                'id': 'preview',
+                'parent': parentId,
+                'createdAt': (new Date()).toJSON(),
+                'message': '<p>' + preMessage + '</p>',
+                'media': media
+            };
+
+            _.load(post);
+
+            timeAgo();
+
+            // 清空或移除评论框
+            _.stat.message = message;
+            _.stat.mediaHtml = item.querySelector('.comment-image-list').innerHTML;
+
+            if( parentId ){
+                item.querySelector('.comment-item-cancel').click();
+            } else {
+                item.querySelector('.comment-form-textarea').value = '';
+                item.querySelector('.comment-image-list').innerHTML = '';
+                item.querySelector('.comment-form-wrapper').classList.remove('expanded','editing');
+            }
         }
 
-        if( media.length == 0 && /^\s*$/i.test(message)){
-            alertmsg.innerHTML = '评论不能为空或空格。';
-            item.querySelector('.comment-form-textarea').focus();
-            return;
-        };
-
-        var preMessage = message;
-
-        if( !!_.opts.emoji_preview ){
-            preMessage = preMessage.replace(/:([-+\w]+):/g, function (match){
-                var emojiShort = match.replace(/:/g,'');
-                var emojiImage = !!_.eac[emojiShort] ? '<img class="emojione" width="24" height="24" alt="'+emojiShort+'" title=":'+emojiShort+':" src="'+_.opts.emoji_path+_.eac[emojiShort]+'.png">' : match;
-                return emojiImage;
-            });
-        } else {
-            _.emoji_list.forEach(function(item){
-                preMessage = preMessage.replace(':'+item.code+':', '<img class="emojione" width="24" height="24" src="' + _.opts.emoji_path + item.unicode + '.png" />');
-            });
-        }
-
-        var post = {
-            'url': !!_.guest.url ? _.guest.url : '',
-            'name': _.guest.name,
-            'avatar': _.guest.avatar,
-            'id': 'preview',
-            'parent': parentId,
-            'createdAt': (new Date()).toJSON(),
-            'message': '<p>' + preMessage + '</p>',
-            'media': media
-        };
-
-        _.load(post);
-
-        timeAgo();
-
-        // 清空或移除评论框
-        
-        _.stat.message = message;
-        _.stat.mediaHtml = item.querySelector('.comment-image-list').innerHTML;
-
-        if( parentId ){
-            item.querySelector('.comment-item-cancel').click();
-        } else {
-            item.querySelector('.comment-form-textarea').value = '';
-            item.querySelector('.comment-image-list').innerHTML = '';
-            item.querySelector('.comment-form-wrapper').classList.remove('expanded','editing');
-        }
-
+        // 文本 + 图片
         message += mediaStr;
 
         // POST 操作
-
-        if( _.stat.editing ){
-            var editing = _.dom.querySelector('.comment-item[style*="display: none"]');
+        // 编辑框则更新评论
+        if( !!item.dataset.currentId ){
             var postData = {
-                id: editing.dataset.id,
+                id: item.dataset.currentId,
                 message: message,
             }
             postAjax( _.opts.api + '/updatecomment.php', postData, function(resp){
-
+                var data = JSON.parse(resp);
+                if (data.code === 0) {
+                    _.stat.message = null;
+                    _.stat.mediaHtml = null;
+                    var post = data.response;
+                    _.load(post);
+                    timeAgo();
+                    _.stat.editing = false;
+                } else {
+                    // 取消编辑
+                    _.load(_.stat.editing)
+                    timeAgo();
+                    _.stat.editing = false;
+                }
             }, function(){
-
+                // 取消编辑
+                _.load(_.stat.editing)
+                timeAgo();
+                _.stat.editing = false;
             })
         } else {
             var postData = {
@@ -1134,15 +1157,12 @@
             postAjax( _.opts.api + '/postcomment.php', postData, function(resp){
                 var data = JSON.parse(resp);
                 if (data.code === 0) {
-                    var preview = _.dom.querySelector('.comment-item[data-id="preview"]');
-                    preview.parentNode.removeChild(preview);
+                    _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
                     _.stat.count += 1;
                     _.dom.querySelector('#comment-count').innerHTML = _.stat.count + ' 条评论';
                     var post = data.response;
                     post.isPost = true;
                     _.load(post);
-                    _.stat.message = null;
-                    _.stat.mediaHtml = null;
                     timeAgo();
                 } else if (data.code === 2) {
                     alertmsg.innerHTML = data.response;
@@ -1185,7 +1205,40 @@
     }
 
     // 编辑
-    iDisqus.prototype.edit = function(item){
+    iDisqus.prototype.edit = function(post){
+        var _ = this;
+        var commentBox = _.box.replace('comment-box','comment-box comment-box-'+post.id).replace(/emoji-input/g,'emoji-input-'+post.id).replace(/upload-input/g,'upload-input-'+ post.id);
+        var $this = _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-body');
+        $this.outerHTML = commentBox;
+        _.guest.init();
+        var item = _.dom.querySelector('.comment-box-' + post.id);
+        item.dataset.currentId = post.id;
+        item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
+        item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
+        item.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
+        item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
+        item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
+        item.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
+        addListener(item.getElementsByClassName('emojione-item'), 'click', _.handle.field);
+        item.querySelector('.comment-form-textarea').focus();
+
+        // 取消编辑
+        item.querySelector('.comment-actions-form').insertAdjacentHTML('afterbegin', '<a class="comment-form-cancel" href="javascript:;">取消</a>')
+        item.querySelector('.comment-form-cancel').addEventListener('click', function(){
+            _.stat.editing = false;
+            _.load(post);
+            timeAgo();
+        }, false);
+
+        // 重新填充文本图片，连续回复、连续编辑会有 bug
+        if(!!_.stat.message){
+            item.querySelector('.comment-form-textarea').value = _.stat.message;
+        }
+        if(!!_.stat.mediaHtml){
+            item.querySelector('.comment-form-wrapper').classList.add('expanded');
+            item.querySelector('.comment-image-list').innerHTML = _.stat.mediaHtml;
+            addListener(item.getElementsByClassName('comment-image-item'), 'click', _.handle.remove);
+        }
 
     }
 

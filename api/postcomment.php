@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-27 20:40:08
+ * @version  2017-08-01 07:30:43
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -27,6 +27,7 @@ if( $author_name == DISQUS_USERNAME ){
     if( $author_email == DISQUS_EMAIL && strpos($session, 'session') !== false ){
         $author_email = null;
         $author_url = null;
+        $approved = null;
     } 
 }
 
