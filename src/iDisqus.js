@@ -1,5 +1,5 @@
 /*!
- * v 0.1.14
+ * v 0.1.15
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -678,7 +678,7 @@
 
             var html = '<li class="comment-item" data-id="' + post.id + '" data-name="'+ post.name + '" id="comment-' + post.id + '">' +
                 '<div class="comment-item-body">'+
-                '<div class="comment-item-avatar"><img src="' + post.avatar + '"></div>'+
+                '<a class="comment-item-avatar" href="#comment-'+post.id+'"><img src="' + post.avatar + '"></a>'+
                 '<div class="comment-item-main">'+
                 '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+ (post.isMod ?'<span class="comment-item-badge">'+_.opts.badge+'</span>' :'')+parentPost.name+'<span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span></div>'+
                 '<div class="comment-item-content">' + post.message + mediaHTML + '</div>'+
@@ -693,6 +693,7 @@
                 parentPost.dom.insertAdjacentHTML(parentPost.insert, html);
             }
             _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
+            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-avatar').addEventListener('click', _.handle.jump, false);
             if( !!post.parent ) {
                 _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-pname').addEventListener('click', _.handle.jump, false);
             }
