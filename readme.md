@@ -145,6 +145,12 @@ var disq = new iDisqus('comment', {
 * {Boolean}
 * 默认：`false`
 
+##### auto
+
+* 是否自动创建 Thread，为了不创建垃圾 Thread，并不推荐设置为 `true`
+* {Boolean}
+* 默认：`false`
+
 ##### badge
 
 * 管理员徽章文本

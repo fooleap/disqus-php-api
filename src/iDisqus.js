@@ -1,5 +1,5 @@
 /*!
- * v 0.1.15
+ * v 0.1.16
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -643,7 +643,7 @@
 
                     _.stat.loading = false;
                     _.stat.loaded = true;
-                } else if ( data.code === 2){
+                } else if ( data.code === 2 ){
                     _.create();
                 }
             },function(){
@@ -1246,6 +1246,18 @@
     // 创建 Thread 表单
     iDisqus.prototype.create = function(){
         var _ = this;
+        if(!!_.opts.auto){
+            _.dom.querySelector('.loading-container').dataset.tip = '正在创建 Thread……';
+            var postData = {
+                url: _.opts.link,
+                identifier: _.opts.identifier,
+                title: _.opts.title,
+                slug: _.opts.slug,
+                message: _.opts.desc
+            }
+            _.postThread(postData);
+            return;
+        }
         _.dom.querySelector('#idisqus').classList.remove('loading');
         _.dom.querySelector('#idisqus').innerHTML  = '<div class="comment-header"><span class="comment-header-item">创建 Thread<\/span><\/div>'+
             '<div class="comment-thread-form">'+
@@ -1262,12 +1274,16 @@
     // 创建 Thread 事件
     iDisqus.prototype.postThread = function(){
         var _ = this;
-        var postData = {
-            url: _.dom.querySelector('#thread-url').value,
-            identifier: _.dom.querySelector('#thread-identifier').value,
-            title: _.dom.querySelector('#thread-title').value,
-            slug: _.dom.querySelector('#thread-slug').value.replace(/\//g,''),
-            message: _.dom.querySelector('#thread-message').value
+        if( !!arguments[0].target ){
+            var postData = {
+                url: _.dom.querySelector('#thread-url').value,
+                identifier: _.dom.querySelector('#thread-identifier').value,
+                title: _.dom.querySelector('#thread-title').value,
+                slug: _.dom.querySelector('#thread-slug').value.replace(/\//g,''),
+                message: _.dom.querySelector('#thread-message').value
+            }
+        } else {
+            var postData = arguments[0];
         }
         postAjax( _.opts.api + '/createthread.php', postData, function(resp){
             var data = JSON.parse(resp);
@@ -1287,6 +1303,9 @@
                     alert('参数错误，无效的\'slug\'');
                     return;
                 }
+                alert(data.response);
+                return;
+            } else { 
                 alert(data.response);
                 return;
             }
