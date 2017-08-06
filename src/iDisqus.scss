@@ -691,8 +691,8 @@
         padding-top: 5px;
         line-height: 24px;
         font-size: 14px;
-        .at{
-            padding-right: 4px;
+        a[data-dsq-mention]:before{
+            content: "@";
         }
         .comment-item-content {
             min-height: 20px;

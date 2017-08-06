@@ -1,5 +1,5 @@
 /*!
- * v 0.1.16
+ * v 0.1.17
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -63,58 +63,6 @@
         });
     }
 
-    // TimeAgo https://coderwall.com/p/uub3pw/javascript-timeago-func-e-g-8-hours-ago
-    function timeAgo(selector) {
-
-        var templates = {
-            prefix: "",
-            suffix: "前",
-            seconds: "几秒",
-            minute: "1分钟",
-            minutes: "%d分钟",
-            hour: "1小时",
-            hours: "%d小时",
-            day: "1天",
-            days: "%d天",
-            month: "1个月",
-            months: "%d个月",
-            year: "1年",
-            years: "%d年"
-        };
-        var template = function (t, n) {
-            return templates[t] && templates[t].replace(/%d/i, Math.abs(Math.round(n)));
-        };
-
-        var timer = function (time) {
-            if (!time) return;
-            time = time.replace(/\.\d+/, ""); // remove milliseconds
-            time = time.replace(/-/, "/").replace(/-/, "/");
-            time = time.replace(/T/, " ").replace(/Z/, " UTC");
-            time = time.replace(/([\+\-]\d\d)\:?(\d\d)/, " $1$2"); // -04:00 -> -0400
-            time = new Date(time * 1000 || time);
-
-            var now = new Date();
-            var seconds = ((now.getTime() - time) * .001) >> 0;
-            var minutes = seconds / 60;
-            var hours = minutes / 60;
-            var days = hours / 24;
-            var years = days / 365;
-
-            return templates.prefix + (
-                seconds < 45 && template('seconds', seconds) || seconds < 90 && template('minute', 1) || minutes < 45 && template('minutes', minutes) || minutes < 90 && template('hour', 1) || hours < 24 && template('hours', hours) || hours < 42 && template('day', 1) || days < 30 && template('days', days) || days < 45 && template('month', 1) || days < 365 && template('months', days / 30) || years < 1.5 && template('year', 1) || template('years', years)) + templates.suffix;
-        };
-
-        var elements = document.getElementsByClassName('timeago');
-        for (var i in elements) {
-            var $this = elements[i];
-            if (typeof $this === 'object') {
-                $this.innerHTML = timer($this.getAttribute('title') || $this.getAttribute('datetime'));
-            }
-        }
-        // update time every minute
-        setTimeout(timeAgo, 60000);
-
-    }
 
     // matches & closest polyfill https://github.com/jonathantneal/closest
     (function (ElementProto) {
@@ -316,7 +264,6 @@
             next: null,         // 下条评论
             message: null,      // 新评论
             mediaHtml: null,    // 新上传图片
-            unload: [],         // 未加载评论
             root: [],           // 根评论
             count: 0,           // 评论数
             imageSize: [],      // 已上传图片大小
@@ -346,6 +293,61 @@
             _.init();
             //console.log(_);
         }
+    }
+
+    // TimeAgo https://coderwall.com/p/uub3pw/javascript-timeago-func-e-g-8-hours-ago
+    iDisqus.prototype.timeAgo = function() {
+
+        var _ = this;
+        var templates = {
+            prefix: "",
+            suffix: "前",
+            seconds: "几秒",
+            minute: "1分钟",
+            minutes: "%d分钟",
+            hour: "1小时",
+            hours: "%d小时",
+            day: "1天",
+            days: "%d天",
+            month: "1个月",
+            months: "%d个月",
+            year: "1年",
+            years: "%d年"
+        };
+        var template = function (t, n) {
+            return templates[t] && templates[t].replace(/%d/i, Math.abs(Math.round(n)));
+        };
+
+        var timer = function (time) {
+            if (!time) return;
+            time = time.replace(/\.\d+/, ""); // remove milliseconds
+            time = time.replace(/-/, "/").replace(/-/, "/");
+            time = time.replace(/T/, " ").replace(/Z/, " UTC");
+            time = time.replace(/([\+\-]\d\d)\:?(\d\d)/, " $1$2"); // -04:00 -> -0400
+            time = new Date(time * 1000 || time);
+
+            var now = new Date();
+            var seconds = ((now.getTime() - time) * .001) >> 0;
+            var minutes = seconds / 60;
+            var hours = minutes / 60;
+            var days = hours / 24;
+            var years = days / 365;
+
+            return templates.prefix + ( seconds < 45 && template('seconds', seconds) || seconds < 90 && template('minute', 1) || minutes < 45 && template('minutes', minutes) || minutes < 90 && template('hour', 1) || hours < 24 && template('hours', hours) || hours < 42 && template('day', 1) || days < 30 && template('days', days) || days < 45 && template('month', 1) || days < 365 && template('months', days / 30) || years < 1.5 && template('year', 1) || template('years', years)) + templates.suffix;
+        };
+
+        var elements = _.dom.querySelectorAll('.comment-item-time');
+        for (var i in elements) {
+            var $this = elements[i];
+            if (typeof $this === 'object') {
+                $this.title = new Date($this.getAttribute('datetime'));
+                $this.innerHTML = timer($this.getAttribute('datetime'));
+            }
+        }
+
+        // update time every minute
+        setTimeout(_.timeAgo.bind(_), 60000);
+
     }
 
     // 初始化评论框
@@ -596,8 +598,7 @@
                     _.dom.querySelector('#comment-link').href = data.link;
                     _.dom.querySelector('#comment-count').innerHTML = _.stat.count + ' 条评论';
                     var loadmore = _.dom.querySelector('.comment-loadmore');
-                    var posts = _.stat.unload.length > 0 ? data.response.concat(_.stat.unload) : (!!data.response ? data.response : []);
-                    _.stat.unload = [];
+                    var posts = !!data.response ? data.response : [];
                     _.stat.root = [];
                     posts.forEach(function(item){
                         _.load(item);
@@ -634,7 +635,7 @@
 
                     window.scrollTo(0, _.stat.offsetTop);
 
-                    timeAgo();
+                    _.timeAgo();
 
                     if (/^#disqus|^#comment/.test(location.hash) && !data.cursor.hasPrev && !_.stat.disqusLoaded ) {
                         var el = _.dom.querySelector('#idisqus ' + location.hash)
@@ -659,47 +660,43 @@
 
         var parentPostDom = _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]');
         
-        var parentPost = !post.parent ? {
-            name: '',
-            dom: _.dom.querySelector('.comment-list'),
+        var parentPost = !!post.parent ? {
+            name: '<a class="comment-item-pname" href="#'+parentPostDom.id+'"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1.664 902.144s97.92-557.888 596.352-557.888V129.728L1024 515.84l-425.984 360.448V628.8c-270.464 0-455.232 23.872-596.352 273.28"></path></svg>' + parentPostDom.dataset.name + '</a>',
+            dom: parentPostDom.querySelector('.comment-item-children'),
             insert: 'afterbegin'
         } : {
-            name: !!parentPostDom ? '<a class="comment-item-pname" href="#'+parentPostDom.id+'"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1.664 902.144s97.92-557.888 596.352-557.888V129.728L1024 515.84l-425.984 360.448V628.8c-270.464 0-455.232 23.872-596.352 273.28"></path></svg>' + parentPostDom.dataset.name + '</a>': '',
-            dom: _.dom.querySelector('.comment-item[data-id="'+post.parent+'"] .comment-item-children'),
+            name: '',
+            dom: _.dom.querySelector('.comment-list'),
             insert: 'beforeend'
         };
 
-        if (!!parentPost.dom) {
-            var mediaHTML = '';
-            post.media.forEach(function(item){
-                mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '?imageView2/2/h/200"></a>';
-            })
-            mediaHTML = '<div class="comment-item-images">' + mediaHTML + '</div>';
+        var mediaHTML = '';
+        post.media.forEach(function(item){
+            mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '?imageView2/2/h/200"></a>';
+        })
+        mediaHTML = '<div class="comment-item-images">' + mediaHTML + '</div>';
 
-            var html = '<li class="comment-item" data-id="' + post.id + '" data-name="'+ post.name + '" id="comment-' + post.id + '">' +
-                '<div class="comment-item-body">'+
-                '<a class="comment-item-avatar" href="#comment-'+post.id+'"><img src="' + post.avatar + '"></a>'+
-                '<div class="comment-item-main">'+
-                '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+ (post.isMod ?'<span class="comment-item-badge">'+_.opts.badge+'</span>' :'')+parentPost.name+'<span class="comment-item-bullet"> • </span><span class="comment-item-time timeago" datetime="' + post.createdAt + '"></span></div>'+
-                '<div class="comment-item-content">' + post.message + mediaHTML + '</div>'+
-                '<div class="comment-item-footer">' + (!!post.isPost ? '<span class="comment-item-manage"><a class="comment-item-edit" href="javascript:;">编辑</a><span class="comment-item-bullet"> • </span><a class="comment-item-delete" href="javascript:;">删除</a><span class="comment-item-bullet"> • </span></span>' : '') + '<a class="comment-item-reply" href="javascript:;">回复</a> </div>'+
-                '</div></div>'+
-                '<ul class="comment-item-children"></ul>'+
-                '</li>';
-            // 更新 or 创建
-            if(!!_.dom.querySelector('.comment-item[data-id="' + post.id + '"]')){
-                _.dom.querySelector('.comment-item[data-id="' + post.id + '"]').outerHTML = html;
-            } else {
-                parentPost.dom.insertAdjacentHTML(parentPost.insert, html);
-            }
-            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
-            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-avatar').addEventListener('click', _.handle.jump, false);
-            if( !!post.parent ) {
-                _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-pname').addEventListener('click', _.handle.jump, false);
-            }
+        var html = '<li class="comment-item" data-id="' + post.id + '" data-name="'+ post.name + '" id="comment-' + post.id + '">' +
+            '<div class="comment-item-body">'+
+            '<a class="comment-item-avatar" href="#comment-'+post.id+'"><img src="' + post.avatar + '"></a>'+
+            '<div class="comment-item-main">'+
+            '<div class="comment-item-header"><a class="comment-item-name" title="' + post.name + '" rel="nofollow" target="_blank" href="' + ( post.url ? post.url : 'javascript:;' ) + '">' + post.name + '</a>'+ (post.isMod ?'<span class="comment-item-badge">'+_.opts.badge+'</span>' :'')+parentPost.name+'<span class="comment-item-bullet"> • </span><time class="comment-item-time" datetime="' + post.createdAt + '"></time></div>'+
+            '<div class="comment-item-content">' + post.message + mediaHTML + '</div>'+
+            '<div class="comment-item-footer">' + (!!post.isPost ? '<span class="comment-item-manage"><a class="comment-item-edit" href="javascript:;">编辑</a><span class="comment-item-bullet"> • </span><a class="comment-item-delete" href="javascript:;">删除</a><span class="comment-item-bullet"> • </span></span>' : '') + '<a class="comment-item-reply" href="javascript:;">回复</a> </div>'+
+            '</div></div>'+
+            '<ul class="comment-item-children"></ul>'+
+            '</li>';
+
+        // 更新 or 创建
+        if(!!_.dom.querySelector('.comment-item[data-id="' + post.id + '"]')){
+            _.dom.querySelector('.comment-item[data-id="' + post.id + '"]').outerHTML = html;
         } else {
-            _.stat.unload.push(post);
-            return;
+            parentPost.dom.insertAdjacentHTML(parentPost.insert, html);
+        }
+        _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
+        _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-avatar').addEventListener('click', _.handle.jump, false);
+        if( !!post.parent ) {
+            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-pname').addEventListener('click', _.handle.jump, false);
         }
 
         // 发布留言，可编辑删除
@@ -1098,7 +1095,7 @@
 
             _.load(post);
 
-            timeAgo();
+            _.timeAgo();
 
             // 清空或移除评论框
             _.stat.message = message;
@@ -1130,18 +1127,18 @@
                     _.stat.mediaHtml = null;
                     var post = data.response;
                     _.load(post);
-                    timeAgo();
+                    _.timeAgo();
                     _.stat.editing = false;
                 } else {
                     // 取消编辑
                     _.load(_.stat.editing)
-                    timeAgo();
+                    _.timeAgo();
                     _.stat.editing = false;
                 }
             }, function(){
                 // 取消编辑
                 _.load(_.stat.editing)
-                timeAgo();
+                _.timeAgo();
                 _.stat.editing = false;
             })
         } else {
@@ -1164,7 +1161,7 @@
                     var post = data.response;
                     post.isPost = true;
                     _.load(post);
-                    timeAgo();
+                    _.timeAgo();
                 } else if (data.code === 2) {
                     alertmsg.innerHTML = data.response;
                     _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
@@ -1228,7 +1225,7 @@
         item.querySelector('.comment-form-cancel').addEventListener('click', function(){
             _.stat.editing = false;
             _.load(post);
-            timeAgo();
+            _.timeAgo();
         }, false);
 
         // 重新填充文本图片，连续回复、连续编辑会有 bug

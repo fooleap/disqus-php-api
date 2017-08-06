@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-27 20:31:19
+ * @version  2017-08-06 16:11:41
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -22,7 +22,7 @@ $fields_data = array(
     'order' => 'desc',
     'thread' => 'link:'.$website.$_GET['link']
 );
-$curl_url = '/api/3.0/posts/list.json?'.http_build_query($fields_data);
+$curl_url = '/api/3.0/threads/listPostsThreaded?'.http_build_query($fields_data);
 $data = curl_get($curl_url);
 
 $fields_data = array(
@@ -39,6 +39,7 @@ foreach ( $data -> response as $key => $post ) {
 }
 
 $isauth = strpos($session, 'session') !== false ? true : false;
+$data -> auth = $isauth;
 
 $output = $data -> code == 0 ? array(
     'auth' => $isauth,
@@ -46,7 +47,7 @@ $output = $data -> code == 0 ? array(
     'cursor' => $data -> cursor,
     'link' => 'https://disqus.com/home/discussion/'.DISQUS_SHORTNAME.'/'.$detail -> response -> slug.'/?l=zh',
     'posts' => $detail -> response -> posts,
-    'response' => array_reverse($posts),
+    'response' => $posts,
     'thread' => $detail -> response -> id
 ) : $data;
 

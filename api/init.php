@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-30 15:43:58
+ * @version  2017-08-06 16:11:26
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -95,7 +95,8 @@ function curl_get($url){
 
     $options = array(
         CURLOPT_URL => $curl_url,
-        CURLOPT_HTTPHEADER => array('Host: disqus.com'),
+        CURLOPT_HTTPHEADER => array('Host: disqus.com','Origin: https://disqus.com'),
+        CURLOPT_REFERER => 'https://disqus.com',
         CURLOPT_COOKIE => $session,
         CURLOPT_HEADER => false,
         CURLOPT_RETURNTRANSFER => true
@@ -120,9 +121,10 @@ function curl_post($url, $data){
 
     $options = array(
         CURLOPT_URL => $curl_url,
-        CURLOPT_HTTPHEADER => array('Host: '.$curl_host),
+        CURLOPT_HTTPHEADER => array('Host: '.$curl_host,'Origin: https://disqus.com'),
         CURLOPT_COOKIE => $session,
         CURLOPT_HEADER => false,
+        CURLOPT_REFERER => 'https://disqus.com',
         CURLOPT_ENCODING => 'gzip, deflate',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
