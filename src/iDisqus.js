@@ -1,5 +1,5 @@
 /*!
- * v 0.1.17
+ * v 0.1.18
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -266,6 +266,7 @@
             mediaHtml: null,    // 新上传图片
             root: [],           // 根评论
             count: 0,           // 评论数
+            users: [],          // Disqus 会员
             imageSize: [],      // 已上传图片大小
             disqusLoaded: false // Disqus 已加载
         };
@@ -659,6 +660,10 @@
         var _ = this;
 
         var parentPostDom = _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]');
+
+        if(!!post.username && _.stat.users.indexOf(post.username) == -1){
+            _.stat.users.push(post.username);
+        }
         
         var parentPost = !!post.parent ? {
             name: '<a class="comment-item-pname" href="#'+parentPostDom.id+'"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1.664 902.144s97.92-557.888 596.352-557.888V129.728L1024 515.84l-425.984 360.448V628.8c-270.464 0-455.232 23.872-596.352 273.28"></path></svg>' + parentPostDom.dataset.name + '</a>',
@@ -667,14 +672,16 @@
         } : {
             name: '',
             dom: _.dom.querySelector('.comment-list'),
-            insert: 'beforeend'
+            insert: post.id == 'preview' || !!post.isPost ? 'afterbegin' : 'beforeend'
         };
 
         var mediaHTML = '';
-        post.media.forEach(function(item){
-            mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '?imageView2/2/h/200"></a>';
-        })
-        mediaHTML = '<div class="comment-item-images">' + mediaHTML + '</div>';
+        if( post.media.length > 0 ){
+            post.media.forEach(function(item){
+                mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '"></a>';
+            })
+            mediaHTML = '<div class="comment-item-images">' + mediaHTML + '</div>';
+        }
 
         var html = '<li class="comment-item" data-id="' + post.id + '" data-name="'+ post.name + '" id="comment-' + post.id + '">' +
             '<div class="comment-item-body">'+
@@ -1084,6 +1091,8 @@
 
             var post = {
                 'url': !!_.guest.url ? _.guest.url : '',
+                'isMod': false,
+                'username': null,
                 'name': _.guest.name,
                 'avatar': _.guest.avatar,
                 'id': 'preview',
@@ -1108,6 +1117,15 @@
                 item.querySelector('.comment-image-list').innerHTML = '';
                 item.querySelector('.comment-form-wrapper').classList.remove('expanded','editing');
             }
+        }
+
+        // @
+        var mentions = message.match(/@\w+/g);
+        if( !!mentions ){
+            mentions = mentions.filter(function(value) {
+                return _.stat.users.indexOf(value.slice(1)) > -1;
+            });
+            message = !!mentions ? message.replace(eval('/('+mentions.join('|')+')/g'),'$1:disqus') : message;
         }
 
         // 文本 + 图片

@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-08-06 16:11:26
+ * @version  2017-08-09 14:29:53
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -182,6 +182,7 @@ function post_format( $post ){
     $data = array( 
         'avatar' => $post -> author -> avatar -> cache,
         'isMod' => $isMod,
+        'username' => $post->author->username,
         'createdAt' => $post -> createdAt.'+00:00',
         'id'=> $post -> id,
         'media' => $imgArr,
