@@ -821,6 +821,47 @@
     }
 }
 
+.mention-user{
+    background-color: #fff;
+    border-radius: 2px;
+    //border: 2px solid #c2c6cc;
+    box-shadow: 1px 1px 2px 1px rgba(29,47,58,.2);
+    position: absolute;
+    overflow: hidden;
+    .mention-user-list{
+        list-style: none;
+    }
+    .mention-user-item{
+        height: 30px;
+        padding: 3px;
+        line-height: 24px;
+        font-size: 12px;
+        display: flex;
+        cursor: default;
+        &.active{
+           background-color: #2e9fff;
+           color: #fff;
+           .mention-user-name{
+               color: #fff;
+           }
+        }
+    }
+    .mention-user-avatar{
+        width: 24px;
+        height: 24px;
+        border-radius: 3px;
+        display: block;
+    }
+    .mention-user-username{
+        font-weight: 600;
+        padding-left: 4px;
+    }
+    .mention-user-name{
+        color: #656c7a;
+        padding-left: 4px;
+    }
+}
+
 @keyframes disqus-loader-spinner-animation{
     0%{transform:rotate(0)}
     100%{transform:rotate(360deg)}

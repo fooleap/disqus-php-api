@@ -1,5 +1,5 @@
 /*!
- * v 0.1.18
+ * v 0.1.19
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -434,6 +434,8 @@
             upload: _.upload.bind(_),
             verify: _.verify.bind(_),
             jump: _.jump.bind(_),
+            mention: _.mention.bind(_),
+            keySelect: _.keySelect.bind(_),
             field: _.field,
             focus: _.focus,
             input: _.input
@@ -618,6 +620,7 @@
                         _.dom.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
                         _.dom.querySelector('.comment-form-textarea').addEventListener('focus',_.handle.focus, false);
                         _.dom.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
+                        _.dom.querySelector('.comment-form-textarea').addEventListener('keyup', _.handle.mention, false);
                         _.dom.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
                         _.dom.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
                         _.dom.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
@@ -661,8 +664,13 @@
 
         var parentPostDom = _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]');
 
-        if(!!post.username && _.stat.users.indexOf(post.username) == -1){
-            _.stat.users.push(post.username);
+        var user = {
+            username: post.username,
+            name: post.name,
+            avatar: post.avatar
+        }
+        if(!!post.username && _.stat.users.map(function(user) { return user.username; }).indexOf(post.username) == -1){
+            _.stat.users.push(user);
         }
         
         var parentPost = !!post.parent ? {
@@ -785,6 +793,133 @@
         alertmsg.innerHTML = '';
     }
 
+    // 提醒用户 @ mention 
+    iDisqus.prototype.mention = function(e){
+        var _ = this;
+        var textarea = e.currentTarget;
+        var selStart = textarea.selectionStart;
+        var mentionIndex = textarea.value.slice(0, selStart).lastIndexOf('@');
+        var mentionText = textarea.value.slice(mentionIndex, selStart);
+        var mentionDom = _.dom.querySelector('.mention-user');
+        if(mentionText.search(/^@\w+$|^@$/) == 0){
+            if( e.keyCode == 38 || e.keyCode == 40){
+                return;
+            }
+            var showUsers = _.stat.users.filter(function(user){
+                var re = '/'+ mentionText.slice(1) + '/i'
+                return user.username.search(eval(re)) > -1;
+            });
+            var coord = _.getCaretCoord(textarea);
+            var list='', html = '';
+
+            if( showUsers.length > 0){
+                showUsers.forEach(function(item, i){
+                    list += '<li class="mention-user-item'+(i == 0 ? ' active' : '')+'" data-username="'+item.username+'"><img class="mention-user-avatar" src="'+item.avatar+'"><div class="mention-user-username">'+item.username+'</div><div class="mention-user-name">'+item.name+'</div></li>';
+                })
+                if(!!mentionDom){
+                    mentionDom.innerHTML = '<ul class="mention-user-list">'+list+'</ul>';
+                    mentionDom.style.left = coord.left + 'px';
+                    mentionDom.style.top = coord.top + 'px';
+                } else {
+                    html = '<div class="mention-user" style="left:'+coord.left+'px;top:'+coord.top+'px"><ul class="mention-user-list">'+list+'</ul></div>';
+                    _.dom.querySelector('#idisqus').insertAdjacentHTML('beforeend', html);
+                }
+
+                // 鼠标悬浮
+                addListener(_.dom.getElementsByClassName('mention-user-item'), 'mouseover', function(){
+                    _.dom.querySelector('.mention-user-item.active').classList.remove('active');
+                    this.classList.add('active');
+                })
+
+                // 鼠标点击
+                addListener(_.dom.getElementsByClassName('mention-user-item'), 'click', function(){
+                    var username = '@' + this.dataset.username + ' ';
+                    textarea.value = textarea.value.slice(0, mentionIndex) + username + textarea.value.slice(selStart);
+                    _.dom.querySelector('.mention-user').outerHTML = '';
+                    textarea.focus();
+                    textarea.setSelectionRange(mentionIndex + username.length, mentionIndex + username.length)
+                    textarea.removeEventListener('keydown', _.handle.keySelect, false);
+                })
+
+                // 键盘事件
+                textarea.addEventListener('keydown', _.handle.keySelect, false);
+            } else{
+                if(!!mentionDom){
+                    mentionDom.outerHTML = '';
+                    textarea.removeEventListener('keydown', _.handle.keySelect, false);
+                }
+            }
+        } else {
+            if(!!mentionDom){
+                mentionDom.outerHTML = '';
+                textarea.removeEventListener('keydown', _.handle.keySelect, false);
+            }
+        }
+    }
+
+    // 获取光标坐标 https://medium.com/@_jh3y/how-to-where-s-the-caret-getting-the-xy-position-of-the-caret-a24ba372990a
+    iDisqus.prototype.getCaretCoord = function(textarea){
+        var _ = this;
+        var carPos = textarea.selectionEnd,
+            div = d.createElement('div'),
+            span = d.createElement('span'),
+            copyStyle = getComputedStyle(textarea);
+        [].forEach.call(copyStyle, function(prop){
+            div.style[prop] = copyStyle[prop];
+        });
+        div.style.position = 'absolute';
+        _.dom.appendChild(div);
+        div.textContent = textarea.value.substr(0, carPos);
+        span.textContent = textarea.value.substr(carPos) || '.';
+        div.appendChild(span);
+        var coords = {
+            'top': textarea.offsetTop - textarea.scrollTop + span.offsetTop + parseFloat(copyStyle.lineHeight),
+            'left': textarea.offsetLeft - textarea.scrollLeft + span.offsetLeft
+        };
+        _.dom.removeChild(div);
+        return coords;
+    }
+
+    // 键盘选择用户
+    iDisqus.prototype.keySelect = function(e){
+        var _ = this;
+        var textarea = e.currentTarget;
+        var selStart = textarea.selectionStart;
+        var mentionIndex = textarea.value.slice(0, selStart).lastIndexOf('@');
+        var mentionText = textarea.value.slice(mentionIndex, selStart);
+        var mentionDom = _.dom.querySelector('.mention-user');
+        var current = _.dom.querySelector('.mention-user-item.active')
+        switch(e.keyCode){
+            case 13:
+                //回车
+                var username = '@' + current.dataset.username + ' ';
+                textarea.value = textarea.value.slice(0, mentionIndex) + username + textarea.value.slice(selStart);
+                textarea.setSelectionRange(mentionIndex + username.length, mentionIndex + username.length)
+                _.dom.querySelector('.mention-user').outerHTML = '';
+                textarea.removeEventListener('keydown', _.handle.keySelect, false);
+                e.preventDefault();
+                break;
+            case 38:
+                //上
+                if(!!current.previousSibling){
+                    current.previousSibling.classList.add('active');
+                    current.classList.remove('active');
+                }
+                e.preventDefault();
+                break;
+            case 40:
+                //下
+                if(!!current.nextSibling){
+                    current.nextSibling.classList.add('active');
+                    current.classList.remove('active');
+                }
+                e.preventDefault();
+                break;
+            default:
+                break;
+        }
+    }
+
     // 跳到评论
     iDisqus.prototype.jump = function(e){
         var _ = this;
@@ -801,8 +936,11 @@
         var item = e.currentTarget;
         var form = item.closest('.comment-form');
         var textarea = form.querySelector('.comment-form-textarea');
-        textarea.value += item.dataset.code;
+        var selStart = textarea.selectionStart;
+        var shortCode = selStart == 0 ? item.dataset.code + ' ' : ' ' + item.dataset.code + ' '
+        textarea.value = textarea.value.slice(0, selStart) + shortCode + textarea.value.slice(selStart) 
         textarea.focus();
+        textarea.setSelectionRange(selStart + shortCode.length, selStart + shortCode.length);
     }
 
     // 显示回复框 or 取消回复框
@@ -830,6 +968,7 @@
 
             item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
             item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
+            item.querySelector('.comment-form-textarea').addEventListener('keyup', _.handle.mention, false);
             item.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
             item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
             item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
@@ -1122,8 +1261,8 @@
         // @
         var mentions = message.match(/@\w+/g);
         if( !!mentions ){
-            mentions = mentions.filter(function(value) {
-                return _.stat.users.indexOf(value.slice(1)) > -1;
+            mentions = mentions.filter(function(mention) {
+                return _.stat.users.map(function(user) { return user.username; }).indexOf(mention.slice(1)) > -1;
             });
             message = !!mentions ? message.replace(eval('/('+mentions.join('|')+')/g'),'$1:disqus') : message;
         }
@@ -1232,6 +1371,7 @@
         item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
         item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
         item.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
+        item.querySelector('.comment-form-textarea').addEventListener('keyup', _.handle.mention, false);
         item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
         item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
         item.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
@@ -1335,6 +1475,7 @@
         _.dom.querySelector('.exit').removeEventListener('click', _.handle.guestReset, false);
         removeListener(_.dom.getElementsByClassName('comment-form-textarea'), 'blur', _.handle.focus);
         removeListener(_.dom.getElementsByClassName('comment-form-textarea'), 'focus', _.handle.focus);
+        removeListener(_.dom.getElementsByClassName('comment-form-textarea'), 'keyup', _.handle.mention);
         removeListener(_.dom.getElementsByClassName('comment-form-email'), 'blur', _.handle.verify);
         removeListener(_.dom.getElementsByClassName('comment-form-submit'), 'click', _.handle.post);
         removeListener(_.dom.getElementsByClassName('comment-image-input'), 'change', _.handle.upload);
