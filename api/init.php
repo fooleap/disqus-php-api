@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-08-09 14:29:53
+ * @version  2017-08-13 14:54:05
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -146,7 +146,7 @@ function post_format( $post ){
     global $client;
 
     // 是否是管理员
-    $isMod = ($post->author->name == DISQUS_USERNAME || $post->author->email == DISQUS_EMAIL ) && $post->author->isAnonymous == false ? true : false;
+    $isMod = ($post->author->username == DISQUS_USERNAME || $post->author->email == DISQUS_EMAIL ) && $post->author->isAnonymous == false ? true : false;
 
     // 访客指定 Gravatar 头像
     $avatar_url = GRAVATAR_CDN.md5($post->author->email).'?d='.GRAVATAR_DEFAULT;

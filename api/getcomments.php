@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-08-06 16:11:41
+ * @version  2017-08-13 14:51:03
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -34,8 +34,10 @@ $curl_url = '/api/3.0/threads/details.json?'.http_build_query($fields_data);
 $detail = curl_get($curl_url);
 
 $posts = array();
-foreach ( $data -> response as $key => $post ) {
-    $posts[$key] = post_format($post);
+if (is_array($data -> response) || is_object($data -> response)){
+    foreach ( $data -> response as $key => $post ) {
+        $posts[$key] = post_format($post);
+    }
 }
 
 $isauth = strpos($session, 'session') !== false ? true : false;
