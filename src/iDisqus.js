@@ -1,5 +1,5 @@
 /*!
- * v 0.1.19
+ * v 0.1.20
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -806,8 +806,8 @@
                 return;
             }
             var showUsers = _.stat.users.filter(function(user){
-                var re = '/'+ mentionText.slice(1) + '/i'
-                return user.username.search(eval(re)) > -1;
+                var re = new RegExp(mentionText.slice(1), 'i');
+                return user.username.search(re) > -1;
             });
             var coord = _.getCaretCoord(textarea);
             var list='', html = '';
@@ -1264,7 +1264,10 @@
             mentions = mentions.filter(function(mention) {
                 return _.stat.users.map(function(user) { return user.username; }).indexOf(mention.slice(1)) > -1;
             });
-            message = !!mentions ? message.replace(eval('/('+mentions.join('|')+')/g'),'$1:disqus') : message;
+            if( mentions.length > 0 ){
+                var re = new RegExp('('+mentions.join('|')+')','g');
+                message = message.replace(re,'$1:disqus');
+            }
         }
 
         // 文本 + 图片
