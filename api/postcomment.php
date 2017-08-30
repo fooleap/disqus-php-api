@@ -10,19 +10,19 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-08-05 06:33:21
+ * @version  2017-08-16 15:51:25
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 namespace Emojione;
 require_once('init.php');
 
-$curl_url = '/api/3.0/posts/create.json';
 $author_name = $_POST['name'];
 $author_email = $_POST['email'];
 $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
 
-if( $author_name == DISQUS_USERNAME ){
+// 管理员
+if($author_name == DISQUS_USERNAME){
     $author_name = null;
     if( $author_email == DISQUS_EMAIL && strpos($session, 'session') !== false ){
         $author_email = null;
@@ -31,6 +31,21 @@ if( $author_name == DISQUS_USERNAME ){
     } 
 }
 
+// 父评是已登录用户
+if(isset($_POST['parent'])){
+    $fields_data = array(
+        'api_key' => DISQUS_PUBKEY,
+        'post' => $_POST['parent']
+    );
+    $curl_url = '/api/3.0/posts/details.json?'.http_build_query($fields_data);
+    $data = curl_get($curl_url);
+    $post = post_format($data->response);
+    if($data->response->author->isAnonymous == false){
+        $approved = null;
+    }
+}
+
+$curl_url = '/api/3.0/posts/create.json';
 $post_message = html_entity_decode($client->shortnameToUnicode($_POST['message']));
 //$post_message = $client->unifyUnicode($_POST['message']);
 
@@ -53,7 +68,7 @@ $output = $data -> code == 0 ? array(
     'response' => post_format($data -> response)
 ) : $data;
 
-if ( $_POST['parent'] != '' && $data -> code == 0 ){
+if ( isset($_POST['parent']) && $data -> code == 0 ){
     $mail_query = array(
         'parent'=> $_POST['parent'],
         'id'=> $data -> response -> id,

@@ -722,6 +722,14 @@
     }
     .comment-item-main{
         flex: 1;
+        &:empty{
+            padding-bottom: 5px;
+        }
+        &:empty:after{
+            content: attr(data-message);
+            line-height: 36px;
+            color: #7f919e;
+        }
     }
     .comment-box{
         margin: 0;

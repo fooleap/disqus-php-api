@@ -1,5 +1,5 @@
 /*!
- * v 0.1.20
+ * v 0.1.21
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -702,16 +702,30 @@
             '<ul class="comment-item-children"></ul>'+
             '</li>';
 
+        // 已删除评论
+        if(!!post.isDeleted){
+            html = '<li class="comment-item" data-id="' + post.id + '" id="comment-' + post.id + '" data-name="已删除">' +
+                '<div class="comment-item-body">'+
+                '<a class="comment-item-avatar" href="#comment-'+post.id+'"><img src="' + post.avatar + '"></a>'+
+                '<div class="comment-item-main" data-message="此评论已被删除。"></div></div>'+
+                '<ul class="comment-item-children"></ul>'+
+                '</li>';
+        }
+
+
         // 更新 or 创建
         if(!!_.dom.querySelector('.comment-item[data-id="' + post.id + '"]')){
             _.dom.querySelector('.comment-item[data-id="' + post.id + '"]').outerHTML = html;
         } else {
             parentPost.dom.insertAdjacentHTML(parentPost.insert, html);
         }
-        _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
-        _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-avatar').addEventListener('click', _.handle.jump, false);
-        if( !!post.parent ) {
-            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-pname').addEventListener('click', _.handle.jump, false);
+
+        if(!post.isDeleted){
+            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-reply').addEventListener('click', _.handle.show, false);
+            _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-avatar').addEventListener('click', _.handle.jump, false);
+            if( !!post.parent ) {
+                _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-pname').addEventListener('click', _.handle.jump, false);
+            }
         }
 
         // 发布留言，可编辑删除
