@@ -1,5 +1,5 @@
 /*!
- * v 0.1.21
+ * v 0.1.22
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -1004,7 +1004,7 @@
         var avatar = box.querySelector('.comment-avatar-image');
         var email = box.querySelector('.comment-form-email');
         var alertmsg = box.querySelector('.comment-form-alert');
-        if (/^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i.test(email.value)) {
+        if(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.value)){
             getAjax(
                 _.opts.api + '/getgravatar.php?email=' + email.value,
                 function(resp) {
@@ -1204,7 +1204,7 @@
                 _.errorTips('邮箱不能为空。', elEmail);
                 return;
             }
-            if(!/^([\w-_]+(?:\.[\w-_]+)*)@((?:[a-z0-9]+(?:-[a-zA-Z0-9]+)*)+\.[a-z]{2,6})$/i.test(guest.email)){
+            if(!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(guest.email)){
                 _.errorTips('请正确填写邮箱。', elEmail);
                 return;
             }

@@ -92,6 +92,13 @@ if ( $day < date('Ymd') ){
     }
 }
 
+function encodeURI($uri)
+{
+    return preg_replace_callback("{[^0-9a-z_.!~*();,/?:@&=+$#-]}i", function ($m) {
+        return sprintf('%%%02X', ord($m[0]));
+    }, $uri);
+}
+
 function curl_get($url){
     global $session, $disqus_host;
     $curl_url = 'https://'.$disqus_host.$url;
@@ -175,12 +182,16 @@ function post_format( $post ){
     }
 
     // 去掉图片链接
-    $imgpat = '/<a(.*?)href="(.*?disquscdn.com.*?\.(jpg|gif|png))"(.*?)>(.*?)<\/a>/i';
+    $imgpat = '/<a(.*?)href="(.*?(disquscdn.com|media.giphy.com).*?\.(jpg|gif|png))"(.*?)>(.*?)<\/a>/i';
     $post -> message = preg_replace($imgpat,'',$post -> message);
 
     $imgArr = array();
     foreach ( $post -> media as $key => $image ){
-        $imgArr[$key] = $image -> url;
+        if( strpos($image -> url, 'giphy.gif') !== false ){
+            $imgArr[$key] = '//a.disquscdn.com/get?url='.urlencode($image -> url).'&key=Hx_Z1IMzKElPuRPVmpnfsQ';
+        } else {
+            $imgArr[$key] = $image -> url;
+        }
     };
 
     // 是否已删除

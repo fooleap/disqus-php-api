@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-08-16 15:51:25
+ * @version  2017-09-16 23:26:32 
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -32,7 +32,7 @@ if($author_name == DISQUS_USERNAME){
 }
 
 // 父评是已登录用户
-if(isset($_POST['parent'])){
+if(!empty($_POST['parent'])){
     $fields_data = array(
         'api_key' => DISQUS_PUBKEY,
         'post' => $_POST['parent']
@@ -68,7 +68,7 @@ $output = $data -> code == 0 ? array(
     'response' => post_format($data -> response)
 ) : $data;
 
-if ( isset($_POST['parent']) && $data -> code == 0 ){
+if ( !empty($_POST['parent']) && $data -> code == 0 ){
     $mail_query = array(
         'parent'=> $_POST['parent'],
         'id'=> $data -> response -> id,
