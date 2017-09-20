@@ -1,5 +1,5 @@
 /*!
- * v 0.1.22
+ * v 0.1.23
  * https://github.com/fooleap/disqus-php-api
  *
  * Copyright 2017 fooleap
@@ -171,7 +171,7 @@
         _.opts.identifier = !!_.opts.identifier ? _.opts.identifier : _.opts.url;
         _.opts.link = _.opts.site + _.opts.url; 
         _.opts.title = !!_.opts.title ? _.opts.title : d.title;
-        _.opts.slug = !!_.opts.slug ? _.opts.slug.replace(/\//g,'') : '';
+        _.opts.slug = !!_.opts.slug ? _.opts.slug.replace(/[^A-Za-z0-9_-]+/g,'') : '';
         _.opts.desc =  !!_.opts.desc ? _.opts.desc : (!!d.querySelector('[name="description"]') ? d.querySelector('[name="description"]').content : '');
         _.opts.mode = !!_.opts.mode ? _.opts.mode : 1;
         _.opts.timeout = !!_.opts.timeout ? _.opts.timeout : 3000;
@@ -548,6 +548,7 @@
                         var el = d.querySelector('[data-disqus-url$="'+itemLink+'"]')
                         if(!!el ){
                             el.innerHTML = item.posts;
+                            el.dataset.disqusCount = item.posts;
                         }
                     });
                 }, function(){
@@ -1451,7 +1452,7 @@
                 url: _.dom.querySelector('#thread-url').value,
                 identifier: _.dom.querySelector('#thread-identifier').value,
                 title: _.dom.querySelector('#thread-title').value,
-                slug: _.dom.querySelector('#thread-slug').value.replace(/\//g,''),
+                slug: _.dom.querySelector('#thread-slug').value.replace(/[^A-Za-z0-9_-]+/g,''),
                 message: _.dom.querySelector('#thread-message').value
             }
         } else {
