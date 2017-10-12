@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-09-08 13:06:12
+ * @version  2017-10-14 15:11:16 
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -11,7 +11,7 @@ namespace Emojione;
 require_once('config.php');
 require_once('emojione/autoload.php');
 
-error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ERROR | E_PARSE);
 header('Content-type:text/json');
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';  
 $ipRegex = '((2[0-4]|1\d|[1-9])?\d|25[0-5])(\.(?1)){3}';
