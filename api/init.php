@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-10-14 15:11:16 
+ * @version  2017-10-16 17:46:41
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -36,13 +36,15 @@ $media_host = GFW_INSIDE == 1 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
 $url = parse_url(DISQUS_WEBSITE);
 $website = $url['scheme'].'://'.$url['host'];
 
-//读取文件
+// 读取文件
 $session_data = json_decode(file_get_contents(sys_get_temp_dir().'/session-'.DISQUS_SHORTNAME.'.json'));
 $session = $session_data -> session;
-$day = date('Ymd', strtotime('+20 day', strtotime($session_data -> day)));
+$pwd_md5 = $session_data -> pwd;
+$date_expires = strtotime($session_data -> expires);
+$date_now = strtotime(now);
 
-//20 天前则模拟登录，重新获取 session 并保存
-if ( $day < date('Ymd') ){
+// session 过期或密码更新
+if( $date_now >= $date_expires || md5(DISQUS_PASSWORD) != $pwd_md5 ){
     $cookie_temp = sys_get_temp_dir().'/cookie_temp.txt';
     $cookie = sys_get_temp_dir().'/cookie.txt';
 
@@ -79,15 +81,16 @@ if ( $day < date('Ymd') ){
     curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
     $result = curl_exec($ch);
-
-    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $result, $output_matches);
-    $session = str_replace("Set-Cookie: ", "", $output_matches[0][2]);
+    preg_match('/^Set-Cookie:\s+(session.*)/mi', $result, $output_match);
+    preg_match('/(session[^;]*)/mi', $output_match[1], $session_match);
+    preg_match('/expires=([^;]*)/mi', $output_match[1], $expires_match);
+    $session = $session_match[0];
+    $expires = $expires_match[1];
 
     curl_close($ch);
-
     if( strpos($session, 'session') !== false ){
         //写入文件
-        $output_data = array('day' => date('Ymd'), 'session' => $session);
+        $output_data = array('expires' => $expires, 'session' => $session, 'pwd' => md5(DISQUS_PASSWORD));
         file_put_contents(sys_get_temp_dir().'/session-'.DISQUS_SHORTNAME.'.json', json_encode($output_data));
     }
 }

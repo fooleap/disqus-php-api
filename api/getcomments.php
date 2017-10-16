@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-08-13 14:51:03
+ * @version  2017-10-16 14:08:12
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -40,11 +40,14 @@ if (is_array($data -> response) || is_object($data -> response)){
     }
 }
 
-$isauth = strpos($session, 'session') !== false ? true : false;
-$data -> auth = $isauth;
+if( isset($detail -> response -> ipAddress)){
+    $isAuth = true;
+} else {
+    $isAuth = false;
+}
 
 $output = $data -> code == 0 ? array(
-    'auth' => $isauth,
+    'auth' => $isAuth,
     'code' => $detail -> code,
     'cursor' => $data -> cursor,
     'link' => 'https://disqus.com/home/discussion/'.DISQUS_SHORTNAME.'/'.$detail -> response -> slug.'/?l=zh',
