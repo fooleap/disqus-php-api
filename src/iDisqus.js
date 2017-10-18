@@ -12,7 +12,9 @@
         l = localStorage,
         scripts = d.scripts,
         lasturl = scripts[scripts.length - 1].src,
-        filepath = lasturl.substring(0, lasturl.lastIndexOf('/'));
+        filepath = lasturl.substring(0, lasturl.lastIndexOf('/')),
+        isEdge = navigator.userAgent.indexOf("Edge") > -1,
+        isIE = !!window.ActiveXObject || "ActiveXObject" in window;
 
     function getLocation(href) {
         var link = d.createElement('a');
@@ -165,6 +167,8 @@
         if(!!_.opts.url){
             var optsUrl = _.opts.url.replace(_.opts.site, '');
             _.opts.url = optsUrl.slice(0, 1) != '/' ? '/' + optsUrl : optsUrl;
+        } else if(isEdge || isIE) {
+            _.opts.url = encodeURI(location.pathname) + encodeURI(location.search);
         } else {
             _.opts.url = location.pathname + location.search;
         }
