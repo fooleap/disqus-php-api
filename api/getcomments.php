@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-10-16 14:08:12
+ * @version  2017-11-13 17:03:14
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -40,20 +40,26 @@ if (is_array($data -> response) || is_object($data -> response)){
     }
 }
 
-if( isset($detail -> response -> ipAddress)){
+//if( isset($detail -> response -> ipAddress)){
+if( strpos($session, 'session') !== false ){
     $isAuth = true;
 } else {
     $isAuth = false;
 }
 
-$output = $data -> code == 0 ? array(
-    'auth' => $isAuth,
-    'code' => $detail -> code,
-    'cursor' => $data -> cursor,
-    'link' => 'https://disqus.com/home/discussion/'.DISQUS_SHORTNAME.'/'.$detail -> response -> slug.'/?l=zh',
-    'posts' => $detail -> response -> posts,
-    'response' => $posts,
-    'thread' => $detail -> response -> id
-) : $data;
+if($data -> code == 0 ){
+    $output =  array(
+        'auth' => $isAuth,
+        'code' => $detail -> code,
+        'cursor' => $data -> cursor,
+        'link' => 'https://disqus.com/home/discussion/'.DISQUS_SHORTNAME.'/'.$detail -> response -> slug.'/?l=zh',
+        'posts' => $detail -> response -> posts,
+        'response' => $posts,
+        'thread' => $detail -> response -> id
+    );
+} else {
+    $output = $data;
+    $output -> auth = $isAuth;
+}
 
 print_r(json_encode($output));
