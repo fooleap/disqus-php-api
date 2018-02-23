@@ -1,8 +1,8 @@
 /*!
- * v 0.1.23
+ * v 0.1.24
  * https://github.com/fooleap/disqus-php-api
  *
- * Copyright 2017 fooleap
+ * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
 (function (global) {
@@ -385,20 +385,26 @@
             '                <div class="comment-actions">\n'+
             '                    <div class="comment-actions-group">\n'+
             '                        <input id="emoji-input" class="comment-actions-input" type="checkbox"> \n'+
-            '                        <label class="comment-actions-label emojione" for="emoji-input" title="选择表情">\n'+
+            '                        <label class="comment-actions-label emojione" for="emoji-input">\n'+
             '                            <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">\n'+
+            '                                <g>\n'+
+            '                                <title>选择表情</title>\n'+
             '                                <path d="M512 1024c-282.713043 0-512-229.286957-512-512s229.286957-512 512-512c282.713043 0 512 229.286957 512 512S792.486957 1024 512 1024zM512 44.521739c-258.226087 0-467.478261 209.252174-467.478261 467.478261 0 258.226087 209.252174 467.478261 467.478261 467.478261s467.478261-209.252174 467.478261-467.478261C979.478261 253.773913 768 44.521739 512 44.521739z"></path>\n'+
             '                                <path d="M801.391304 554.295652c0 160.278261-129.113043 289.391304-289.391304 289.391304s-289.391304-129.113043-289.391304-289.391304L801.391304 554.295652z"></path>\n'+
             '                                <path d="M674.504348 349.495652m-57.878261 0a2.6 2.6 0 1 0 115.756522 0 2.6 2.6 0 1 0-115.756522 0Z"></path>\n'+
             '                                <path d="M347.269565 349.495652m-57.878261 0a2.6 2.6 0 1 0 115.756522 0 2.6 2.6 0 1 0-115.756522 0Z"></path>\n'+
+            '                                </g>\n'+
             '                            </svg>\n'+
             '                            <ul class="emojione-list">'+emojiList+'</ul>\n'+
             '                        </label>\n'+
             '                        <input id="upload-input" class="comment-actions-input comment-image-input" type="file" accept="image/*" name="file"> \n'+
-            '                        <label class="comment-actions-label" for="upload-input" title="上传图片">\n'+
+            '                        <label class="comment-actions-label" for="upload-input">\n'+
             '                            <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">\n'+
+            '                                <g>\n'+
+            '                                <title>上传图片</title>\n'+
             '                                <path d="M15.515152 15.515152 15.515152 15.515152 15.515152 15.515152Z"></path>\n'+
             '                                <path d="M15.515152 139.636364l0 806.787879 992.969697 0 0-806.787879-992.969697 0zM946.424242 884.363636l-868.848485 0 0-682.666667 868.848485 0 0 682.666667zM698.181818 356.848485c0-51.417212 41.673697-93.090909 93.090909-93.090909s93.090909 41.673697 93.090909 93.090909c0 51.417212-41.673697 93.090909-93.090909 93.090909s-93.090909-41.673697-93.090909-93.090909zM884.363636 822.30303l-744.727273 0 186.181818-496.484848 248.242424 310.30303 124.121212-93.090909z"></path>\n'+
+            '                                </g>\n'+
             '                            </svg>\n'+
             '                        </label>\n'+
             '                    </div>\n'+
