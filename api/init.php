@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-10-16 17:46:41
+ * @version  2018-03-01 17:02:06
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -173,13 +173,17 @@ function post_format( $post ){
     $post -> author -> url = !!$post -> author -> url ? $post -> author -> url : $post -> author -> profileUrl;
 
     // 去除链接重定向
-    $urlPat = '/<a.*?href="(.*?disq\.us.*?)".*?>(.*?)<\/a>/i';
+    $urlPat = '/<a.*?href="(.*?[disq\.us][disqus\.com].*?)".*?>(.*?)<\/a>/mi';
     preg_match_all($urlPat, $post -> message, $urlArr);    
     if( count($urlArr[0]) > 0 ){
         $linkArr = array();
         foreach ( $urlArr[1] as $item => $urlItem){
-            parse_str(parse_url($urlItem,PHP_URL_QUERY),$out);
-            $linkArr[$item] = '<a href="'.join(':', explode(':',$out['url'],-1)).'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
+            if(preg_match('/^(http|https):\/\/disq\.us/i', $urlItem)){
+                parse_str(parse_url($urlItem,PHP_URL_QUERY),$out);
+                $linkArr[$item] = '<a href="'.join(':', explode(':',$out['url'],-1)).'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
+            } else {
+                $linkArr[$item] = '<a href="'.$urlItem.'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
+            }
         }
         $post -> message = str_replace($urlArr[0],$linkArr,$post -> message);
     }
