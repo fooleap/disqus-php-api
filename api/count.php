@@ -14,7 +14,7 @@ require_once('init.php');
 
 $links = '&thread=link:'.$website.preg_replace('/,/i','&thread=link:'.$website, $_GET['links']);
 
-$fields_data = array(
+$fields_data = (object) array(
     'api_key' => DISQUS_PUBKEY,
     'forum' => DISQUS_SHORTNAME,
     'limit' => 100

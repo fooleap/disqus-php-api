@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-02-22 13:55:01
+ * @version  2018-03-10 14:02:38
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -21,19 +21,9 @@ $author_name = $_POST['name'];
 $author_email = $_POST['email'];
 $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
 
-// 管理员
-if($author_name == DISQUS_USERNAME){
-    $author_name = null;
-    if( $author_email == DISQUS_EMAIL && strpos($session, 'session') !== false ){
-        $author_email = null;
-        $author_url = null;
-        $approved = null;
-    } 
-}
-
 // 父评是已登录用户
 if(!empty($_POST['parent'])){
-    $fields_data = array(
+    $fields_data = (object) array(
         'api_key' => DISQUS_PUBKEY,
         'post' => $_POST['parent']
     );
@@ -47,19 +37,30 @@ if(!empty($_POST['parent'])){
 
 $curl_url = '/api/3.0/posts/create.json';
 $post_message = html_entity_decode($client->shortnameToUnicode($_POST['message']));
-//$post_message = $client->unifyUnicode($_POST['message']);
 
-$post_data = array(
-    'api_key' => DISQUS_PUBKEY,
-    'thread' => $_POST['thread'],
-    'parent' => $_POST['parent'],
-    'message' => $post_message,
-    'author_name' => $author_name,
-    'author_email' => $author_email,
-    'author_url' => $author_url,
-    'state' => $approved
-    //'ip_address' => $_SERVER["REMOTE_ADDR"]
-);
+// 已登录
+if( isset($access_token) ){
+
+    $post_data = (object) array(
+        'thread' => $_POST['thread'],
+        'parent' => $_POST['parent'],
+        'message' => $post_message,
+        'ip_address' => $_SERVER['REMOTE_ADDR']
+    );
+
+} else {
+
+    $post_data = (object) array(
+        'thread' => $_POST['thread'],
+        'parent' => $_POST['parent'],
+        'message' => $post_message,
+        'author_name' => $author_name,
+        'author_email' => $author_email,
+        'author_url' => $author_url,
+        'state' => $approved
+    );
+}
+
 $data = curl_post($curl_url, $post_data);
 
 $output = $data -> code == 0 ? array(
@@ -69,7 +70,8 @@ $output = $data -> code == 0 ? array(
 ) : $data;
 
 if ( !empty($_POST['parent']) && $data -> code == 0 ){
-    $mail_query = array(
+
+    $mail_query = (object) array(
         'parent'=> $_POST['parent'],
         'id'=> $data -> response -> id,
         'link'=> $_POST['link'],
@@ -77,17 +79,8 @@ if ( !empty($_POST['parent']) && $data -> code == 0 ){
         'session'=> $session
     );
     $mail = curl_init();
-    $isSecure = false;
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-        $isSecure = true;
-    }
-    elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
-        $isSecure = true;
-    }
-    $protocol = $isSecure ? 'https://' : 'http://';
-    //$protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
     $curl_opt = array(
-        CURLOPT_URL => $protocol.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/sendemail.php',
+        CURLOPT_URL => getCurrentDir().'/sendemail.php',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $mail_query,

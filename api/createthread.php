@@ -9,15 +9,14 @@
  * @param identifier  identifier
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-01 16:13:50
+ * @version  2018-03-10 13:59:51
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 namespace Emojione;
 require_once('init.php');
 $curl_url = '/api/3.0/threads/create.json';
-$post_data = array(
-    'api_key' => DISQUS_PUBKEY,
+$post_data = (object) array(
     'forum' => DISQUS_SHORTNAME,
     'identifier' => $_POST['identifier'],
     'message' => $_POST['message'],

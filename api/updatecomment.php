@@ -6,7 +6,7 @@
  * @param message  评论内容
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-08-05 06:33:56
+ * @version  2018-03-10 14:03:07
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -14,7 +14,7 @@ namespace Emojione;
 date_default_timezone_set('UTC');
 require_once('init.php');
 
-$fields_data = array(
+$fields_data = (object) array(
     'api_key' => DISQUS_PUBKEY,
     'post' => $_POST['id']
 );
@@ -35,13 +35,13 @@ if($data->code !== 0){
     return;
 }
 
+$post_data = (object) array(
+    'post' => $_POST['id'],
+    'message' => $post_message
+);
+
 if( $duration < 1800 ){
     // 三十分钟内
-    $post_data = array(
-        'api_key' => DISQUS_PUBKEY,
-        'post' => $_POST['id'],
-        'message' => $post_message
-    );
     $curl_url = '/api/3.0/posts/update.json';
     $data = curl_post($curl_url, $post_data);
     $output = $data -> code == 0 ? array(

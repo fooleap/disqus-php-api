@@ -1,6 +1,10 @@
 /*!
- * v 0.1.24
+ * v 0.2.0
+ * 
+ * 2018-03-10 13:59:08 
+ *
  * https://github.com/fooleap/disqus-php-api
+ *
  *
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
@@ -31,6 +35,7 @@
             }
         }
         xhr.onerror = error;
+        xhr.withCredentials = true;
         xhr.send();
         return xhr;
     }
@@ -48,24 +53,12 @@
             }
         };
         xhr.onerror = error; 
+        xhr.withCredentials = true;
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send(params);
         return xhr;
     }
     
-    function addListener(els, evt, func){
-        [].forEach.call(els, function(item){
-            item.addEventListener(evt, func, false);
-        });
-    }
-
-    function removeListener(els, evt, func){
-        [].forEach.call(els, function(item){
-            item.removeEventListener(evt, func, false);
-        });
-    }
-
-
     // matches & closest polyfill https://github.com/jonathantneal/closest
     (function (ElementProto) {
         if (typeof ElementProto.matches !== 'function') {
@@ -100,12 +93,14 @@
     })(window.Element.prototype);
 
     // 访客信息
-    var Guest = function () {
+    var User = function () {
         this.dom = arguments[0];
+        this.opts = arguments[1];
         this.init();
+        this.autologin();
     }
 
-    Guest.prototype = {
+    User.prototype = {
         // 初始化访客信息
         init: function(){
             var _ = this;
@@ -114,12 +109,15 @@
             _.email = l.getItem('email');
             _.url = l.getItem('url');
             _.avatar = l.getItem('avatar');
+            _.type = l.getItem('type');
             _.logged_in = l.getItem('logged_in');
 
             var boxarr = _.dom.getElementsByClassName('comment-box');
             if( _.logged_in == 'true' ) {
                 [].forEach.call(boxarr,function(item){
-                    item.querySelector('.comment-form-wrapper').classList.add('logged-in');
+                    if(_.type == '1'){
+                        item.querySelector('.comment-form-wrapper').classList.add('logged-in');
+                    }
                     item.querySelector('.comment-form-name').value = _.name;
                     item.querySelector('.comment-form-email').value = _.email;
                     item.querySelector('.comment-form-url').value = _.url;
@@ -128,31 +126,70 @@
             } else {
                 [].forEach.call(boxarr,function(item){
                     item.querySelector('.comment-form-wrapper').classList.remove('logged-in');
-                    item.querySelector('.comment-form-name').value = _.name;
-                    item.querySelector('.comment-form-email').value = _.email;
-                    item.querySelector('.comment-form-url').value = _.url;
-                    item.querySelector('.comment-avatar-image').src = !!_.avatar ? _.avatar : item.querySelector('.comment-avatar-image').src;
+                    item.querySelector('.comment-form-name').value = '';
+                    item.querySelector('.comment-form-email').value = '';
+                    item.querySelector('.comment-form-url').value = '';
+                    item.querySelector('.comment-avatar-image').src = _.dom.querySelector('.comment-avatar-image').dataset.avatar;
                 });
                 l.setItem('logged_in', 'false');
             }
         },
 
-        // 重置访客信息
-        reset: function(){
+        // 自动登录
+        autologin: function(){
+            var _ = this;
+            getAjax( _.opts.api +'/user.php', function(resp){
+                var data = JSON.parse(resp);
+                if( data.code == 0 ){
+                    _.submit(data.response);
+                } else {
+                    if( _.type == '1' ){
+                        l.setItem('logged_in', 'false');
+                        _.init();
+                    }
+                }
+            }, function(){
+            })
+        },
+
+        // 登录
+        login: function(){
+
+            var _ = this;
+            var popup = window.open(_.opts.api+'/login.php', 'Disqus Oauth', 'width=470,height=508');
+            function isLogged(){
+                popup.postMessage('Already logged in?', _.opts.api);
+            }
+            var timer = setInterval(isLogged, 1000);
+            function receiveMessage(event){
+                if( event.data.code == 0 ){
+                    _.user.submit(event.data.response);
+                    clearInterval(timer);
+                }
+            }
+            window.addEventListener('message', receiveMessage, false);
+
+        },
+
+        // 退出登录
+        logout: function(){
+            var _ = this;
             l.setItem('logged_in', 'false');
-            this.init();
+            postAjax( _.opts.api + '/logout.php', {}, function(resp){})
+            _.user.init();
         },
 
         // 提交访客信息
-        submit: function(g){
-            if( this.logged_in == 'false' ){
-                l.setItem('name', g.name);
-                l.setItem('email', g.email);
-                l.setItem('url', g.url);
-                l.setItem('avatar', g.avatar);
-                l.setItem('logged_in', 'true');
-                this.init();
+        submit: function(user){
+            if( user.type == '0' ){
+                l.setItem('email', user.email);
             }
+            l.setItem('type', user.type);
+            l.setItem('name', user.name);
+            l.setItem('url', user.url);
+            l.setItem('avatar', user.avatar);
+            l.setItem('logged_in', 'true');
+            this.init();
         }
     }
 
@@ -251,7 +288,7 @@
         }];
         
         if(!!_.opts.emoji_preview){
-            getAjax(filepath +'/eac.min.json', function(resp){
+            getAjax(_.opts.api +'/eac.min.php', function(resp){
                 _.eac = JSON.parse(resp);
             }, function(){
             })
@@ -409,7 +446,7 @@
             '                        </label>\n'+
             '                    </div>\n'+
             '                    <div class="comment-actions-form">\n'+
-            '                        <label class="comment-actions-label exit" title="重置访客信息">\n'+
+            '                        <label class="comment-actions-label exit" title="退出登录">\n'+
             '                            <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48">\n'+
             '                                <path d="M348.870666 210.685443l378.570081 0c32.8205 0 58.683541 26.561959 58.683541 58.683541 0 162.043606 0 324.804551 0 486.848157 0 32.81129-26.561959 58.674331-58.683541 58.674331L348.870666 814.891472c-10.477632 0-18.850323-8.363482-18.850323-18.841114l0-37.728276c0-10.477632 8.372691-18.841114 18.850323-18.841114l343.645664 0c10.477632 0 18.850323-8.372691 18.850323-18.850323L711.366653 304.983109c0-10.477632-8.372691-18.841114-18.850323-18.841114L348.870666 286.141996c-10.477632 0-18.850323-8.363482-18.850323-18.841114l0-37.728276C329.98248 219.095997 338.393034 210.685443 348.870666 210.685443z"></path>\n'+
             '                                <path d="M128.152728 526.436804l112.450095 112.450095c6.985088 6.985088 19.567661 6.985088 26.552749 0l26.561959-26.561959c6.985088-6.985088 6.985088-19.567661 0-26.552749l-34.925441-34.925441L494.168889 550.84675c10.477632 0 18.850323-8.372691 18.850323-18.850323l0-37.719066c0-10.477632-8.372691-18.850323-18.850323-18.850323L258.754229 475.427036l34.925441-34.925441c6.985088-6.985088 6.985088-19.567661 0-26.552749l-26.561959-26.524097c-6.985088-6.985088-19.567661-6.985088-26.552749 0L128.152728 499.875868C120.431883 506.859933 120.431883 519.451716 128.152728 526.436804z"></path>\n'+
@@ -423,7 +460,7 @@
             '                    </div>\n'+
             '                </div>\n'+
             '            </div>\n'+
-            '            <div class="comment-login"><input class="comment-form-input comment-form-name" type="text" placeholder="名字（必填）" autocomplete="name"><input class="comment-form-input comment-form-email" type="email" placeholder="邮箱（必填）" autocomplete="email"><input class="comment-form-input comment-form-url" type="url" placeholder="网址（可选）" autocomplete="url"></div>\n'+
+            '            <div class="comment-form-user"><div class="comment-form-auth"><button class="comment-form-login" title="使用 Disqus 帐号登录"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 200 200"><path fill="#2E9FFF" d="M102.535 167.5c-16.518 0-31.621-6.036-43.298-16.021L30.5 155.405l11.102-27.401A67.658 67.658 0 0 1 35.564 100c0-37.277 29.984-67.5 66.971-67.5 36.984 0 66.965 30.223 66.965 67.5 0 37.284-29.98 67.5-66.965 67.5zm36.567-67.693v-.188c0-19.478-13.736-33.367-37.42-33.367h-25.58v67.5h25.201c23.868.001 37.799-14.468 37.799-33.945zm-37.138 17.361h-7.482V82.841h7.482c10.989 0 18.283 6.265 18.283 17.07v.188c0 10.896-7.294 17.069-18.283 17.069z"/></svg></button></div> 或 <div class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" placeholder="名字（必填）" autocomplete="name"><input class="comment-form-input comment-form-email" type="email" placeholder="邮箱（必填）" autocomplete="email"><input class="comment-form-input comment-form-url" type="url" placeholder="网址（可选）" autocomplete="url"></div></div>\n'+
             '        </div>\n'+
             '    </div>\n'+
             '    <ul id="comments" class="comment-list"></ul>\n'+
@@ -431,10 +468,11 @@
             '</div>\n'+
             '<div class="comment" id="disqus_thread"></div>';
 
-        _.guest = new Guest(_.dom);
+        _.user = new User(_.dom,_.opts);
         _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/,'').replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
         _.handle = {
-            guestReset: _.guest.reset.bind(_.guest),
+            logout: _.user.logout.bind(_),
+            login: _.user.login.bind(_),
             loadMore: _.loadMore.bind(_),
             post: _.post.bind(_),
             postThread: _.postThread.bind(_),
@@ -537,6 +575,39 @@
         }
     }
 
+    // 添加事件监听
+    iDisqus.prototype.addListener = function (els, evt, func){
+        var _ = this;
+        var el = _.dom.getElementsByClassName(els);
+        [].forEach.call(el, function(item){
+            item.addEventListener(evt, func, false);
+        });
+    }
+
+    // 移除事件监听
+    iDisqus.prototype.removeListener = function (els, evt, func){
+        var _ = this;
+        var el = _.dom.getElementsByClassName(els);
+        [].forEach.call(el, function(item){
+            item.removeEventListener(evt, func, false);
+        });
+    }
+
+    // 添加所有事件监听
+    iDisqus.prototype.addAllListeners = function (){
+        var _ = this;
+        _.addListener('exit', 'click', _.handle.logout);
+        _.addListener('comment-form-textarea', 'blur',  _.handle.focus);
+        _.addListener('comment-form-textarea', 'focus',  _.handle.focus);
+        _.addListener('comment-form-textarea', 'input',  _.handle.input);
+        _.addListener('comment-form-textarea', 'keyup',  _.handle.mention);
+        _.addListener('comment-form-email', 'blur',  _.handle.verify);
+        _.addListener('comment-form-submit', 'click',  _.handle.post);
+        _.addListener('comment-form-login', 'click',  _.handle.login);
+        _.addListener('comment-image-input', 'change',  _.handle.upload);
+        _.addListener('emojione-item', 'click', _.handle.field);
+    }
+
     // 评论计数
     iDisqus.prototype.count = function (){
         var _ = this;
@@ -601,13 +672,16 @@
             _.opts.api + '/getcomments.php?link=' + _.opts.url + (!!_.stat.next ? '&cursor=' + _.stat.next : ''),
             function(resp){
                 var data = JSON.parse(resp);
-                if (!data.auth){
-                    alert('认证出错，请查看后端配置中，Disqus 帐号密码是否填写有误。');
-                }
                 if (data.code === 0) {
                     _.stat.offsetTop = d.documentElement.scrollTop || d.body.scrollTop;
                     _.stat.thread = data.thread;
                     _.stat.count = data.posts;
+                    _.opts.avatar = data.forum.avatar;
+                    _.dom.querySelector('.comment-avatar-image').dataset.avatar = data.forum.avatar;
+                    if( _.user.logged_in == 'false' ){
+                        _.dom.querySelector('.comment-avatar-image').src = data.forum.avatar;
+                    }
+                    _.opts.badge =  data.forum.moderatorBadgeText;
                     _.dom.querySelector('#idisqus').classList.remove('loading');
                     _.dom.querySelector('#comment-link').href = data.link;
                     _.dom.querySelector('#comment-count').innerHTML = _.stat.count + ' 条评论';
@@ -627,15 +701,7 @@
                         })
                     } else {
                         loadmore.addEventListener('click', _.handle.loadMore, false);
-                        _.dom.querySelector('.exit').addEventListener('click', _.handle.guestReset, false);
-                        _.dom.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
-                        _.dom.querySelector('.comment-form-textarea').addEventListener('focus',_.handle.focus, false);
-                        _.dom.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
-                        _.dom.querySelector('.comment-form-textarea').addEventListener('keyup', _.handle.mention, false);
-                        _.dom.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
-                        _.dom.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
-                        _.dom.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
-                        addListener(_.dom.getElementsByClassName('emojione-item'), 'click', _.handle.field);
+                        _.addAllListeners();
                     }
                     if ( data.cursor.hasNext ){
                         _.stat.next = data.cursor.next;
@@ -742,13 +808,6 @@
         // 发布留言，可编辑删除
         if(!!post.isPost && !_.stat.editing){
             var $this = _.dom.querySelector('.comment-item[data-id="' + post.id + '"]');
-            $this.querySelector('.comment-item-footer').insertAdjacentHTML('beforeend','<span class="comment-item-tips">页面刷新前，十分钟内可编辑或删除</span>');
-            setTimeout(function(){
-                // 五秒后
-                if(!!$this.querySelector('.comment-item-tips')){
-                    $this.querySelector('.comment-item-tips').outerHTML = '';
-                }
-            }, 5000);
 
             var postEdit = setTimeout(function(){
                 // 十分钟后
@@ -851,13 +910,13 @@
                 }
 
                 // 鼠标悬浮
-                addListener(_.dom.getElementsByClassName('mention-user-item'), 'mouseover', function(){
+                _.addListener('mention-user-item', 'mouseover', function(){
                     _.dom.querySelector('.mention-user-item.active').classList.remove('active');
                     this.classList.add('active');
                 })
 
                 // 鼠标点击
-                addListener(_.dom.getElementsByClassName('mention-user-item'), 'click', function(){
+                _.addListener('mention-user-item', 'click', function(){
                     var username = '@' + this.dataset.username + ' ';
                     textarea.value = textarea.value.slice(0, mentionIndex) + username + textarea.value.slice(selStart);
                     _.dom.querySelector('.mention-user').outerHTML = '';
@@ -989,22 +1048,15 @@
             $this.outerHTML = $this.outerHTML.replace('reply','cancel');
             var commentBox = _.box.replace(/emoji-input/g,'emoji-input-'+item.dataset.id).replace(/upload-input/g,'upload-input-'+item.dataset.id);
             item.querySelector('.comment-item-children').insertAdjacentHTML('beforebegin', commentBox);
-            _.guest.init();
+            _.user.init();
 
-            item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
-            item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
-            item.querySelector('.comment-form-textarea').addEventListener('keyup', _.handle.mention, false);
-            item.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
-            item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
-            item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
-            item.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
-            addListener(item.getElementsByClassName('emojione-item'), 'click', _.handle.field);
+            _.addAllListeners();
             item.querySelector('.comment-form-textarea').focus();
         }
 
         // 监听事件
-        addListener(_.dom.getElementsByClassName('comment-item-reply'), 'click', _.handle.show);
-        addListener(_.dom.getElementsByClassName('comment-item-cancel'), 'click', _.handle.show);
+        _.addListener('comment-item-reply', 'click', _.handle.show);
+        _.addListener('comment-item-cancel', 'click', _.handle.show);
 
     }
 
@@ -1155,8 +1207,8 @@
     // 错误提示
     iDisqus.prototype.errorTips = function(Text, Dom){
         var _ = this;
-        if( _.guest.logged_in == 'true' ){
-            _.handle.guestReset();
+        if( _.user.logged_in == 'true' ){
+            _.handle.logout();
         }
         var idisqus = _.dom.querySelector('#idisqus');
         var errorDom = _.dom.querySelector('.comment-form-error');
@@ -1194,43 +1246,46 @@
             var elName = item.querySelector('.comment-form-name');
             var elEmail = item.querySelector('.comment-form-email');
             var elUrl = item.querySelector('.comment-form-url');
-            var guest = {
+            var user = {
                 name: elName.value,
                 email: elEmail.value,
                 url: elUrl.value.replace(/\s/g,''),
-                avatar: item.querySelector('.comment-avatar-image').src
+                avatar: item.querySelector('.comment-avatar-image').src,
+                type: 0
             }
             var alertmsg = item.querySelector('.comment-form-alert');
-            function alertClear(){
+            var alertClear = function() {
                 setTimeout(function(){
                     alertmsg.innerHTML = '';
                 }, 3000);
             }
 
-            if(/^\s*$/i.test(guest.name)){
-                _.errorTips('名字不能为空。', elName);
-                return;
+            if(_.user.type != '1'){
+                if(/^\s*$/i.test(user.name)){
+                    _.errorTips('名字不能为空。', elName);
+                    return;
+                }
+                if(/^\s*$/i.test(user.email)){
+                    _.errorTips('邮箱不能为空。', elEmail);
+                    return;
+                }
+                if(!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(user.email)){
+                    _.errorTips('请正确填写邮箱。', elEmail);
+                    return;
+                }
+                if(!/^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$|^\s*$/i.test(user.url)){
+                    _.errorTips('请正确填写网址。', elUrl);
+                    return;
+                }
+                _.user.submit(user);
+
+                if( !_.user.name && !_.user.email ){
+                    return;
+                }
             }
-            if(/^\s*$/i.test(guest.email)){
-                _.errorTips('邮箱不能为空。', elEmail);
-                return;
-            }
-            if(!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(guest.email)){
-                _.errorTips('请正确填写邮箱。', elEmail);
-                return;
-            }
-            if(!/^([hH][tT]{2}[pP]:\/\/|[hH][tT]{2}[pP][sS]:\/\/)(([A-Za-z0-9-~]+)\.)+([A-Za-z0-9-~\/])+$|^\s*$/i.test(guest.url)){
-                _.errorTips('请正确填写网址。', elUrl);
-                return;
-            }
-            _.guest.submit(guest);
 
             if(!_.stat.message && !_.stat.mediaHtml){
                 _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/,'').replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
-            }
-
-            if( !_.guest.name && !_.guest.email ){
-                return;
             }
 
             if( media.length == 0 && /^\s*$/i.test(message)){
@@ -1254,11 +1309,11 @@
             }
 
             var post = {
-                'url': !!_.guest.url ? _.guest.url : '',
+                'url': !!_.user.url ? _.user.url : '',
                 'isMod': false,
                 'username': null,
-                'name': _.guest.name,
-                'avatar': _.guest.avatar,
+                'name': _.user.name,
+                'avatar': _.user.avatar,
                 'id': 'preview',
                 'parent': parentId,
                 'createdAt': (new Date()).toJSON(),
@@ -1331,9 +1386,9 @@
                 thread:  _.stat.thread,
                 parent: parentId,
                 message: message,
-                name: _.guest.name,
-                email: _.guest.email,
-                url:  _.guest.url,
+                name: _.user.name,
+                email: _.user.email,
+                url:  _.user.url,
                 link: _.opts.url,
                 title: _.opts.title
             }
@@ -1353,7 +1408,7 @@
                     _.reEdit(item);
 
                     if( data.response.indexOf('author') > -1){
-                        _.handle.guestReset();
+                        _.handle.logout();
                     }
                 }
             }, function(){
@@ -1383,7 +1438,7 @@
         if(!!_.stat.mediaHtml){
             item.querySelector('.comment-form-wrapper').classList.add('expanded');
             item.querySelector('.comment-image-list').innerHTML = _.stat.mediaHtml;
-            addListener(item.getElementsByClassName('comment-image-item'), 'click', _.handle.remove);
+            _.addListener('comment-image-item', 'click', _.handle.remove);
         }
     }
 
@@ -1393,17 +1448,10 @@
         var commentBox = _.box.replace('comment-box','comment-box comment-box-'+post.id).replace(/emoji-input/g,'emoji-input-'+post.id).replace(/upload-input/g,'upload-input-'+ post.id);
         var $this = _.dom.querySelector('.comment-item[data-id="' + post.id + '"] .comment-item-body');
         $this.outerHTML = commentBox;
-        _.guest.init();
+        _.user.init();
         var item = _.dom.querySelector('.comment-box-' + post.id);
         item.dataset.currentId = post.id;
-        item.querySelector('.comment-form-textarea').addEventListener('blur', _.handle.focus, false);
-        item.querySelector('.comment-form-textarea').addEventListener('focus', _.handle.focus, false);
-        item.querySelector('.comment-form-textarea').addEventListener('input', _.handle.input, false);
-        item.querySelector('.comment-form-textarea').addEventListener('keyup', _.handle.mention, false);
-        item.querySelector('.comment-form-email').addEventListener('blur', _.handle.verify, false);
-        item.querySelector('.comment-form-submit').addEventListener('click', _.handle.post, false);
-        item.querySelector('.comment-image-input').addEventListener('change', _.handle.upload, false);
-        addListener(item.getElementsByClassName('emojione-item'), 'click', _.handle.field);
+        _.addAllListeners();
         item.querySelector('.comment-form-textarea').focus();
 
         // 取消编辑
@@ -1421,7 +1469,7 @@
         if(!!_.stat.mediaHtml){
             item.querySelector('.comment-form-wrapper').classList.add('expanded');
             item.querySelector('.comment-image-list').innerHTML = _.stat.mediaHtml;
-            addListener(item.getElementsByClassName('comment-image-item'), 'click', _.handle.remove);
+            _.addListener('comment-image-item', 'click', _.handle.remove);
         }
 
     }
@@ -1500,21 +1548,21 @@
     // 销毁评论框
     iDisqus.prototype.destroy = function(){
         var _ = this;
-        _.dom.querySelector('.exit').removeEventListener('click', _.handle.guestReset, false);
-        removeListener(_.dom.getElementsByClassName('comment-form-textarea'), 'blur', _.handle.focus);
-        removeListener(_.dom.getElementsByClassName('comment-form-textarea'), 'focus', _.handle.focus);
-        removeListener(_.dom.getElementsByClassName('comment-form-textarea'), 'keyup', _.handle.mention);
-        removeListener(_.dom.getElementsByClassName('comment-form-email'), 'blur', _.handle.verify);
-        removeListener(_.dom.getElementsByClassName('comment-form-submit'), 'click', _.handle.post);
-        removeListener(_.dom.getElementsByClassName('comment-image-input'), 'change', _.handle.upload);
-        removeListener(_.dom.getElementsByClassName('comment-item-reply'), 'click', _.handle.show);
-        removeListener(_.dom.getElementsByClassName('comment-loadmore'), 'click', _.handle.loadMore);
-        removeListener(_.dom.getElementsByClassName('emojione-item'), 'click', _.handle.field);
+        _.removeListener('exit', 'click', _.handle.logout);
+        _.removeListener('comment-form-textarea', 'blur', _.handle.focus);
+        _.removeListener('comment-form-textarea', 'focus', _.handle.focus);
+        _.removeListener('comment-form-textarea', 'keyup', _.handle.mention);
+        _.removeListener('comment-form-email', 'blur', _.handle.verify);
+        _.removeListener('comment-form-submit', 'click', _.handle.post);
+        _.removeListener('comment-image-input', 'change', _.handle.upload);
+        _.removeListener('comment-item-reply', 'click', _.handle.show);
+        _.removeListener('comment-loadmore', 'click', _.handle.loadMore);
+        _.removeListener('emojione-item', 'click', _.handle.field);
         _.dom.innerHTML = '';
         delete _.box;
         delete _.dom;
         delete _.emoji_list;
-        delete _.guest;
+        delete _.user;
         delete _.handle;
         delete _.opts;
         delete _.stat;

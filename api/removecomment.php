@@ -5,7 +5,7 @@
  * @param id  评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-25 12:03:09
+ * @version  2018-03-10 14:02:49
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -13,7 +13,7 @@ namespace Emojione;
 date_default_timezone_set('UTC');
 require_once('init.php');
 
-$fields_data = array(
+$fields_data = (object) array(
     'api_key' => DISQUS_PUBKEY,
     'post' => $_POST['id']
 );
@@ -44,8 +44,7 @@ if( $data->response->isDeleted ){
 } else {
     if( $duration < 600 ){
         // 十分钟内
-        $post_data = array(
-            'api_key' => DISQUS_PUBKEY,
+        $post_data = (object) array(
             'post' => $_POST['id']
         );
         $curl_url = '/api/3.0/posts/remove.json';

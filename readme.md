@@ -4,6 +4,16 @@ Disqus PHP API
 
 > Disqus 被墙，故做几个简单的接口，用于墙内环境访问 Disqus。
 
+## 注意
+
+本次更新主要是授权登录，实现使用 Disqus 帐号登录以发表评论，便于评论者以后对自己评论的管理。
+
+授权登录必须在 [Disqus API](https://disqus.com/api/applications/) 申请注册一个 App，取得相关的公钥（API Key）和私钥（API Secret），并填写于后端的配置文件 `config.php` 中。
+
+App 设置方面，回调链接请填写 `login.php` 文件的绝对地址，主要的设置如下图，可根据自己情况填写。
+
+![Disqus API 相关设置](https://uploads.disquscdn.com/images/013aa0590d3d091408c06d3d42b9e2fa15d6731f6c1e2cff5c8495fe23b21e80.png)
+
 ## 实现功能
 
 * 评论列表
@@ -27,7 +37,7 @@ Disqus PHP API
 
 DEMO: http://blog.fooleap.org/disqus-php-api.html
 
-项目将 Disqus 原生评论框打包在内，若使用本评论框，需将网页上所有与 Disqus 相关的元素清除，例如 id 为 `disqus_thread` 的容器、`disqus_config` 函数等。
+项目将 Disqus 原生评论框加载代码打包在内，若使用本评论框，需将网页上所有与 Disqus 相关的元素清除，例如 id 为 `disqus_thread` 的容器、`disqus_config` 函数等。
 
 Disqus 评论框的相关配置`disqus_config`：
 
@@ -59,7 +69,7 @@ Disqus 评论框的相关配置`disqus_config`：
 
 ```javascript
 var disq = new iDisqus('comment', {
-    forum: 'fooleap',
+    forum: 'ifool',
     api: 'http://api.fooleap.org/disqus',
     site: 'http://blog.fooleap.org',
     mode: 1,
@@ -150,12 +160,6 @@ var disq = new iDisqus('comment', {
 * 是否自动创建 Thread，为了不创建垃圾 Thread，并不推荐设置为 `true`
 * {Boolean}
 * 默认：`false`
-
-##### badge
-
-* 管理员徽章文本
-* {String}
-* 默认：`"管理员"`
 
 ##### emoji_path
 

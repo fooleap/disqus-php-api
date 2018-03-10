@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-01 17:02:06
+ * @version  2018-03-10 17:51:29
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -13,6 +13,7 @@ require_once('emojione/autoload.php');
 
 error_reporting(E_ERROR | E_PARSE);
 header('Content-type:text/json');
+header('Access-Control-Allow-Credentials: true');
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';  
 $ipRegex = '((2[0-4]|1\d|[1-9])?\d|25[0-5])(\.(?1)){3}';
 function domain($url){
@@ -36,15 +37,17 @@ $media_host = GFW_INSIDE == 1 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
 $url = parse_url(DISQUS_WEBSITE);
 $website = $url['scheme'].'://'.$url['host'];
 
-// 读取文件
-$session_data = json_decode(file_get_contents(sys_get_temp_dir().'/session-'.DISQUS_SHORTNAME.'.json'));
-$session = $session_data -> session;
-$pwd_md5 = $session_data -> pwd;
-$date_expires = strtotime($session_data -> expires);
-$date_now = strtotime(now);
+// 缓存文件
+$data_path = sys_get_temp_dir().'/disqus_'.DISQUS_SHORTNAME.'.json';
+$forum_data = json_decode(file_get_contents($data_path));
+$session = $forum_data -> session -> data;
+$expires = $forum_data -> session -> expires;
+$passwd = $forum_data -> passwd;
 
-// session 过期或密码更新
-if( $date_now >= $date_expires || md5(DISQUS_PASSWORD) != $pwd_md5 ){
+// 管理员登录
+function adminLogin(){
+    global $session, $data_path, $forum_data, $disqus_host;
+
     $cookie_temp = sys_get_temp_dir().'/cookie_temp.txt';
     $cookie = sys_get_temp_dir().'/cookie.txt';
 
@@ -85,14 +88,55 @@ if( $date_now >= $date_expires || md5(DISQUS_PASSWORD) != $pwd_md5 ){
     preg_match('/(session[^;]*)/mi', $output_match[1], $session_match);
     preg_match('/expires=([^;]*)/mi', $output_match[1], $expires_match);
     $session = $session_match[0];
-    $expires = $expires_match[1];
+    $expires = strtotime($expires_match[1]);
 
     curl_close($ch);
     if( strpos($session, 'session') !== false ){
-        //写入文件
-        $output_data = array('expires' => $expires, 'session' => $session, 'pwd' => md5(DISQUS_PASSWORD));
-        file_put_contents(sys_get_temp_dir().'/session-'.DISQUS_SHORTNAME.'.json', json_encode($output_data));
+        // 写入文件
+        $forum_data -> session = array(
+            'data' => $session,
+            'expires' => $expires
+        );
+        $forum_data -> passwd = md5(DISQUS_PASSWORD);
+        file_put_contents($data_path, json_encode($forum_data));
     }
+}
+
+// 鉴权
+function getAccessToken($fields){
+    global $data_path, $forum_data, $access_token;
+
+    extract($_POST);
+    $url = 'https://disqus.com/api/oauth/2.0/access_token/?';
+
+    foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+    rtrim($fields_string, "&");
+    $ch = curl_init();
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_setopt($ch,CURLOPT_POST,count($fields));
+    curl_setopt($ch,CURLOPT_POSTFIELDS,$fields_string);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+    $data = curl_exec($ch);
+    curl_close($ch);
+
+    // 用户授权数据
+    $auth_results = json_decode($data);
+
+    // 换算过期时间
+    $auth_results -> expires = time() + $auth_results -> expires_in;
+
+    // 重新获取授权码
+    $access_token = $auth_results -> access_token;
+
+    // user_id 写入 cookie，并设置过期时间为 30 天
+    $user_id = $auth_results -> user_id;
+    setcookie('user_id', $user_id, time() + 3600*24*30);
+
+    // 写入文件缓存
+    $forum_data -> users -> $user_id = $auth_results;
+    file_put_contents($data_path, json_encode($forum_data));
+
+    return $user_id;
 }
 
 function encodeURI($uri)
@@ -127,23 +171,33 @@ function curl_get($url){
 }
 
 function curl_post($url, $data){
-    global $session, $disqus_host, $media_host;
+    global $session, $disqus_host, $media_host, $access_token;
 
     $curl_url = strpos($url, 'media') !== false ? 'https://'.$media_host.$url : 'https://'.$disqus_host.$url;
     $curl_host = strpos($url, 'media') !== false ? 'uploads.services.disqus.com' : 'disqus.com';
 
+    if( isset($access_token) ){
+        $data -> api_secret = SECRET_KEY;
+        $data -> access_token = $access_token;
+    } else {
+        $data -> api_key = DISQUS_PUBKEY;
+    }
+
     $options = array(
         CURLOPT_URL => $curl_url,
         CURLOPT_HTTPHEADER => array('Host: '.$curl_host,'Origin: https://disqus.com'),
-        CURLOPT_COOKIE => $session,
         CURLOPT_HEADER => false,
-        CURLOPT_REFERER => 'https://disqus.com',
+        //CURLOPT_REFERER => 'https://disqus.com',
         CURLOPT_ENCODING => 'gzip, deflate',
         CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $data,
     );
     $curl = curl_init();
+    if( !isset($access_token) ){
+        curl_setopt($curl,CURLOPT_COOKIE,$session);
+    }
     curl_setopt_array($curl, $options);
     $data = curl_exec($curl);
     $errno = curl_errno($curl);
@@ -156,14 +210,14 @@ function curl_post($url, $data){
 }
 
 function post_format( $post ){
-    global $client;
+    global $client, $forum_data;
 
     // 是否是管理员
     $isMod = ($post  ->  author -> username == DISQUS_USERNAME || $post -> author -> email == DISQUS_EMAIL ) && $post -> author -> isAnonymous == false ? true : false;
 
 
     // 访客指定 Gravatar 头像
-    $avatar_url = GRAVATAR_CDN.md5($post -> author -> email).'?d='.GRAVATAR_DEFAULT;
+    $avatar_url = GRAVATAR_CDN.md5($post -> author -> email).'?d='.$forum_data -> forum -> avatar;
     $post -> author -> avatar -> cache = $post -> author -> isAnonymous ? $avatar_url : $post -> author -> avatar -> cache;
 
     // 表情
@@ -194,17 +248,19 @@ function post_format( $post ){
 
     $imgArr = array();
     foreach ( $post -> media as $key => $image ){
-        if( strpos($image -> url, 'giphy.gif') !== false ){
-            $imgArr[$key] = '//a.disquscdn.com/get?url='.urlencode($image -> url).'&key=Hx_Z1IMzKElPuRPVmpnfsQ';
-        } else {
-            $imgArr[$key] = $image -> url;
+        if( $image -> url !== 'https://disqus.com' ){
+            if( strpos($image -> url, 'giphy.gif') !== false ){
+                $imgArr[$key] = '//a.disquscdn.com/get?url='.urlencode($image -> url).'&key=Hx_Z1IMzKElPuRPVmpnfsQ';
+            } else {
+                $imgArr[$key] = $image -> url;
+            }
         }
     };
 
     // 是否已删除
     if(!!$post -> isDeleted){
         $post -> message = '';
-        $post -> author -> avatar -> cache = GRAVATAR_CDN.'?d='.GRAVATAR_DEFAULT;
+        $post -> author -> avatar -> cache = GRAVATAR_CDN.'?d='.$forum_data -> forum -> avatar;
         $post -> author -> username = '';
         $post -> author -> name = '';
         $post -> author -> url = '';
@@ -226,4 +282,100 @@ function post_format( $post ){
     );
 
     return $data;
+}
+
+function getUserData(){
+    global $access_token;
+    $fields_data = array(
+        'api_secret' => SECRET_KEY,
+        'access_token' => $access_token
+    );
+    $url = 'https://disqus.com/api/3.0/users/details.json?'.http_build_query($fields_data);
+    $ch = curl_init();
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+    curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
+    $data = json_decode(curl_exec($ch));
+    curl_close($ch);
+    $user_detail = array(
+        'avatar' => $data -> response -> avatar -> cache,
+        'name' => $data -> response -> name,
+        'username' => $data -> response -> username,
+        'url' =>  !!$data -> response -> url ? $data -> response -> url : $data -> response -> profileUrl,
+        'type' => 1
+    );
+    $output = array(
+        'code' => $data -> code,
+        'response' => $user_detail
+    );
+    return json_encode($output);
+}
+
+function getForumData(){
+    global $data_path,$forum_data;
+    $fields_data = array(
+        'api_key' => DISQUS_PUBKEY,
+        'forum' => DISQUS_SHORTNAME,
+    );
+    $curl_url = '/api/3.0/forums/details.json?'.http_build_query($fields_data);
+    $data = curl_get($curl_url);
+    $forum = array(
+        'founder' => $data -> response -> founder,
+        'avatar' => $data -> response -> avatar -> large -> cache,
+        'moderatorBadgeText' =>  $data -> response -> moderatorBadgeText,
+        'expires' => time() + 3600*24
+    );
+    if( $data -> code == 0 ){
+        $forum_data -> forum = $forum;
+        file_put_contents($data_path, json_encode($forum_data));
+    }
+}
+
+function getCurrentDir (){
+    $isSecure = false;
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+        $isSecure = true;
+    }
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+        $isSecure = true;
+    }
+    $protocol = $isSecure ? 'https://' : 'http://';
+    return $protocol.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']);
+}
+
+$user_id = $_COOKIE['user_id'];
+if ( isset($user_id) ){
+
+    // 取用户授权数据，可能为空
+    $auth_results = $forum_data -> users -> $user_id;
+
+    if( isset($auth_results) ){
+
+        // 取刷新码和过期时间
+        $refresh_token = $auth_results -> refresh_token;
+        $auth_expires = $auth_results -> expires;
+        $access_token = $auth_results -> access_token;
+
+        // 离过期少于 20 天
+        if( $auth_expires - time() < 3600 * 20 ){
+
+            $authorize = 'refresh_token';
+            $fields = array(
+                'grant_type'=>urlencode($authorize),
+                'client_id'=>urlencode($PUBLIC_KEY),
+                'client_secret'=>urlencode($SECRET_KEY),
+                'refresh_token'=>urlencode($refresh_token)
+            );
+
+            getAccessToken($fields);
+        }
+    }
+}
+
+if( time() > $expires || md5(DISQUS_PASSWORD) != $passwd ){
+    adminLogin();
+}
+
+if( time() > $forum_data -> forum -> expires || !$forum_data -> forum){
+    getForumData();
 }

@@ -23,7 +23,7 @@ if( $_POST['session'] != $session ){
 }
 
 // 获取被回复人信息
-$fields_data = array(
+$fields_data = (object) array(
     'api_key' => DISQUS_PUBKEY,
     'post' => $_POST['parent']
 );
@@ -36,7 +36,7 @@ $parent_name    = $post['name']; //被回复人名
 $parent_message = $post['message']; //被回复留言
 
 // 获取回复信息
-$fields_data = array(
+$fields_data = (object) array(
     'api_key' => DISQUS_PUBKEY,
     'post' => $_POST['id']
 );

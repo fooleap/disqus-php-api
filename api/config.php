@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-07-27 20:33:28
+ * @version  2018-03-10 13:19:05
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -13,6 +13,8 @@ namespace Emojione;
  * Disqus 设置
  *
  * DISQUS_PUBKEY    Disqus 公钥，无需修改
+ * PUBLIC_KEY       Disqus APP 公钥，在 https://disqus.com/api/applications/ 申请注册后获得
+ * SECRET_KEY       Disqus APP 私钥，在 https://disqus.com/api/applications/ 申请注册后获得
  * DISQUS_USERNAME  Disqus 用户名
  * DISQUS_EMAIL     Disqus 注册邮箱，重要
  * DISQUS_PASSWORD  Disqus 密码，重要
@@ -27,6 +29,8 @@ namespace Emojione;
  */
 
 define('DISQUS_PUBKEY', 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F');
+define('PUBLIC_KEY', '');
+define('SECRET_KEY', '');
 define('DISQUS_USERNAME', '');
 define('DISQUS_EMAIL', '');
 define('DISQUS_PASSWORD', '');
@@ -51,13 +55,11 @@ define('DISQUS_MEDIAIP', '151.101.24.64');
  * 图片设置
  *
  * GRAVATAR_CDN     Gravatar 头像 CDN
- * GRAVATAR_DEFAULT 默认头像 URL
  * EMOJI_PATH       Emoji 表情 PNG 资源路径
  *
  */
  
 define('GRAVATAR_CDN', '//cn.gravatar.com/avatar/');
-define('GRAVATAR_DEFAULT', 'https://a.disquscdn.com/images/noavatar92.png');
 define('EMOJI_PATH', 'https://assets-cdn.github.com/images/icons/emoji/unicode/');
 
 /*

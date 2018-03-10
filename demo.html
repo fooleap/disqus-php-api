@@ -3,29 +3,49 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>DEMO</title>
-        <link rel="stylesheet" href="path/to/iDisqus.min.css" />
+        <title>Disqus PHP API 示例</title>
+        <link rel="stylesheet" href="/path/to/iDisqus.min.css" />
         <style>
             body{
-                width: 700px;
+                max-width: 640px;
+                width: 100%;
                 margin: 0 auto;
-                > * {
+                overflow-x: hidden;
+            }
+            body > * {
                     width: 100%;
-                }
+            }
+            body a{
+                color: #0095dd;
             }
         </style>
-        <script src="path/to/iDisqus.min.js"></script>
+        <script src="/path/to/iDisqus.min.js"></script>
+        <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?fa7ec982118ebd236663169678264582";
+          var s = document.getElementsByTagName("script")[0]; 
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
     <body>
         <div id="comment"></div>
-        <script>
+        <p>本页共有 <span data-disqus-url="/disqus-php-api.html"></span> 条评论</p>
+        <ul id="popular-posts"></ul>
+        <p>项目地址：<a href="https://github.com/fooleap/disqus-php-api" target="_blank">https://github.com/fooleap/disqus-php-api</a></p>
+       <script>
             var disq = new iDisqus('comment', {
-                forum: '',
-                api: '',
-                site: '',
+                forum: 'fooleap',
+                site: 'http://blog.fooleap.org',
+                api: 'http://api.fooleap.org/disqus',
                 mode: 2,
                 timeout: 3000,
-                init: true
+                popular: document.getElementById('popular-posts'),
+                init: true,
             });
+            disq.popular();
+            disq.count();
         </script>
     </body>
 </html>

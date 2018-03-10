@@ -11,7 +11,7 @@
 namespace Emojione;
 require_once('init.php');
 
-$fields_data = array(
+$fields_data = (object) array(
     'api_key' => DISQUS_PUBKEY,
     'limit' => 5,
     'forum' => DISQUS_SHORTNAME,

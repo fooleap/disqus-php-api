@@ -350,7 +350,7 @@
 
 .comment-form-wrapper {
     &.editing{
-        + .comment-login{
+        + .comment-form-user{
             opacity: 1;
             height: auto;
             margin-top: 10px;
@@ -409,7 +409,7 @@
             margin: 0;
             transition: all .5s;
         }
-        + .comment-login{
+        + .comment-form-user{
             height: 0;
             opacity: 0;
             margin-top: -40px;
@@ -482,14 +482,30 @@
     }
 }
 
-.comment-login {
+.comment-form-user {
     display: flex;
     opacity: 0;
     transition: all .5s .2s;
     height: 0;
     margin: -40px -5px 40px;
     overflow: hidden;
-    flex-wrap: wrap;
+    line-height: 32px;
+    .comment-form-guest {
+        display: flex;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+    .comment-form-auth{
+        height: 32px;
+    }
+    .comment-form-login {
+        background-color: transparent;
+        border: none;
+        height: 32px;
+        width: 32px;
+        margin: 0 0 0 5px;
+        cursor: pointer;
+    }
 }
 .comment-thread-form{
     text-align: center;
@@ -547,7 +563,7 @@
     background-color: rgb(255,255,255);
     border: 2px solid #dbdfe4;
     transition: all .2s linear;
-    padding: 0 10px;
+    padding: 0 7px;
     border-radius: 4px;
     font-size: 14px;
     height: 32px;
@@ -583,7 +599,7 @@
     }
     a{
         text-decoration:none;
-        color:#0095dd
+        color: #288ce4;
     }
     a[href="javascript:void(0);"] {
         color: #000;
@@ -903,9 +919,15 @@
             display: none;
         }
     }
-    .comment-form-input{
-        margin: 5px;
-        width: 100%;
+    .comment-form-user{
+        line-height: 42px;
+        .comment-form-auth{
+            margin: 5px;
+        }
+        .comment-form-input{
+            margin: 5px;
+            width: 100%;
+        }
     }
     .comment-form-wrapper.editing .comment-actions-form{
         margin: 180px 0 0;
