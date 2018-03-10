@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-10 17:51:29
+ * @version  2018-03-10 23:55:03
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -340,7 +340,7 @@ function getCurrentDir (){
         $isSecure = true;
     }
     $protocol = $isSecure ? 'https://' : 'http://';
-    return $protocol.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']);
+    return $protocol.$_SERVER['HTTP_HOST'].substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']));
 }
 
 $user_id = $_COOKIE['user_id'];
