@@ -203,9 +203,9 @@
             var optsUrl = _.opts.url.replace(_.opts.site, '');
             _.opts.url = optsUrl.slice(0, 1) != '/' ? '/' + optsUrl : optsUrl;
         } else if(isEdge || isIE) {
-            _.opts.url = encodeURI(location.pathname) + encodeURI(location.search);
+            _.opts.url = encodeURI(location.pathname);// + encodeURI(location.search);
         } else {
-            _.opts.url = location.pathname + location.search;
+            _.opts.url = location.pathname;// + location.search;
         }
         _.opts.identifier = !!_.opts.identifier ? _.opts.identifier : _.opts.url;
         _.opts.link = _.opts.site + _.opts.url; 
