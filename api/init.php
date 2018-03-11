@@ -256,6 +256,7 @@ function post_format( $post ){
             }
         }
     };
+    $imgArr = array_reverse($imgArr);
 
     // 是否已删除
     if(!!$post -> isDeleted){
