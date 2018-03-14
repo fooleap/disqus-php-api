@@ -1,5 +1,5 @@
 /*!
- * v 0.2.1
+ * v 0.2.2
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -215,7 +215,6 @@
         _.opts.mode = !!_.opts.mode ? _.opts.mode : 1;
         _.opts.timeout = !!_.opts.timeout ? _.opts.timeout : 3000;
         _.opts.toggle = !!_.opts.toggle ? d.getElementById(_.opts.toggle) : null;
-        _.opts.badge = !!_.opts.badge ? _.opts.badge : '管理员';
 
         // emoji 表情
         _.opts.emoji_path = !!_.opts.emoji_path ? _.opts.emoji_path : 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
@@ -759,9 +758,11 @@
         };
 
         var mediaHTML = '';
-        if( post.media.length > 0 ){
+        if( post.media.length == 1 ){
+            mediaHTML = '<div class="comment-item-images"><a class="comment-item-image" target="_blank" href="' + post.media[0] + '" style="background-image: url('+post.media[0]+');width: 167px;height: 167px"></a></div>';
+        } else if( post.media.length > 1 ){
             post.media.forEach(function(item){
-                mediaHTML += '<a class="comment-item-imagelink" target="_blank" href="' + item + '" ><img class="comment-item-image" src="' + item + '"></a>';
+                mediaHTML += '<a class="comment-item-image" target="_blank" href="' + item + '" style="background-image: url('+item+')"></a>';
             })
             mediaHTML = '<div class="comment-item-images">' + mediaHTML + '</div>';
         }
