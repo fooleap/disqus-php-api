@@ -1,5 +1,5 @@
 /*!
- * v 0.2.2
+ * v 0.2.3
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -621,8 +621,9 @@
                     var data  = JSON.parse(resp);
                     var posts = data.response;
                     posts.forEach(function(item){
-                        var link = item.link.replace(_.opts.site, '');
-                        var itemLink = link.slice(0, 1) != '/' ? '/' + link : link;
+                        var link = document.createElement('a');
+                        link.href = item.link;
+                        var itemLink = link.href.replace(link.origin, '');
                         var el = d.querySelector('[data-disqus-url$="'+itemLink+'"]')
                         if(!!el ){
                             el.innerHTML = item.posts;
