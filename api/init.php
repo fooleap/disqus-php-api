@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-15 12:47:00
+ * @version  2018-03-27 22:26:28
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -215,9 +215,9 @@ function post_format( $post ){
     // 是否是管理员
     $isMod = ($post  ->  author -> username == DISQUS_USERNAME || $post -> author -> email == DISQUS_EMAIL ) && $post -> author -> isAnonymous == false ? true : false;
 
-
     // 访客指定 Gravatar 头像
-    $avatar_url = GRAVATAR_CDN.md5($post -> author -> email).'?d=https:'.$forum_data -> forum -> avatar;
+    $avatar_default = strpos($forum_data -> forum -> avatar, 'https') !== false ? $forum_data -> forum -> avatar : 'https:'.$forum_data -> forum -> avatar;
+    $avatar_url = GRAVATAR_CDN.md5($post -> author -> email).'?d='.$avatar_default;
     $post -> author -> avatar -> cache = $post -> author -> isAnonymous ? $avatar_url : $post -> author -> avatar -> cache;
 
     // 表情
@@ -235,6 +235,8 @@ function post_format( $post ){
             if(preg_match('/^(http|https):\/\/disq\.us/i', $urlItem)){
                 parse_str(parse_url($urlItem,PHP_URL_QUERY),$out);
                 $linkArr[$item] = '<a href="'.join(':', explode(':',$out['url'],-1)).'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
+            } elseif ( strpos($urlItem, 'https://disqus.com/by/') !== false ){
+                $linkArr[$item] = '<a href="'.$urlItem.'" target="_blank" title="'.$urlArr[2][$item].'">@'.$urlArr[2][$item].'</a>';
             } else {
                 $linkArr[$item] = '<a href="'.$urlItem.'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
             }
@@ -261,7 +263,7 @@ function post_format( $post ){
     // 是否已删除
     if(!!$post -> isDeleted){
         $post -> message = '';
-        $post -> author -> avatar -> cache = GRAVATAR_CDN.'?d='.$forum_data -> forum -> avatar;
+        $post -> author -> avatar -> cache = GRAVATAR_CDN.'?d='.$avatar_default;
         $post -> author -> username = '';
         $post -> author -> name = '';
         $post -> author -> url = '';
