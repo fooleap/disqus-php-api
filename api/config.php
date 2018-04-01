@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-10 13:19:05
+ * @version  2018-03-31 20:39:22
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -37,19 +37,6 @@ define('DISQUS_PASSWORD', '');
 define('DISQUS_WEBSITE', '');
 define('DISQUS_SHORTNAME', '');
 define('DISQUS_APPROVED', true);
-
-/*
- * 网络设置
- *
- * GFW_INSIDE     服务器是否在墙内，在墙内则为 true，将指定 IP
- * DISQUS_IP      disqus.com IP 地址，可选：151.101.0.134, 151.101.64.134, 151.101.128.134, 151.101.192.134
- * DISQUS_MEDIAIP uploads.services.disqus.com IP 地址，可选：151.101.24.64, 151.101.40.64, 151.101.52.64
- *
- */
-
-define('GFW_INSIDE', false);
-define('DISQUS_IP', '151.101.0.134'); 
-define('DISQUS_MEDIAIP', '151.101.24.64');
 
 /*
  * 图片设置

@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-27 22:26:28
+ * @version  2018-03-31 20:38:30 
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -32,8 +32,6 @@ $client -> imageType = 'png';
 $client -> imagePathPNG = EMOJI_PATH;
 
 $approved = DISQUS_APPROVED == 1 ? 'approved' : null;
-$disqus_host = GFW_INSIDE == 1 ? DISQUS_IP : 'disqus.com';
-$media_host = GFW_INSIDE == 1 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
 $url = parse_url(DISQUS_WEBSITE);
 $website = $url['scheme'].'://'.$url['host'];
 
@@ -41,12 +39,10 @@ $website = $url['scheme'].'://'.$url['host'];
 $data_path = sys_get_temp_dir().'/disqus_'.DISQUS_SHORTNAME.'.json';
 $forum_data = json_decode(file_get_contents($data_path));
 $session = $forum_data -> session -> data;
-$expires = $forum_data -> session -> expires;
-$passwd = $forum_data -> passwd;
 
 // 管理员登录
 function adminLogin(){
-    global $session, $data_path, $forum_data, $disqus_host;
+    global $session, $data_path, $forum_data;
 
     $cookie_temp = sys_get_temp_dir().'/cookie_temp.txt';
     $cookie = sys_get_temp_dir().'/cookie.txt';
@@ -55,7 +51,7 @@ function adminLogin(){
 
     // 取得 csrftoken
     $options = array(
-        CURLOPT_URL => 'https://'.$disqus_host.'/profile/login/',
+        CURLOPT_URL => 'https://disqus.com/profile/login/',
         CURLOPT_HTTPHEADER => array('Host: disqus.com'),
         CURLOPT_COOKIEJAR => $cookie_temp,
         CURLOPT_HEADER => true,
@@ -147,8 +143,8 @@ function encodeURI($uri)
 }
 
 function curl_get($url){
-    global $session, $disqus_host;
-    $curl_url = 'https://'.$disqus_host.$url;
+    global $session;
+    $curl_url = 'https://disqus.com'.$url;
 
     $options = array(
         CURLOPT_URL => $curl_url,
@@ -171,9 +167,9 @@ function curl_get($url){
 }
 
 function curl_post($url, $data){
-    global $session, $disqus_host, $media_host, $access_token;
+    global $session, $access_token;
 
-    $curl_url = strpos($url, 'media') !== false ? 'https://'.$media_host.$url : 'https://'.$disqus_host.$url;
+    $curl_url = strpos($url, 'media') !== false ? 'https://uploads.services.disqus.com'.$url : 'https://disqus.com'.$url;
     $curl_host = strpos($url, 'media') !== false ? 'uploads.services.disqus.com' : 'disqus.com';
 
     if( isset($access_token) ){
@@ -315,7 +311,7 @@ function getUserData(){
 }
 
 function getForumData(){
-    global $data_path,$forum_data;
+    global $data_path, $forum_data;
     $fields_data = array(
         'api_key' => DISQUS_PUBKEY,
         'forum' => DISQUS_SHORTNAME,
@@ -324,6 +320,8 @@ function getForumData(){
     $data = curl_get($curl_url);
     $forum = array(
         'founder' => $data -> response -> founder,
+        'name' => $data -> response -> name,
+        'url' => $data -> response -> url,
         'avatar' => $data -> response -> avatar -> large -> cache,
         'moderatorBadgeText' =>  $data -> response -> moderatorBadgeText,
         'expires' => time() + 3600*24
@@ -375,7 +373,7 @@ if ( isset($user_id) ){
     }
 }
 
-if( time() > $expires || md5(DISQUS_PASSWORD) != $passwd ){
+if( time() > $forum_data -> session -> expires || md5(DISQUS_PASSWORD) != $forum_data -> passwd ){
     adminLogin();
 }
 
