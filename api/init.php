@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-31 20:38:30 
+ * @version  2018-04-19 09:49:04
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -106,7 +106,7 @@ function getAccessToken($fields){
     $url = 'https://disqus.com/api/oauth/2.0/access_token/?';
 
     foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-    rtrim($fields_string, "&");
+    rtrim($fields_string, '&');
     $ch = curl_init();
     curl_setopt($ch,CURLOPT_URL,$url);
     curl_setopt($ch,CURLOPT_POST,count($fields));
@@ -166,18 +166,23 @@ function curl_get($url){
     return json_decode($data);
 }
 
-function curl_post($url, $data){
+function curl_post($url, $fields){
     global $session, $access_token;
 
     $curl_url = strpos($url, 'media') !== false ? 'https://uploads.services.disqus.com'.$url : 'https://disqus.com'.$url;
     $curl_host = strpos($url, 'media') !== false ? 'uploads.services.disqus.com' : 'disqus.com';
 
     if( isset($access_token) ){
-        $data -> api_secret = SECRET_KEY;
-        $data -> access_token = $access_token;
+        $fields -> api_secret = SECRET_KEY;
+        $fields -> access_token = $access_token;
     } else {
-        $data -> api_key = DISQUS_PUBKEY;
+        $fields -> api_key = DISQUS_PUBKEY;
     }
+
+    extract($_POST);
+
+    foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+    rtrim($fields_string, '&');
 
     $options = array(
         CURLOPT_URL => $curl_url,
@@ -187,13 +192,13 @@ function curl_post($url, $data){
         CURLOPT_ENCODING => 'gzip, deflate',
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => $data,
+        CURLOPT_POST => count($fields),
+        CURLOPT_POSTFIELDS => $fields_string
     );
-    $curl = curl_init();
     if( !isset($access_token) ){
-        curl_setopt($curl,CURLOPT_COOKIE,$session);
+        $options[CURLOPT_COOKIE] = $session;
     }
+    $curl = curl_init();
     curl_setopt_array($curl, $options);
     $data = curl_exec($curl);
     $errno = curl_errno($curl);
@@ -209,7 +214,7 @@ function post_format( $post ){
     global $client, $forum_data;
 
     // 是否是管理员
-    $isMod = ($post  ->  author -> username == DISQUS_USERNAME || $post -> author -> email == DISQUS_EMAIL ) && $post -> author -> isAnonymous == false ? true : false;
+    $isMod = ($post -> author -> username == DISQUS_USERNAME || $post -> author -> email == DISQUS_EMAIL ) && $post -> author -> isAnonymous == false ? true : false;
 
     // 访客指定 Gravatar 头像
     $avatar_default = strpos($forum_data -> forum -> avatar, 'https') !== false ? $forum_data -> forum -> avatar : 'https:'.$forum_data -> forum -> avatar;
