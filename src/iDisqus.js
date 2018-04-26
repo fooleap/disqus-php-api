@@ -1,5 +1,5 @@
 /*!
- * v 0.2.4
+ * v 0.2.5
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -1132,6 +1132,7 @@
         var $item;
 
         var xhrUpload = new XMLHttpRequest();
+        xhrUpload.withCredentials = true;
         xhrUpload.onreadystatechange = function(){
             if(xhrUpload.readyState == 4 && xhrUpload.status == 200){
                 var data = JSON.parse(xhrUpload.responseText);

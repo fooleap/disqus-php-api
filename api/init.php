@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-19 09:49:04
+ * @version  2018-04-26 12:45:27
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -151,8 +151,8 @@ function curl_get($url){
         CURLOPT_HTTPHEADER => array('Host: disqus.com','Origin: https://disqus.com'),
         CURLOPT_REFERER => 'https://disqus.com',
         CURLOPT_COOKIE => $session,
-        CURLOPT_HEADER => false,
-        CURLOPT_RETURNTRANSFER => true
+        CURLOPT_HEADER => 0,
+        CURLOPT_RETURNTRANSFER => 1 
     );
     $curl = curl_init();
     curl_setopt_array($curl, $options);
@@ -169,33 +169,45 @@ function curl_get($url){
 function curl_post($url, $fields){
     global $session, $access_token;
 
-    $curl_url = strpos($url, 'media') !== false ? 'https://uploads.services.disqus.com'.$url : 'https://disqus.com'.$url;
-    $curl_host = strpos($url, 'media') !== false ? 'uploads.services.disqus.com' : 'disqus.com';
+    if( isset($access_token) && strpos($url, 'media') === false  ){
 
-    if( isset($access_token) ){
         $fields -> api_secret = SECRET_KEY;
         $fields -> access_token = $access_token;
+
     } else {
+
         $fields -> api_key = DISQUS_PUBKEY;
+
     }
 
-    extract($_POST);
+    if( strpos($url, 'media') !== false ){
 
-    foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-    rtrim($fields_string, '&');
+        $curl_url = 'https://uploads.services.disqus.com'.$url;
+        $curl_host = 'uploads.services.disqus.com';
+
+        $fields_string = $fields;
+
+    } else {
+
+        $curl_url = 'https://disqus.com'.$url;
+        $curl_host = 'disqus.com';
+
+        foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+        rtrim($fields_string, '&');
+
+    }
 
     $options = array(
         CURLOPT_URL => $curl_url,
         CURLOPT_HTTPHEADER => array('Host: '.$curl_host,'Origin: https://disqus.com'),
-        CURLOPT_HEADER => false,
-        //CURLOPT_REFERER => 'https://disqus.com',
+        CURLOPT_HEADER => 0,
         CURLOPT_ENCODING => 'gzip, deflate',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_POST => count($fields),
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_FOLLOWLOCATION => 1,
+        CURLOPT_POST => 1,
         CURLOPT_POSTFIELDS => $fields_string
     );
-    if( !isset($access_token) ){
+    if( !isset($access_token) || strpos($url, 'media') !== false  ){
         $options[CURLOPT_COOKIE] = $session;
     }
     $curl = curl_init();
