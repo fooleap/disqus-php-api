@@ -7,31 +7,33 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-10 14:00:54
+ * @version  2018-04-26 17:16:59
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 namespace Emojione;
 require_once('init.php');
 
-$fields_data = (object) array(
-    'api_key' => DISQUS_PUBKEY,
+$thread = 'link:'.$website.$_GET['link'];
+
+$fields = (object) array(
+    'forum' => DISQUS_SHORTNAME,
     'cursor' => $_GET['cursor'],
     'limit' => 50,
-    'forum' => DISQUS_SHORTNAME,
     'order' => 'desc',
-    'thread' => 'link:'.$website.$_GET['link']
+    'thread' => $thread
 );
-$curl_url = '/api/3.0/threads/listPostsThreaded?'.http_build_query($fields_data);
-$data = curl_get($curl_url);
 
-$fields_data = (object) array(
-    'api_key' => DISQUS_PUBKEY,
+$curl_url = '/api/3.0/threads/listPostsThreaded?';
+$data = curl_get($curl_url, $fields);
+
+$fields = (object) array(
     'forum' => DISQUS_SHORTNAME,
-    'thread' => 'link:'.$website.$_GET['link']
+    'thread' => $thread
 );
-$curl_url = '/api/3.0/threads/details.json?'.http_build_query($fields_data);
-$detail = curl_get($curl_url);
+
+$curl_url = '/api/3.0/threads/details.json?';
+$detail = curl_get($curl_url, $fields);
 
 $posts = array();
 if (is_array($data -> response) || is_object($data -> response)){

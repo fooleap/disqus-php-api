@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-26 12:45:27
+ * @version  2018-04-26 17:26:55
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -105,8 +105,8 @@ function getAccessToken($fields){
     extract($_POST);
     $url = 'https://disqus.com/api/oauth/2.0/access_token/?';
 
-    foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-    rtrim($fields_string, '&');
+    $fields_string = fields_format($fields);
+
     $ch = curl_init();
     curl_setopt($ch,CURLOPT_URL,$url);
     curl_setopt($ch,CURLOPT_POST,count($fields));
@@ -135,16 +135,39 @@ function getAccessToken($fields){
     return $user_id;
 }
 
-function encodeURI($uri)
-{
-    return preg_replace_callback("{[^0-9a-z_.!~*();,/?:@&=+$#-]}i", function ($m) {
-        return sprintf('%%%02X', ord($m[0]));
-    }, $uri);
+function encodeURIComponent($str){
+    $replacers = [
+        '%21' => '!',
+        '%2A' => '*',
+        '%27' => "'",
+        '%28' => '(',
+        '%29' => ')'
+    ];
+    if (!is_string($str)) return $str;
+    return strtr(rawurlencode($str), $replacers);
 }
 
-function curl_get($url){
+function fields_format($fields){
+    foreach($fields as $key=>$value) { 
+        if (is_array($value)) {
+            foreach( $value as $item ){
+                $fields_string .= encodeURIComponent($key).'='.encodeURIComponent($item).'&';
+            }
+        } else {
+            $fields_string .= encodeURIComponent($key).'='.encodeURIComponent($value).'&';
+        }
+    }
+    $fields_string = rtrim($fields_string, '&');
+    return $fields_string;
+}
+
+function curl_get($url, $fields){
     global $session;
-    $curl_url = 'https://disqus.com'.$url;
+
+    $fields -> api_key = DISQUS_PUBKEY;
+    $fields_string = fields_format($fields);
+
+    $curl_url = 'https://disqus.com'.$url.$fields_string;
 
     $options = array(
         CURLOPT_URL => $curl_url,
@@ -192,9 +215,7 @@ function curl_post($url, $fields){
         $curl_url = 'https://disqus.com'.$url;
         $curl_host = 'disqus.com';
 
-        foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-        rtrim($fields_string, '&');
-
+        $fields_string = fields_format($fields);
     }
 
     $options = array(

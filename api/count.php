@@ -5,24 +5,27 @@
  * @param links  页面链接，以“,”分隔
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-11-14 09:21:38
+ * @version  2018-04-26 17:17:09
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 namespace Emojione;
 require_once('init.php');
 
-$links = '&thread=link:'.$website.preg_replace('/,/i','&thread=link:'.$website, $_GET['links']);
+$links = explode(',', $_GET['links']);
+foreach( $links as $key=>$value ){
+    $links[$key] = $website.$value;
+}
 
-$fields_data = (object) array(
-    'api_key' => DISQUS_PUBKEY,
+$fields = (object) array(
     'forum' => DISQUS_SHORTNAME,
-    'limit' => 100
+    'limit' => 100,
+    'thread:link' => $links
 );
 
-$curl_url = '/api/3.0/threads/list.json?'.http_build_query($fields_data).encodeURI($links);
+$curl_url = '/api/3.0/threads/list.json?';
 
-$data = curl_get($curl_url);
+$data = curl_get($curl_url, $fields);
 
 $countArr = array();
 foreach ( $data -> response as $key => $post ) {

@@ -10,7 +10,7 @@
  * @param id      该评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2017-08-05 06:23:17
+ * @version  2018-04-26 17:17:32
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -23,12 +23,11 @@ if( $_POST['session'] != $session ){
 }
 
 // 获取被回复人信息
-$fields_data = (object) array(
-    'api_key' => DISQUS_PUBKEY,
+$fields = (object) array(
     'post' => $_POST['parent']
 );
-$curl_url = '/api/3.0/posts/details.json?'.http_build_query($fields_data);
-$data = curl_get($curl_url);
+$curl_url = '/api/3.0/posts/details.json?';
+$data = curl_get($curl_url, $fields);
 $post = post_format($data->response);
 $parent_isanon = $data->response->author->isAnonymous; //是否为访客
 $parent_email   = $data->response->author->email; //被回复邮箱
@@ -36,12 +35,11 @@ $parent_name    = $post['name']; //被回复人名
 $parent_message = $post['message']; //被回复留言
 
 // 获取回复信息
-$fields_data = (object) array(
-    'api_key' => DISQUS_PUBKEY,
+$fields = (object) array(
     'post' => $_POST['id']
 );
-$curl_url = '/api/3.0/posts/details.json?'.http_build_query($fields_data);
-$data = curl_get($curl_url);
+$curl_url = '/api/3.0/posts/details.json?';
+$data = curl_get($curl_url, $fields);
 $post = post_format($data->response);
 $reply_name    = $post['name']; //回复者人名
 $reply_message = $post['message']; //回复者留言
