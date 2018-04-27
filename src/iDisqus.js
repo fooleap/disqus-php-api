@@ -1,5 +1,5 @@
 /*!
- * v 0.2.5
+ * v 0.2.6
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -202,7 +202,7 @@
         _.opts = typeof(arguments[1]) == 'object' ? arguments[1] : arguments[0];
         _.dom =  d.getElementById(typeof(arguments[0]) == 'string' ? arguments[0] : 'comment');
         _.opts.api = _.opts.api.slice(-1) == '/' ? _.opts.api.slice(0,-1) : _.opts.api;
-        _.opts.site = !!_.opts.site ? _.opts.site : location.origin;
+        _.opts.site = _.opts.site || location.origin;
         if(!!_.opts.url){
             var optsUrl = _.opts.url.replace(_.opts.site, '');
             _.opts.url = optsUrl.slice(0, 1) != '/' ? '/' + optsUrl : optsUrl;
@@ -211,18 +211,19 @@
         } else {
             _.opts.url = location.pathname + location.search;
         }
-        _.opts.identifier = !!_.opts.identifier ? _.opts.identifier : _.opts.url;
+        _.opts.identifier = _.opts.identifier || _.opts.url;
         _.opts.link = _.opts.site + _.opts.url; 
-        _.opts.title = !!_.opts.title ? _.opts.title : d.title;
+        _.opts.title = _.opts.title || d.title;
         _.opts.slug = !!_.opts.slug ? _.opts.slug.replace(/[^A-Za-z0-9_-]+/g,'') : '';
-        _.opts.desc =  !!_.opts.desc ? _.opts.desc : (!!d.querySelector('[name="description"]') ? d.querySelector('[name="description"]').content : '');
-        _.opts.mode = !!_.opts.mode ? _.opts.mode : 1;
-        _.opts.timeout = !!_.opts.timeout ? _.opts.timeout : 3000;
+        _.opts.desc =  _.opts.desc || (!!d.querySelector('[name="description"]') ? d.querySelector('[name="description"]').content : '');
+        _.opts.mode = _.opts.mode || 1;
+        _.opts.timeout = _.opts.timeout || 3000;
         _.opts.toggle = !!_.opts.toggle ? d.getElementById(_.opts.toggle) : null;
+        _.opts.autoCreate = !!_.opts.autoCreate || !!_.opts.auto;
 
         // emoji 表情
-        _.opts.emoji_path = !!_.opts.emoji_path ? _.opts.emoji_path : 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
-        _.emoji_list =!!_.opts.emoji_list ? _.opts.emoji_list : [{
+        _.opts.emojiPath = _.opts.emojiPath || _.opts.emoji_path || 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
+        _.emojiList = _.opts.emojiList || _.opts.emoji_list || [{
             code:'smile',
             title:'笑脸',
             unicode:'1f604'
@@ -288,7 +289,7 @@
             unicode:'270c'
         }];
         
-        if(!!_.opts.emoji_preview){
+        if(!!_.opts.emoji_preview || !!_.opts.emojiPreview ){
             getAjax(_.opts.api +'/eac.min.php', function(resp){
                 _.eac = JSON.parse(resp);
             }, function(){
@@ -402,8 +403,8 @@
         }
         // 表情
         var emojiList = '';
-        _.emoji_list.forEach(function(item){
-            emojiList += '<li class="emojione-item" title="'+ item.title+'" data-code=":'+item.code+':"><img class="emojione-item-image" src="'+_.opts.emoji_path + item.unicode+'.png" /></li>';
+        _.emojiList.forEach(function(item){
+            emojiList += '<li class="emojione-item" title="'+ item.title+'" data-code=":'+item.code+':"><img class="emojione-item-image" src="'+_.opts.emojiPath + item.unicode+'.png" /></li>';
         })
         _.dom.innerHTML = '<div class="comment loading" id="idisqus">\n'+
             '    <div class="loading-container" data-tip="正在加载评论……"><svg class="loading-bg" width="72" height="72" viewBox="0 0 720 720" version="1.1" xmlns="http://www.w3.org/2000/svg"><path class="ring" fill="none" stroke="#9d9ea1" d="M 0 -260 A 260 260 0 1 1 -80 -260" transform="translate(400,400)" stroke-width="50" /><polygon transform="translate(305,20)" points="50,0 0,100 18,145 50,82 92,145 100,100" style="fill:#9d9ea1"/></svg></div>\n'+
@@ -720,7 +721,7 @@
 
                     _.timeAgo();
 
-                    if (/^#disqus|^#comment/.test(location.hash) && !data.cursor.hasPrev && !_.stat.disqusLoaded ) {
+                    if (/^#disqus|^#comment-/.test(location.hash) && !data.cursor.hasPrev && !_.stat.disqusLoaded ) {
                         var el = _.dom.querySelector('#idisqus ' + location.hash)
                         window.scrollBy(0, el.getBoundingClientRect().top);
                     }
@@ -857,6 +858,7 @@
     // 读取更多
     iDisqus.prototype.loadMore = function(e){
         var _ = this;
+        _.stat.offsetTop = d.documentElement.scrollTop || d.body.scrollTop;
         if( !_.stat.loading ){
             e.currentTarget.classList.add('loading');
             _.getlist();
@@ -1304,12 +1306,12 @@
             if( !!_.opts.emoji_preview ){
                 preMessage = preMessage.replace(/:([-+\w]+):/g, function (match){
                     var emojiShort = match.replace(/:/g,'');
-                    var emojiImage = !!_.eac[emojiShort] ? '<img class="emojione" width="24" height="24" alt="'+emojiShort+'" title=":'+emojiShort+':" src="'+_.opts.emoji_path+_.eac[emojiShort]+'.png">' : match;
+                    var emojiImage = !!_.eac[emojiShort] ? '<img class="emojione" width="24" height="24" alt="'+emojiShort+'" title=":'+emojiShort+':" src="'+_.opts.emojiPath +_.eac[emojiShort]+'.png">' : match;
                     return emojiImage;
                 });
             } else {
-                _.emoji_list.forEach(function(item){
-                    preMessage = preMessage.replace(':'+item.code+':', '<img class="emojione" width="24" height="24" src="' + _.opts.emoji_path + item.unicode + '.png" />');
+                _.emojiList.forEach(function(item){
+                    preMessage = preMessage.replace(':'+item.code+':', '<img class="emojione" width="24" height="24" src="' + _.opts.emojiPath + item.unicode + '.png" />');
                 });
             }
 
@@ -1415,7 +1417,14 @@
                     if( data.response.indexOf('author') > -1){
                         _.handle.logout();
                     }
+                } else {
+                    alertmsg.innerHTML = '提交失败，请稍后重试，错误代码：' + data.code;
+                    alertClear();
+
+                    _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
+                    _.reEdit(item);
                 }
+
             }, function(){
                 alertmsg.innerHTML = '提交出错，请稍后重试。';
                 alertClear();
@@ -1482,7 +1491,7 @@
     // 创建 Thread 表单
     iDisqus.prototype.create = function(){
         var _ = this;
-        if(!!_.opts.auto){
+        if(_.opts.autoCreate){
             _.dom.querySelector('.loading-container').dataset.tip = '正在创建 Thread……';
             var postData = {
                 url: _.opts.link,
@@ -1566,7 +1575,7 @@
         _.dom.innerHTML = '';
         delete _.box;
         delete _.dom;
-        delete _.emoji_list;
+        delete _.emojiList;
         delete _.user;
         delete _.handle;
         delete _.opts;

@@ -3,7 +3,7 @@
  * 登录
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-10 14:01:48
+ * @version  2018-04-27 13:46:11
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -23,11 +23,11 @@ if( isset($CODE)){
 
     $authorize = 'authorization_code';
     $fields = array(
-        'grant_type'=>urlencode($authorize),
-        'client_id'=>urlencode(PUBLIC_KEY),
-        'client_secret'=>urlencode(SECRET_KEY),
-        'redirect_uri'=>urlencode($redirect),
-        'code'=>urlencode($CODE)
+        'grant_type'=>$authorize,
+        'client_id'=>PUBLIC_KEY,
+        'client_secret'=>SECRET_KEY,
+        'redirect_uri'=>$redirect,
+        'code'=>$CODE
     );
     $user_id = getAccessToken($fields);
     if( $user_id ){

@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-26 17:26:55
+ * @version  2018-04-29 12:00:27
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -350,12 +350,11 @@ function getUserData(){
 
 function getForumData(){
     global $data_path, $forum_data;
-    $fields_data = array(
-        'api_key' => DISQUS_PUBKEY,
-        'forum' => DISQUS_SHORTNAME,
+    $fields = (object) array(
+        'forum' => DISQUS_SHORTNAME
     );
-    $curl_url = '/api/3.0/forums/details.json?'.http_build_query($fields_data);
-    $data = curl_get($curl_url);
+    $curl_url = '/api/3.0/forums/details.json?';
+    $data = curl_get($curl_url, $fields);
     $forum = array(
         'founder' => $data -> response -> founder,
         'name' => $data -> response -> name,
@@ -412,7 +411,7 @@ if ( isset($user_id) ){
 }
 
 if( time() > $forum_data -> session -> expires || md5(DISQUS_PASSWORD) != $forum_data -> passwd ){
-    adminLogin();
+    //adminLogin();
 }
 
 if( time() > $forum_data -> forum -> expires || !$forum_data -> forum){

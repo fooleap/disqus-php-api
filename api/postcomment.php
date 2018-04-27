@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-26 17:17:55
+ * @version  2018-04-29 11:59:39
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -56,8 +56,10 @@ if( isset($access_token) ){
         'author_name' => $author_name,
         'author_email' => $author_email,
         'author_url' => $author_url,
-        'state' => $approved
     );
+    if( !!$session ){
+        $post_data -> state = $approved;
+    }
 }
 
 $data = curl_post($curl_url, $post_data);

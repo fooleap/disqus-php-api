@@ -1,7 +1,7 @@
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const autoprefixer = require('autoprefixer'); 
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -13,19 +13,20 @@ module.exports = {
         libraryTarget: 'umd',
         library: '[name]'
     },
-
+    stats: {
+        entrypoints: false,
+        children: false
+    },
     module: {
         rules: [
             {
                 test: /\.(scss|css)$/,
-                use: ExtractTextPlugin.extract({
-                    use:[
-                        'css-loader',
-                        'sass-loader',
-                        {loader: 'postcss-loader', options: { plugins: () => [ require('autoprefixer') ] }}
-                    ],
-                    fallback: 'style-loader'
-                }),
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    {loader: 'postcss-loader', options: { plugins: () => [ require('autoprefixer') ] }},
+                    'sass-loader'
+                ]
             },
             {
                 test: /\.html$/,
@@ -39,7 +40,9 @@ module.exports = {
         ],
     },
     plugins: [
-        new ExtractTextPlugin('iDisqus.min.css')
+        new MiniCssExtractPlugin({
+            filename: 'iDisqus.min.css'
+        })
     ],
     optimization: {
         minimizer: [
@@ -48,7 +51,7 @@ module.exports = {
                     warnings: false,
                     output: {
                         comments: false,
-                        beautify: false,
+                        beautify: false
                     },
                     ie8: false
                 }

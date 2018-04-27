@@ -154,24 +154,24 @@ var disq = new iDisqus('comment', {
 * {Boolean}
 * 默认：`false`
 
-##### auto
+##### autoCreate
 
 * 是否自动创建 Thread，为了不创建垃圾 Thread，并不推荐设置为 `true`
 * {Boolean}
 * 默认：`false`
 
-##### emoji_path
+##### emojiPath
 
 * Emoji 表情 PNG 图片路径
 * {String}
 * 默认：`"https://assets-cdn.github.com/images/icons/emoji/unicode/"`
 
-##### emoji_list
+##### emojiList
 
 * 自定义评论框内的点选 Emoji 表情，具体可看 DEMO 页面
 * {Object}
 
-##### emoji_preview
+##### emojiPreview
 
 * 评论预览是否支持 Emoji 短代码
 * {Boolean}
