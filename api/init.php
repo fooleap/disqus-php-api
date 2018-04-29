@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-29 12:00:27
+ * @version  2018-04-29 17:25:43
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -38,64 +38,51 @@ $website = $url['scheme'].'://'.$url['host'];
 // 缓存文件
 $data_path = sys_get_temp_dir().'/disqus_'.DISQUS_SHORTNAME.'.json';
 $forum_data = json_decode(file_get_contents($data_path));
-$session = $forum_data -> session -> data;
 
-// 管理员登录
 function adminLogin(){
-    global $session, $data_path, $forum_data;
 
-    $cookie_temp = sys_get_temp_dir().'/cookie_temp.txt';
-    $cookie = sys_get_temp_dir().'/cookie.txt';
+    global $data_path, $forum_data;
 
-    $ch = curl_init();
-
-    // 取得 csrftoken
-    $options = array(
-        CURLOPT_URL => 'https://disqus.com/profile/login/',
-        CURLOPT_HTTPHEADER => array('Host: disqus.com'),
-        CURLOPT_COOKIEJAR => $cookie_temp,
-        CURLOPT_HEADER => true,
-        CURLOPT_RETURNTRANSFER => true,
-    );
-    curl_setopt_array($ch, $options);
-    $response = curl_exec($ch);
-    $errno = curl_errno($ch);
-    if ($errno == 60 || $errno == 77) {
-        curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
-        $response = curl_exec($ch);
-    }
-
-    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
-    $token = str_replace("Set-Cookie: csrftoken=", "", $matches[0][0]);
-
-    // 登录并取得 session
-    $params = array(
-        'csrfmiddlewaretoken' => $token,
+    $fields = (object) array(
         'username' => DISQUS_EMAIL,
-        'password' => DISQUS_PASSWORD 
+        'password' => DISQUS_PASSWORD
     );
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_REFERER, 'https://disqus.com/profile/login/');
-    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_temp);
-    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-    $result = curl_exec($ch);
-    preg_match('/^Set-Cookie:\s+(session.*)/mi', $result, $output_match);
-    preg_match('/(session[^;]*)/mi', $output_match[1], $session_match);
-    preg_match('/expires=([^;]*)/mi', $output_match[1], $expires_match);
-    $session = $session_match[0];
-    $expires = strtotime($expires_match[1]);
 
-    curl_close($ch);
-    if( strpos($session, 'session') !== false ){
-        // 写入文件
-        $forum_data -> session = array(
-            'data' => $session,
-            'expires' => $expires
-        );
-        $forum_data -> passwd = md5(DISQUS_PASSWORD);
-        file_put_contents($data_path, json_encode($forum_data));
+    $options = array(
+        CURLOPT_URL => 'https://import.disqus.com/login/',
+        CURLOPT_HEADER => 1,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_POST => 1,
+        CURLOPT_POSTFIELDS => http_build_query($fields)
+    );
+
+    $curl = curl_init();
+    curl_setopt_array($curl, $options);
+    $result = curl_exec($curl);
+    $errno = curl_errno($curl);
+
+    if ($errno == 60 || $errno == 77) {
+        curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
+        $data = curl_exec($curl);
     }
+
+    curl_close($curl);
+    preg_match('/^Set-Cookie:\s+(session.*)/mi', $result, $matches);
+    $cookieArr =  explode('; ',$matches[1]);
+    $cookie = (object) array();
+
+    foreach( $cookieArr as $value){
+
+        if( strpos($value,'=') !== false){
+            list($key, $val) = explode('=', $value);
+            $cookie -> $key = $val;
+        }
+
+    }
+
+    $forum_data -> cookie = $cookie;
+
+    file_put_contents($data_path, json_encode($forum_data));
 }
 
 // 鉴权
@@ -162,9 +149,21 @@ function fields_format($fields){
 }
 
 function curl_get($url, $fields){
-    global $session;
 
-    $fields -> api_key = DISQUS_PUBKEY;
+    global $forum_data;
+
+    if( defined(ACCESS_TOKEN) ){
+
+        $fields -> api_secret = SECRET_KEY;
+        $fields -> access_token = ACCESS_TOKEN;
+
+    } else {
+
+        $fields -> api_key = DISQUS_PUBKEY;
+        $cookies = 'sessionid='.$forum_data -> cookie -> sessionid;
+
+    }
+
     $fields_string = fields_format($fields);
 
     $curl_url = 'https://disqus.com'.$url.$fields_string;
@@ -172,13 +171,19 @@ function curl_get($url, $fields){
     $options = array(
         CURLOPT_URL => $curl_url,
         CURLOPT_HTTPHEADER => array('Host: disqus.com','Origin: https://disqus.com'),
-        CURLOPT_REFERER => 'https://disqus.com',
-        CURLOPT_COOKIE => $session,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_FOLLOWLOCATION => 1,
         CURLOPT_HEADER => 0,
         CURLOPT_RETURNTRANSFER => 1 
     );
+
     $curl = curl_init();
     curl_setopt_array($curl, $options);
+
+    if( isset($cookies)){
+        curl_setopt($curl, CURLOPT_COOKIE, $cookies);
+    }
+
     $data = curl_exec($curl);
     $errno = curl_errno($curl);
     if ($errno == 60 || $errno == 77) {
@@ -186,13 +191,15 @@ function curl_get($url, $fields){
         $data = curl_exec($curl);
     }
     curl_close($curl);
+
     return json_decode($data);
 }
 
 function curl_post($url, $fields){
-    global $session, $access_token;
 
-    if( isset($access_token) && strpos($url, 'media') === false  ){
+    global $access_token, $forum_data;
+
+    if( isset($access_token) && strpos($url, 'threads/create') === false && strpos($url, 'media') === false ){
 
         $fields -> api_secret = SECRET_KEY;
         $fields -> access_token = $access_token;
@@ -200,7 +207,7 @@ function curl_post($url, $fields){
     } else {
 
         $fields -> api_key = DISQUS_PUBKEY;
-
+        $cookies = 'sessionid='.$forum_data -> cookie -> sessionid;
     }
 
     if( strpos($url, 'media') !== false ){
@@ -218,6 +225,7 @@ function curl_post($url, $fields){
         $fields_string = fields_format($fields);
     }
 
+    $curl = curl_init();
     $options = array(
         CURLOPT_URL => $curl_url,
         CURLOPT_HTTPHEADER => array('Host: '.$curl_host,'Origin: https://disqus.com'),
@@ -228,11 +236,13 @@ function curl_post($url, $fields){
         CURLOPT_POST => 1,
         CURLOPT_POSTFIELDS => $fields_string
     );
-    if( !isset($access_token) || strpos($url, 'media') !== false  ){
-        $options[CURLOPT_COOKIE] = $session;
-    }
-    $curl = curl_init();
+
     curl_setopt_array($curl, $options);
+
+    if( isset($cookies)){
+        curl_setopt($curl, CURLOPT_COOKIE, $cookies);
+    }
+
     $data = curl_exec($curl);
     $errno = curl_errno($curl);
     if ($errno == 60 || $errno == 77) {
@@ -240,6 +250,7 @@ function curl_post($url, $fields){
         $data = curl_exec($curl);
     }
     curl_close($curl);
+
     return json_decode($data);
 }
 
@@ -323,10 +334,12 @@ function post_format( $post ){
 
 function getUserData(){
     global $access_token;
+
     $fields_data = array(
         'api_secret' => SECRET_KEY,
         'access_token' => $access_token
     );
+
     $url = 'https://disqus.com/api/3.0/users/details.json?'.http_build_query($fields_data);
     $ch = curl_init();
     curl_setopt($ch,CURLOPT_URL,$url);
@@ -349,7 +362,9 @@ function getUserData(){
 }
 
 function getForumData(){
+
     global $data_path, $forum_data;
+
     $fields = (object) array(
         'forum' => DISQUS_SHORTNAME
     );
@@ -369,19 +384,32 @@ function getForumData(){
     }
 }
 
+// 取得当前目录
 function getCurrentDir (){
+
     $isSecure = false;
     if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
         $isSecure = true;
-    }
-    elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
         $isSecure = true;
     }
+
     $protocol = $isSecure ? 'https://' : 'http://';
+
     return $protocol.$_SERVER['HTTP_HOST'].substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']));
+
+}
+
+if( time() > strtotime($forum_data -> cookie -> expires) || !$forum_data -> cookie){
+    adminLogin();
+}
+
+if( time() > $forum_data -> forum -> expires || !$forum_data -> forum){
+    getForumData();
 }
 
 $user_id = $_COOKIE['user_id'];
+
 if ( isset($user_id) ){
 
     // 取用户授权数据，可能为空
@@ -408,12 +436,4 @@ if ( isset($user_id) ){
             getAccessToken($fields);
         }
     }
-}
-
-if( time() > $forum_data -> session -> expires || md5(DISQUS_PASSWORD) != $forum_data -> passwd ){
-    //adminLogin();
-}
-
-if( time() > $forum_data -> forum -> expires || !$forum_data -> forum){
-    getForumData();
 }

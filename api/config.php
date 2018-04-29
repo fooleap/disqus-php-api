@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-26 21:03:24
+ * @version  2018-04-29 12:48:07
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -15,6 +15,7 @@ namespace Emojione;
  * DISQUS_PUBKEY    Disqus 公钥，无需修改
  * PUBLIC_KEY       Disqus APP 公钥，在 https://disqus.com/api/applications/ 申请注册后获得
  * SECRET_KEY       Disqus APP 私钥，在 https://disqus.com/api/applications/ 申请注册后获得
+ * ACCESS_TOKEN     Disqus 管理员 access_token，在 https://disqus.com/api/applications/ 申请注册后获得
  * DISQUS_USERNAME  Disqus 用户名
  * DISQUS_EMAIL     Disqus 注册邮箱，重要
  * DISQUS_PASSWORD  Disqus 密码，重要
@@ -29,6 +30,7 @@ namespace Emojione;
 define('DISQUS_PUBKEY', 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F');
 define('PUBLIC_KEY', '');
 define('SECRET_KEY', '');
+define('ACCESS_TOKEN', '');
 define('DISQUS_USERNAME', '');
 define('DISQUS_EMAIL', '');
 define('DISQUS_PASSWORD', '');

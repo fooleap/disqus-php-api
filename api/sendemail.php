@@ -10,17 +10,13 @@
  * @param id      该评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-26 17:17:32
+ * @version  2018-04-29 13:13:19
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 namespace Emojione;
 date_default_timezone_set("Asia/Shanghai");
 require_once('init.php');
-
-if( $_POST['session'] != $session ){
-    exit('session 有误！');
-}
 
 // 获取被回复人信息
 $fields = (object) array(
