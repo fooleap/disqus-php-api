@@ -1,5 +1,5 @@
 /*!
- * v 0.2.7
+ * v 0.2.8
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -155,17 +155,13 @@
 
             var _ = this;
             var popup = window.open(_.opts.api+'/login.php', 'Disqus Oauth', 'width=470,height=508');
+            var timer;
             function isLogged(){
-                popup.postMessage('Already logged in?', _.opts.api);
+                if (!popup || !popup.closed) return;
+                clearInterval(timer);
+                _.user.autologin();
             }
-            var timer = setInterval(isLogged, 1000);
-            function receiveMessage(event){
-                if( event.data.code == 0 ){
-                    _.user.submit(event.data.response);
-                    clearInterval(timer);
-                }
-            }
-            window.addEventListener('message', receiveMessage, false);
+            timer = setInterval(isLogged, 100);
 
         },
 

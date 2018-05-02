@@ -3,7 +3,7 @@
  * 登录
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-27 13:46:11
+ * @version  2018-05-02 23:32:54
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -79,13 +79,9 @@ if( isset($CODE)){
         <div class="success-container">
             <svg class="success-bg" width="72" height="72" viewBox="0 0 720 720" version="1.1" xmlns="http://www.w3.org/2000/svg"><path class="ring" fill="none" stroke="#9d9ea1" d="M 0 -260 A 260 260 0 1 1 -80 -260" transform="translate(400,400)" stroke-width="50" /><polygon transform="translate(305,20)" points="50,0 0,100 18,145 50,82 92,145 100,100" style="fill:#9d9ea1"/></svg>
         </div>
-    <script>
-        function receiveMessage(event){
-            event.source.postMessage(<?php echo getUserData() ?>, event.origin);
-            window.close()
-        }
-        window.addEventListener("message", receiveMessage, false);
-    </script>
+        <script>
+            parent.close();
+        </script>
     </body>
 </html>
 <?php }

@@ -1,6 +1,6 @@
 {
   "name": "disqus-php-api",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "disqus-php-api 利用 PHP cURL 转发 Disqus API 请求",
   "main": "index.js",
   "dependencies": {},
