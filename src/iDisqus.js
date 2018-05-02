@@ -1,5 +1,5 @@
 /*!
- * v 0.2.6
+ * v 0.2.7
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -179,8 +179,8 @@
                 l.removeItem('avatar');
                 l.removeItem('name');
                 l.removeItem('url');
+                _.user.init();
             })
-            _.user.init();
         },
 
         // 提交访客信息
