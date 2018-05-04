@@ -3,7 +3,7 @@
  * 登录
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-02 23:32:54
+ * @version  2018-05-04 23:26:56
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -16,7 +16,7 @@ $CODE = $_GET['code'];
 
 if( isset($access_token) ){
     print_r('已登录');
-    exit;
+    echo '<script>parent.close();</script>';
 }
 
 if( isset($CODE)){
@@ -29,8 +29,8 @@ if( isset($CODE)){
         'redirect_uri'=>$redirect,
         'code'=>$CODE
     );
-    $user_id = getAccessToken($fields);
-    if( $user_id ){
+    $access_token = getAccessToken($fields);
+    if( $access_token ){
 ?>
 <!doctype html>
 <html>

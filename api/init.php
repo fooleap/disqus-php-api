@@ -9,6 +9,7 @@
  */
 namespace Emojione;
 require_once('config.php');
+require_once('jwt.php');
 require_once('emojione/autoload.php');
 
 error_reporting(E_ERROR | E_PARSE);
@@ -31,6 +32,8 @@ $client -> unicodeRegexp = '(?:\x{1F3F3}\x{FE0F}?\x{200D}?\x{1F308}|\x{1F441}\x{
 $client -> imageType = 'png';
 $client -> imagePathPNG = EMOJI_PATH;
 
+$jwt = new JWT();
+
 $approved = DISQUS_APPROVED == 1 ? 'approved' : null;
 $url = parse_url(DISQUS_WEBSITE);
 $website = $url['scheme'].'://'.$url['host'];
@@ -38,6 +41,33 @@ $website = $url['scheme'].'://'.$url['host'];
 // 缓存文件
 $data_path = sys_get_temp_dir().'/disqus_'.DISQUS_SHORTNAME.'.json';
 $forum_data = json_decode(file_get_contents($data_path));
+
+$user = $_COOKIE['access_token'];
+
+if ( isset($user) ){
+
+    $userData = $jwt -> decode($user, DISQUS_PASSWORD);
+
+    if( $userData ){
+
+        $refresh_token = $userData['refresh_token'];
+        $access_token = $userData['access_token'];
+
+        if( $userData['exp'] < $_SERVER['REQUEST_TIME'] + 3600 * 20 * 24){
+
+            $authorize = 'refresh_token';
+            $fields = array(
+                'grant_type'=>urlencode($authorize),
+                'client_id'=>urlencode(PUBLIC_KEY),
+                'client_secret'=>urlencode(SECRET_KEY),
+                'refresh_token'=>urlencode($refresh_token)
+            );
+
+            getAccessToken($fields);
+        }
+
+    }
+}
 
 function adminLogin(){
 
@@ -87,7 +117,7 @@ function adminLogin(){
 
 // 鉴权
 function getAccessToken($fields){
-    global $data_path, $forum_data, $access_token;
+    global $data_path, $forum_data, $access_token, $jwt;
 
     extract($_POST);
     $url = 'https://disqus.com/api/oauth/2.0/access_token/?';
@@ -106,20 +136,19 @@ function getAccessToken($fields){
     $auth_results = json_decode($data);
 
     // 换算过期时间
-    $auth_results -> expires = time() + $auth_results -> expires_in;
+    $expires = $_SERVER['REQUEST_TIME'] + $auth_results -> expires_in;
 
     // 重新获取授权码
     $access_token = $auth_results -> access_token;
 
-    // user_id 写入 cookie，并设置过期时间为 30 天
-    $user_id = $auth_results -> user_id;
-    setcookie('user_id', $user_id, time() + 3600*24*30);
+    $payload = (array) $auth_results;
+    $payload['iss'] = DISQUS_EMAIL;
+    $payload['iat'] = $_SERVER['REQUEST_TIME'];
+    $payload['exp'] = $expires;
 
-    // 写入文件缓存
-    $forum_data -> users -> $user_id = $auth_results;
-    file_put_contents($data_path, json_encode($forum_data));
+    setcookie('access_token', $jwt -> encode($payload, DISQUS_PASSWORD), $expires, substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT'])), $_SERVER['HTTP_HOST'], false, true); 
 
-    return $user_id;
+    return $access_token;
 }
 
 function encodeURIComponent($str){
@@ -332,35 +361,6 @@ function post_format( $post ){
     return $data;
 }
 
-function getUserData(){
-    global $access_token;
-
-    $fields_data = array(
-        'api_secret' => SECRET_KEY,
-        'access_token' => $access_token
-    );
-
-    $url = 'https://disqus.com/api/3.0/users/details.json?'.http_build_query($fields_data);
-    $ch = curl_init();
-    curl_setopt($ch,CURLOPT_URL,$url);
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-    curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
-    $data = json_decode(curl_exec($ch));
-    curl_close($ch);
-    $user_detail = array(
-        'avatar' => $data -> response -> avatar -> cache,
-        'name' => $data -> response -> name,
-        'username' => $data -> response -> username,
-        'url' =>  !!$data -> response -> url ? $data -> response -> url : $data -> response -> profileUrl,
-        'type' => 1
-    );
-    $output = array(
-        'code' => $data -> code,
-        'response' => $user_detail
-    );
-    return json_encode($output);
-}
-
 function getForumData(){
 
     global $data_path, $forum_data;
@@ -406,34 +406,4 @@ if( time() > strtotime($forum_data -> cookie -> expires) || !$forum_data -> cook
 
 if( time() > $forum_data -> forum -> expires || !$forum_data -> forum){
     getForumData();
-}
-
-$user_id = $_COOKIE['user_id'];
-
-if ( isset($user_id) ){
-
-    // 取用户授权数据，可能为空
-    $auth_results = $forum_data -> users -> $user_id;
-
-    if( isset($auth_results) ){
-
-        // 取刷新码和过期时间
-        $refresh_token = $auth_results -> refresh_token;
-        $auth_expires = $auth_results -> expires;
-        $access_token = $auth_results -> access_token;
-
-        // 离过期少于 20 天
-        if( $auth_expires - time() < 3600 * 20 ){
-
-            $authorize = 'refresh_token';
-            $fields = array(
-                'grant_type'=>urlencode($authorize),
-                'client_id'=>urlencode($PUBLIC_KEY),
-                'client_secret'=>urlencode($SECRET_KEY),
-                'refresh_token'=>urlencode($refresh_token)
-            );
-
-            getAccessToken($fields);
-        }
-    }
 }
