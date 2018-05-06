@@ -2,7 +2,7 @@
 /**
  * JWT
  *
- * @version  2018-05-04 16:11:15
+ * @version  2018-05-06 19:41:14
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -25,7 +25,7 @@ class JWT {
         return base64_decode(strtr($input, '-_', '+/'));
     }
 
-    private static function signature(string $input, string $key, string $alg)
+    private static function signature($input, $key, $alg)
     {
         return hash_hmac($alg, $input, $key);
     }
@@ -57,14 +57,15 @@ class JWT {
         return null;
     }
 
-    public static function encode(array $payload, string $key, string $alg = 'SHA256')
+    public static function encode(array $payload, $key)
     {
         $key = md5($key);
+        $alg = 'SHA256';
         $jwt = self::urlsafeB64Encode(json_encode(['typ' => 'JWT', 'alg' => $alg])) . '.' . self::urlsafeB64Encode(json_encode($payload));
         return $jwt . '.' . self::signature($jwt, $key, $alg);
     }
 
-    public static function decode(string $jwt, string $key)
+    public static function decode($jwt, $key)
     {
         $tokens = explode('.', $jwt);
         $key    = md5($key);
