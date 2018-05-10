@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-29 17:25:43
+ * @version  2018-05-10 09:23:36
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -56,11 +56,11 @@ if ( isset($user) ){
         if( $userData['exp'] < $_SERVER['REQUEST_TIME'] + 3600 * 20 * 24){
 
             $authorize = 'refresh_token';
-            $fields = array(
-                'grant_type'=>urlencode($authorize),
-                'client_id'=>urlencode(PUBLIC_KEY),
-                'client_secret'=>urlencode(SECRET_KEY),
-                'refresh_token'=>urlencode($refresh_token)
+            $fields = (object) array(
+                'grant_type' => urlencode($authorize),
+                'client_id' => urlencode(PUBLIC_KEY),
+                'client_secret' => urlencode(SECRET_KEY),
+                'refresh_token' => urlencode($refresh_token)
             );
 
             getAccessToken($fields);
@@ -78,12 +78,14 @@ function adminLogin(){
         'password' => DISQUS_PASSWORD
     );
 
+    $fields_string = fields_format($fields);
+
     $options = array(
         CURLOPT_URL => 'https://import.disqus.com/login/',
         CURLOPT_HEADER => 1,
         CURLOPT_RETURNTRANSFER => 1,
-        CURLOPT_POST => 1,
-        CURLOPT_POSTFIELDS => http_build_query($fields)
+        CURLOPT_POST => count($fields),
+        CURLOPT_POSTFIELDS => $fields_string
     );
 
     $curl = curl_init();
@@ -125,10 +127,10 @@ function getAccessToken($fields){
     $fields_string = fields_format($fields);
 
     $ch = curl_init();
-    curl_setopt($ch,CURLOPT_URL,$url);
-    curl_setopt($ch,CURLOPT_POST,count($fields));
-    curl_setopt($ch,CURLOPT_POSTFIELDS,$fields_string);
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, count($fields));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $data = curl_exec($ch);
     curl_close($ch);
 
@@ -262,7 +264,7 @@ function curl_post($url, $fields){
         CURLOPT_ENCODING => 'gzip, deflate',
         CURLOPT_RETURNTRANSFER => 1,
         CURLOPT_FOLLOWLOCATION => 1,
-        CURLOPT_POST => 1,
+        CURLOPT_POST => count($fields),
         CURLOPT_POSTFIELDS => $fields_string
     );
 
