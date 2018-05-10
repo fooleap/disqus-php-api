@@ -1,5 +1,5 @@
 /*!
- * v 0.2.8
+ * v 0.2.9
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -1392,8 +1392,6 @@
                 name: _.user.name,
                 email: _.user.email,
                 url:  _.user.url,
-                link: _.opts.url,
-                title: _.opts.title
             }
             postAjax( _.opts.api + '/postcomment.php', postData, function(resp){
                 var data = JSON.parse(resp);

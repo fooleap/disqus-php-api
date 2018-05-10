@@ -10,7 +10,7 @@
  * @param id      该评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-29 13:13:19
+ * @version  2018-05-10 23:41:52
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -19,14 +19,17 @@ date_default_timezone_set("Asia/Shanghai");
 require_once('init.php');
 
 // 获取被回复人信息
-$fields = (object) array(
-    'post' => $_POST['parent']
-);
 $curl_url = '/api/3.0/posts/details.json?';
+$fields = (object) array(
+    'post' => $_POST['parent'],
+    'related' => 'thread'
+);
 $data = curl_get($curl_url, $fields);
 $post = post_format($data->response);
-$parent_isanon = $data->response->author->isAnonymous; //是否为访客
+$parent_isanon  = $data->response->author->isAnonymous; //是否为访客
 $parent_email   = $data->response->author->email; //被回复邮箱
+$thread = $data->response->thread;
+$parent_link = $data->response->url;
 $parent_name    = $post['name']; //被回复人名
 $parent_message = $post['message']; //被回复留言
 
@@ -34,17 +37,16 @@ $parent_message = $post['message']; //被回复留言
 $fields = (object) array(
     'post' => $_POST['id']
 );
-$curl_url = '/api/3.0/posts/details.json?';
 $data = curl_get($curl_url, $fields);
 $post = post_format($data->response);
 $reply_name    = $post['name']; //回复者人名
 $reply_message = $post['message']; //回复者留言
 
-$content = '<p>' . $parent_name . '，您在<a target="_blank" href="'.$website.'">「'.SITE_NAME.'」</a>的评论：</p>';
+$content = '<p>' . $parent_name . '，您在<a target="_blank" href="'.$website.'">「'. $forum_data -> forum -> name.'」</a>的评论：</p>';
 $content .= $parent_message;
 $content .= '<p>' . $reply_name . ' 的回复如下：</p>';
 $content .= $reply_message;
-$content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$website. $_POST['link'] . '#comment-' . $_POST['parent'] . '">' . $_POST['title'] . '</a></p>';
+$content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$parent_link. '">'. $thread -> clean_title . '</a></p>';
 
 use PHPMailer;
 
@@ -61,8 +63,8 @@ if( $parent_isanon ){
     $mail->Port       = SMTP_PORT;
     $mail->Username   = SMTP_USERNAME;
     $mail->Password   = SMTP_PASSWORD;
-    $mail->SetFrom(SMTP_USERNAME, SITE_NAME); 
-    $mail->Subject = '您在「'.SITE_NAME.'」的评论有了新回复';
+    $mail->SetFrom(SMTP_USERNAME, $forum_data -> forum -> name); 
+    $mail->Subject = '您在「'.$forum_data -> forum -> name.'」的评论有了新回复';
     $mail->MsgHTML($content);
     $mail->AddAddress($parent_email, $parent_name);
     if(!$mail->Send()) {

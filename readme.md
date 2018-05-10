@@ -29,7 +29,7 @@ Disqus PHP API
 
 ### 重要
 
-必须在 [Disqus API](https://disqus.com/api/applications/) 申请注册一个 App，取得相关的公钥（**API Key**）、私钥（**API Secret**）以及管理员**access_token**，并填写于后端的配置文件 `config.php` 中。
+必须在 [Disqus API](https://disqus.com/api/applications/) 申请注册一个 App，取得相关的公钥（**API Key**）、私钥（**API Secret**），并填写于后端的配置文件 `config.php` 中。
 
 App 设置方面，回调链接请填写 `login.php` 文件的绝对地址，主要的设置如下图，可根据自己情况填写。
 

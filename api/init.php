@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-10 09:23:36
+ * @version  2018-05-10 22:58:27
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -183,17 +183,8 @@ function curl_get($url, $fields){
 
     global $forum_data;
 
-    if( defined(ACCESS_TOKEN) ){
-
-        $fields -> api_secret = SECRET_KEY;
-        $fields -> access_token = ACCESS_TOKEN;
-
-    } else {
-
-        $fields -> api_key = DISQUS_PUBKEY;
-        $cookies = 'sessionid='.$forum_data -> cookie -> sessionid;
-
-    }
+    $fields -> api_key = DISQUS_PUBKEY;
+    $cookies = 'sessionid='.$forum_data -> cookie -> sessionid;
 
     $fields_string = fields_format($fields);
 
