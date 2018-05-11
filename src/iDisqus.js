@@ -1,8 +1,7 @@
 /*!
- * v 0.2.9
+ * v 0.2.10
  * 
  * https://github.com/fooleap/disqus-php-api
- *
  *
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
@@ -733,7 +732,7 @@
         );
     }
 
-    // 读取评论
+    // 读取评    Entrypoint undefined = index.html论
     iDisqus.prototype.load = function(post){
 
         var _ = this;

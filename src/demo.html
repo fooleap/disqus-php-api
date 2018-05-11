@@ -3,8 +3,6 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Disqus PHP API 示例</title>
-        <link rel="stylesheet" href="/path/to/iDisqus.min.css" />
         <style>
             body{
                 max-width: 640px;
@@ -19,17 +17,18 @@
                 color: #0095dd;
             }
         </style>
-        <script src="/path/to/iDisqus.min.js"></script>
+    </head>
     <body>
         <div id="comment"></div>
         <p>本页共有 <span data-disqus-url="/disqus-php-api.html"></span> 条评论</p>
         <ul id="popular-posts"></ul>
         <p>项目地址：<a href="https://github.com/fooleap/disqus-php-api" target="_blank">https://github.com/fooleap/disqus-php-api</a></p>
-       <script>
+        <script>
             var disq = new iDisqus('comment', {
                 forum: 'fooleap',
                 site: 'http://blog.fooleap.org',
                 api: 'http://api.fooleap.org/disqus',
+                url: '/disqus-php-api.html',
                 mode: 2,
                 timeout: 3000,
                 popular: document.getElementById('popular-posts'),

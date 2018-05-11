@@ -1,61 +1,67 @@
 const webpack = require('webpack');
 const autoprefixer = require('autoprefixer'); 
+const path = require('path');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
-module.exports = {
-    entry: {
-        'iDisqus': './index.js',
-    },
-    output: {
-        path: __dirname + '/dist',
-        filename: '[name].min.js',
-        libraryTarget: 'umd',
-        library: '[name]'
-    },
-    stats: {
-        entrypoints: false,
-        children: false
-    },
-    module: {
-        rules: [
-            {
-                test: /\.(scss|css)$/,
-                use: [
-                    MiniCssExtractPlugin.loader,
-                    'css-loader',
-                    {loader: 'postcss-loader', options: { plugins: () => [ require('autoprefixer') ] }},
-                    'sass-loader'
-                ]
-            },
-            {
-                test: /\.html$/,
-                use: [{
-                    loader: 'file-loader',
-                    options: {
-                        name: '[name].[ext]'
-                    }  
-                }]
-            }
-        ],
-    },
-    plugins: [
-        new MiniCssExtractPlugin({
-            filename: 'iDisqus.min.css'
-        })
-    ],
-    optimization: {
-        minimizer: [
-            new UglifyJSPlugin({
-                uglifyOptions: { 
-                    warnings: false,
-                    output: {
-                        comments: false,
-                        beautify: false
-                    },
-                    ie8: false
+module.exports = function(env, argv) {
+
+    return {
+
+        devtool: argv.mode == 'production' ? 'source-maps' : 'eval',
+
+        entry: {
+            'iDisqus': './index.js',
+        },
+
+        output: {
+            path: path.resolve(__dirname, 'dist'),
+            filename: argv.mode == 'production' ? '[name].min.js' : '[name].js',
+            libraryTarget: 'umd',
+            library: '[name]'
+        },
+
+        stats: {
+            entrypoints: false,
+            children: false
+        },
+
+        module: {
+            rules: [
+                {
+                    test: /\.scss$/,
+                    use: [
+                        MiniCssExtractPlugin.loader,
+                        'css-loader',
+                        {
+                            loader: 'postcss-loader',
+                            options: { plugins: () => [ require('autoprefixer') ] }
+                        },
+                        'sass-loader'
+                    ]
                 }
+            ]
+        },
+
+        plugins: [
+            new MiniCssExtractPlugin({
+                filename: argv.mode == 'production' ? '[name].min.css' : '[name].css'
+            }),
+            new CleanWebpackPlugin(['dist'], {
+                watch: true
+            }),
+            new HtmlWebpackPlugin({
+                title: 'Disqus PHP API',
+                template: './src/demo.html',
+                inject: 'head'
             })
-        ]
+        ],
+
+        devServer: {
+            contentBase: path.join(__dirname, 'dist'),
+            compress: true,
+            port: 9000
+        }
     }
 };

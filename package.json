@@ -1,36 +1,34 @@
 {
-  "name": "disqus-php-api",
-  "version": "0.2.9",
-  "description": "disqus-php-api 利用 PHP cURL 转发 Disqus API 请求",
-  "main": "index.js",
-  "dependencies": {},
-  "devDependencies": {
-    "autoprefixer": "^8.3.0",
-    "css-loader": "^0.28.11",
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^5.0.0",
-    "gulp-cssnano": "^2.1.3",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^4.0.1",
-    "gulp-uglify": "^3.0.0",
-    "mini-css-extract-plugin": "^0.4.0",
-    "node-sass": "^4.9.0",
-    "postcss": "^6.0.21",
-    "postcss-loader": "^2.1.4",
-    "sass-loader": "^7.0.1",
-    "uglifyjs-webpack-plugin": "^1.2.5",
-    "webpack": "^4.6.0",
-    "webpack-cli": "^2.0.15"
-  },
-  "scripts": {
-    "webpack": "webpack -p",
-    "gulp": "gulp"
-  },
-  "repository": "git+https://github.com/fooleap/disqus-php-api.git",
-  "author": "fooleap",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/fooleap/disqus-php-api/issues"
-  },
-  "homepage": "https://github.com/fooleap/disqus-php-api#readme"
+    "name": "disqus-php-api",
+    "version": "0.2.10",
+    "description": "disqus-php-api 利用 PHP cURL 转发 Disqus API 请求",
+    "main": "index.js",
+    "dependencies": {},
+    "devDependencies": {
+        "autoprefixer": "^8.3.0",
+        "clean-webpack-plugin": "^0.1.19",
+        "css-loader": "^0.28.11",
+        "html-webpack-plugin": "^3.2.0",
+        "mini-css-extract-plugin": "^0.4.0",
+        "node-sass": "^4.9.0",
+        "path": "^0.12.7",
+        "postcss": "^6.0.21",
+        "postcss-loader": "^2.1.4",
+        "sass-loader": "^7.0.1",
+        "webpack": "^4.6.0",
+        "webpack-cli": "^2.0.15",
+        "webpack-dev-server": "^3.1.4"
+    },
+    "scripts": {
+        "start": "webpack-dev-server --mode development --open",
+        "dev": "webpack --progress --colors --watch --mode development",
+        "build": "webpack -p --progress --colors --mode production"
+    },
+    "repository": "git+https://github.com/fooleap/disqus-php-api.git",
+    "author": "fooleap",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/fooleap/disqus-php-api/issues"
+    },
+    "homepage": "https://github.com/fooleap/disqus-php-api#readme"
 }
