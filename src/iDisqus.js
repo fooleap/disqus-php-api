@@ -1,5 +1,5 @@
 /*!
- * v 0.2.10
+ * v 0.2.11
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -457,7 +457,7 @@
             '                    </div>\n'+
             '                </div>\n'+
             '            </div>\n'+
-            '            <div class="comment-form-user">'+ ( _.opts.mode != 1 ? '<div class="comment-form-auth"><button class="comment-form-login" title="使用 Disqus 帐号登录"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 200 200"><path fill="#2E9FFF" d="M102.535 167.5c-16.518 0-31.621-6.036-43.298-16.021L30.5 155.405l11.102-27.401A67.658 67.658 0 0 1 35.564 100c0-37.277 29.984-67.5 66.971-67.5 36.984 0 66.965 30.223 66.965 67.5 0 37.284-29.98 67.5-66.965 67.5zm36.567-67.693v-.188c0-19.478-13.736-33.367-37.42-33.367h-25.58v67.5h25.201c23.868.001 37.799-14.468 37.799-33.945zm-37.138 17.361h-7.482V82.841h7.482c10.989 0 18.283 6.265 18.283 17.07v.188c0 10.896-7.294 17.069-18.283 17.069z"/></svg></button></div><span> 或 </span>' : '' ) + '<div class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" placeholder="名字（必填）" autocomplete="name"><input class="comment-form-input comment-form-email" type="email" placeholder="邮箱（必填）" autocomplete="email"><input class="comment-form-input comment-form-url" type="url" placeholder="网址（可选）" autocomplete="url"></div></div>\n'+
+            '            <div class="comment-form-user">'+ ( _.opts.mode != 1 ? '<div class="comment-form-auth"><button class="comment-form-login" title="使用 Disqus 帐号登录"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 200 200"><path fill="#2E9FFF" d="M102.535 167.5c-16.518 0-31.621-6.036-43.298-16.021L30.5 155.405l11.102-27.401A67.658 67.658 0 0 1 35.564 100c0-37.277 29.984-67.5 66.971-67.5 36.984 0 66.965 30.223 66.965 67.5 0 37.284-29.98 67.5-66.965 67.5zm36.567-67.693v-.188c0-19.478-13.736-33.367-37.42-33.367h-25.58v67.5h25.201c23.868.001 37.799-14.468 37.799-33.945zm-37.138 17.361h-7.482V82.841h7.482c10.989 0 18.283 6.265 18.283 17.07v.188c0 10.896-7.294 17.069-18.283 17.069z"/></svg></button></div><span> 或 </span>' : '' ) + '<div class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" name="name" placeholder="名字（必填）" autocomplete="name"><input class="comment-form-input comment-form-email" type="email" name="email" placeholder="邮箱（必填）" autocomplete="email"><input class="comment-form-input comment-form-url" type="url" name="url" placeholder="网址（可选）" autocomplete="url"></div></div>\n'+
             '        </div>\n'+
             '    </div>\n'+
             '    <ul id="comments" class="comment-list"></ul>\n'+
@@ -716,11 +716,12 @@
 
                     _.timeAgo();
 
-                    if (/^#disqus|^#comment-/.test(location.hash) && !data.cursor.hasPrev && !_.stat.disqusLoaded ) {
+                    if (/^#disqus|^#comment-/.test(location.hash) && !data.cursor.hasPrev && !_.stat.disqusLoaded && !_.stat.loaded) {
                         var el = _.dom.querySelector('#idisqus ' + location.hash)
-                        window.scrollBy(0, el.getBoundingClientRect().top);
+                        if( !!el ){
+                            window.scrollBy(0, el.getBoundingClientRect().top);
+                        }
                     }
-
                     _.stat.loading = false;
                     _.stat.loaded = true;
                 } else if ( data.code === 2 ){
@@ -732,7 +733,7 @@
         );
     }
 
-    // 读取评    Entrypoint undefined = index.html论
+    // 读取评论
     iDisqus.prototype.load = function(post){
 
         var _ = this;

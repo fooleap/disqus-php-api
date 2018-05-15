@@ -52,8 +52,8 @@ module.exports = function(env, argv) {
                 watch: true
             }),
             new HtmlWebpackPlugin({
-                title: 'Disqus PHP API',
                 template: './src/demo.html',
+                filename: 'disqus-php-api.html',
                 inject: 'head'
             })
         ],
@@ -61,7 +61,8 @@ module.exports = function(env, argv) {
         devServer: {
             contentBase: path.join(__dirname, 'dist'),
             compress: true,
-            port: 9000
+            port: 9000,
+            openPage: '/disqus-php-api.html'
         }
     }
 };

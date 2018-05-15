@@ -1,6 +1,6 @@
 {
     "name": "disqus-php-api",
-    "version": "0.2.10",
+    "version": "0.2.11",
     "description": "disqus-php-api 利用 PHP cURL 转发 Disqus API 请求",
     "main": "index.js",
     "dependencies": {},
@@ -20,7 +20,7 @@
         "webpack-dev-server": "^3.1.4"
     },
     "scripts": {
-        "start": "webpack-dev-server --mode development --open",
+        "start": "webpack-dev-server --mode development",
         "dev": "webpack --progress --colors --watch --mode development",
         "build": "webpack -p --progress --colors --mode production"
     },
