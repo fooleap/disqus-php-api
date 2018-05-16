@@ -63,10 +63,12 @@ if( $parent_isanon ){
     $mail->Port       = SMTP_PORT;
     $mail->Username   = SMTP_USERNAME;
     $mail->Password   = SMTP_PASSWORD;
-    $mail->SetFrom(SMTP_USERNAME, $forum_data -> forum -> name); 
     $mail->Subject = '您在「'.$forum_data -> forum -> name.'」的评论有了新回复';
     $mail->MsgHTML($content);
     $mail->AddAddress($parent_email, $parent_name);
+    $from = !SMTP_FROM ? SMTP_USERNAME : SMTP_FROM;
+    $from_name = !SMTP_FROMNAME ? $forum_data -> forum -> name : SMTP_FROMNAME;
+    $mail->SetFrom($from, $from_name);
     if(!$mail->Send()) {
         echo "发送失败：" . $mail->ErrorInfo;
     } else {

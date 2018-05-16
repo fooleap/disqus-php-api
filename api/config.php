@@ -55,6 +55,8 @@ define('EMOJI_PATH', 'https://assets-cdn.github.com/images/icons/emoji/unicode/'
  * SMTP_PORT      端口号
  * SMTP_USERNAME  SMTP 登录的账号，即邮箱号
  * SMTP_PASSWORD  SMTP 登录的账号，即邮箱密码
+ * SMTP_FROM      发件人的邮箱地址，可以留空
+ * SMTP_FROMNAME  发件人的名称，可以留空
  *
  */
 
@@ -63,3 +65,5 @@ define('SMTP_HOST', '');
 define('SMTP_PORT', 465);
 define('SMTP_USERNAME', '');
 define('SMTP_PASSWORD', '');
+define('SMTP_FROM', '');
+define('SMTP_FROMNAME', '');
