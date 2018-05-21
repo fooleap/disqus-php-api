@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-10 22:58:27
+ * @version  2018-05-21 20:35:42
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -288,7 +288,7 @@ function post_format( $post ){
     $post -> author -> avatar -> cache = $post -> author -> isAnonymous ? $avatar_url : $post -> author -> avatar -> cache;
 
     // 表情
-    $post -> message = str_replace('<img class="emojione"','<img class="emojione" width="24" height="24"',$client -> toImage($post -> message));
+    $post -> message = str_replace('<img class="emojione"','<img class="emojione" width="24" height="24"',$client -> shortnametoImage($client -> toShort($post -> message)));
 
     // 链接
     $post -> author -> url = !!$post -> author -> url ? $post -> author -> url : $post -> author -> profileUrl;
