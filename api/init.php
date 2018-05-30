@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-21 20:35:42
+ * @version  2018-05-30 09:48:59
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -283,9 +283,8 @@ function post_format( $post ){
     $isMod = ($post -> author -> username == DISQUS_USERNAME || $post -> author -> email == DISQUS_EMAIL ) && $post -> author -> isAnonymous == false ? true : false;
 
     // 访客指定 Gravatar 头像
-    $avatar_default = strpos($forum_data -> forum -> avatar, 'https') !== false ? $forum_data -> forum -> avatar : 'https:'.$forum_data -> forum -> avatar;
-    $avatar_url = GRAVATAR_CDN.md5($post -> author -> email).'?d='.$avatar_default;
-    $post -> author -> avatar -> cache = $post -> author -> isAnonymous ? $avatar_url : $post -> author -> avatar -> cache;
+    /*$avatar_url = GRAVATAR_CDN.md5($post -> author -> email).'?d='.$avatar_default;
+    $post -> author -> avatar -> cache = $post -> author -> isAnonymous ? $avatar_url : $post -> author -> avatar -> cache;*/
 
     // 表情
     $post -> message = str_replace('<img class="emojione"','<img class="emojione" width="24" height="24"',$client -> shortnametoImage($client -> toShort($post -> message)));
@@ -330,7 +329,7 @@ function post_format( $post ){
     // 是否已删除
     if(!!$post -> isDeleted){
         $post -> message = '';
-        $post -> author -> avatar -> cache = GRAVATAR_CDN.'?d='.$avatar_default;
+        $post -> author -> avatar -> cache =  $forum_data -> forum -> avatar;
         $post -> author -> username = '';
         $post -> author -> name = '';
         $post -> author -> url = '';

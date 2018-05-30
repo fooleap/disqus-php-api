@@ -1,5 +1,5 @@
 /*!
- * v 0.2.11
+ * v 0.2.12
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -667,7 +667,7 @@
         _.dom.querySelector('#idisqus').style.display = 'block';
         _.dom.querySelector('#disqus_thread').style.display = 'none';
         getAjax(
-            _.opts.api + '/getcomments.php?link=' + _.opts.url + (!!_.stat.next ? '&cursor=' + _.stat.next : ''),
+            _.opts.api + '/getcomments.php?ident=' + _.opts.identifier + '&link=' + _.opts.url + (!!_.stat.next ? '&cursor=' + _.stat.next : ''),
             function(resp){
                 var data = JSON.parse(resp);
                 if (data.code === 0) {
@@ -1069,18 +1069,8 @@
         var avatar = box.querySelector('.comment-avatar-image');
         var email = box.querySelector('.comment-form-email');
         var alertmsg = box.querySelector('.comment-form-alert');
-        if(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.value)){
-            getAjax(
-                _.opts.api + '/getgravatar.php?email=' + email.value,
-                function(resp) {
-                    if (resp == 'false') {
-                        _.errorTips('您所填写的邮箱地址有误。', email);
-                    } else {
-                        avatar.src = resp;
-                    }
-                }, function(){
-                }
-            );
+        if(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.value) == false){
+            _.errorTips('您所填写的邮箱地址有误。', email);
         }
     }
 

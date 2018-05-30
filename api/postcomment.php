@@ -71,6 +71,7 @@ $output = $data -> code == 0 ? array(
     'response' => post_format($data -> response)
 ) : $data;
 
+/*
 if ( !empty($_POST['parent']) && $data -> code == 0 ){
 
     $fields = (object) array(
@@ -96,5 +97,5 @@ if ( !empty($_POST['parent']) && $data -> code == 0 ){
         curl_exec($ch);
     }
     curl_close($ch);
-}
+}*/
 print_r(json_encode($output));
