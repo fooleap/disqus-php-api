@@ -6,11 +6,10 @@
  * @param message  评论内容
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-26 17:17:18
+ * @version  2018-05-31 15:47:44
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 date_default_timezone_set('UTC');
 require_once('init.php');
 
@@ -21,7 +20,7 @@ $curl_url = '/api/3.0/posts/details.json?';
 $data = curl_get($curl_url, $fields);
 $duration = time() - strtotime($data->response->createdAt);
 
-$post_message = html_entity_decode($client->shortnameToUnicode($_POST['message']));
+$post_message = $emoji->toUnicode($_POST['message']);
 
 $output = array();
 

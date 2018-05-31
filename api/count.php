@@ -5,11 +5,10 @@
  * @param links  页面链接，以“,”分隔
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-26 17:17:09
+ * @version  2018-05-31 15:48:27
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 require_once('init.php');
 
 $links = explode(',', $_GET['links']);

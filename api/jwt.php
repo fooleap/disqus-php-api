@@ -2,11 +2,10 @@
 /**
  * JWT
  *
- * @version  2018-05-06 19:41:14
+ * @version  2018-05-31 15:48:49
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 
 class JWT {
 

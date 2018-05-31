@@ -3,11 +3,10 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-10 23:43:11
+ * @version  2018-05-31 15:48:12
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 
 /*
  * Disqus 设置

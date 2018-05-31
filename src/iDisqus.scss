@@ -717,8 +717,14 @@
     }
     .comment-item-content {
         padding-top: 5px;
-        line-height: 24px;
         font-size: 14px;
+        line-height: 1.6;
+        p{
+            margin-bottom: 5px;
+            &:last-child{
+                margin-bottom: 0;
+            }
+        }
         a[data-dsq-mention]:before{
             content: "@";
         }

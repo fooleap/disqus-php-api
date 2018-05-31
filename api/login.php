@@ -3,11 +3,10 @@
  * 登录
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-10 09:24:49
+ * @version  2018-05-31 15:48:58
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 require_once('init.php');
 header('Content-type:text/html');
 

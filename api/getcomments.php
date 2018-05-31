@@ -7,11 +7,10 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-30 09:44:34
+ * @version  2018-05-31 15:31:28 
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 require_once('init.php');
 
 $thread = 'ident:'.$_GET['ident'];
@@ -30,14 +29,9 @@ $data = curl_get($curl_url, $fields);
 if( $data -> code == 2 ){
 
     $thread = 'link:'.$website.$_GET['link'];
-    $fields = (object) array(
-        'forum' => DISQUS_SHORTNAME,
-        'cursor' => $_GET['cursor'],
-        'limit' => 50,
-        'order' => 'desc',
-        'thread' => $thread
-    );
+    $fields -> thread = $thread;
     $data = curl_get($curl_url, $fields);
+
 }
 
 $fields = (object) array(

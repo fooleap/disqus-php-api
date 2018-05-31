@@ -10,11 +10,10 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-10 23:41:32
+ * @version  2018-05-31 15:47:16
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 require_once('init.php');
 
 $author_name = $_POST['name'];
@@ -35,7 +34,7 @@ if(!empty($_POST['parent'])){
 }
 
 $curl_url = '/api/3.0/posts/create.json';
-$post_message = html_entity_decode($client->shortnameToUnicode($_POST['message']));
+$post_message = $emoji->toUnicode($_POST['message']);
 
 // 已登录
 if( isset($access_token) ){

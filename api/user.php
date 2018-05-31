@@ -3,11 +3,10 @@
  * 获取用户资料
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-04 16:10:12
+ * @version  2018-05-31 15:48:01
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 require_once('init.php');
 
 $output = array(

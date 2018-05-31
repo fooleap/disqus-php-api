@@ -5,11 +5,10 @@
  * @param file  上传的文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-03-10 14:08:47
+ * @version  2018-05-31 15:47:53
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 require_once('init.php');
 
 if ($_FILES['file']['error']){

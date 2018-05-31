@@ -5,11 +5,10 @@
  * @param id  评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-04-26 17:17:43
+ * @version  2018-05-31 15:47:25
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 date_default_timezone_set('UTC');
 require_once('init.php');
 

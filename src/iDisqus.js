@@ -1,5 +1,5 @@
 /*!
- * v 0.2.12
+ * v 0.2.13
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -285,7 +285,7 @@
         }];
         
         if(!!_.opts.emoji_preview || !!_.opts.emojiPreview ){
-            getAjax(_.opts.api +'/eac.min.php', function(resp){
+            getAjax(_.opts.api +'/eac.php', function(resp){
                 _.eac = JSON.parse(resp);
             }, function(){
             })

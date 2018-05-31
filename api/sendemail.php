@@ -14,7 +14,6 @@
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
-namespace Emojione;
 date_default_timezone_set("Asia/Shanghai");
 require_once('init.php');
 
