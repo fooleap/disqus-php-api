@@ -2,15 +2,12 @@
 /**
  * 发送电子邮件
  *
- * @param name    回复者名字
- * @param message 回复内容
- * @param title   页面标题
- * @param link    页面链接
- * @param parent  被回复评论 ID
- * @param id      该评论 ID
+ * @param parent       被回复评论 ID
+ * @param parentEmail  被回复评论者邮箱
+ * @param id           该评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-10 23:41:52
+ * @version  2018-06-03 16:31:28
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -25,8 +22,7 @@ $fields = (object) array(
 );
 $data = curl_get($curl_url, $fields);
 $post = post_format($data->response);
-$parent_isanon  = $data->response->author->isAnonymous; //是否为访客
-$parent_email   = $data->response->author->email; //被回复邮箱
+$parent_email   = $_POST['parentEmail']; //被回复邮箱
 $thread = $data->response->thread;
 $parent_link = $data->response->url;
 $parent_name    = $post['name']; //被回复人名
@@ -49,28 +45,26 @@ $content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$par
 
 use PHPMailer;
 
-if( $parent_isanon ){
-    // 发送邮件
-    require_once('PHPMailer/class.phpmailer.php');
-    require_once('PHPMailer/class.smtp.php');
-    $mail          = new PHPMailer();
-    $mail->CharSet = "UTF-8"; 
-    $mail->IsSMTP();
-    $mail->SMTPAuth   = true;
-    $mail->SMTPSecure = SMTP_SECURE;
-    $mail->Host       = SMTP_HOST;
-    $mail->Port       = SMTP_PORT;
-    $mail->Username   = SMTP_USERNAME;
-    $mail->Password   = SMTP_PASSWORD;
-    $mail->Subject = '您在「'.$forum_data -> forum -> name.'」的评论有了新回复';
-    $mail->MsgHTML($content);
-    $mail->AddAddress($parent_email, $parent_name);
-    $from = !SMTP_FROM ? SMTP_USERNAME : SMTP_FROM;
-    $from_name = !SMTP_FROMNAME ? $forum_data -> forum -> name : SMTP_FROMNAME;
-    $mail->SetFrom($from, $from_name);
-    if(!$mail->Send()) {
-        echo "发送失败：" . $mail->ErrorInfo;
-    } else {
-        echo "恭喜，邮件发送成功！";
-    }
+// 发送邮件
+require_once('PHPMailer/class.phpmailer.php');
+require_once('PHPMailer/class.smtp.php');
+$mail          = new PHPMailer();
+$mail->CharSet = "UTF-8"; 
+$mail->IsSMTP();
+$mail->SMTPAuth   = true;
+$mail->SMTPSecure = SMTP_SECURE;
+$mail->Host       = SMTP_HOST;
+$mail->Port       = SMTP_PORT;
+$mail->Username   = SMTP_USERNAME;
+$mail->Password   = SMTP_PASSWORD;
+$mail->Subject = '您在「'.$forum_data -> forum -> name.'」的评论有了新回复';
+$mail->MsgHTML($content);
+$mail->AddAddress($parent_email, $parent_name);
+$from = defined('SMTP_FROM') ? SMTP_FROM : SMTP_USERNAME;
+$from_name = defined('SMTP_FROMNAME') ? SMTP_FROMNAME : $forum_data -> forum -> name;
+$mail->SetFrom($from, $from_name);
+if(!$mail->Send()) {
+    echo "发送失败：" . $mail->ErrorInfo;
+} else {
+    echo "恭喜，邮件发送成功！";
 }

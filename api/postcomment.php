@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:47:16
+ * @version  2018-06-03 16:02:20
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -19,16 +19,20 @@ require_once('init.php');
 $author_name = $_POST['name'];
 $author_email = $_POST['email'];
 $author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
+$thread = $_POST['thread'];
+$parent = $_POST['parent'];
 
-// 父评是已登录用户
-if(!empty($_POST['parent'])){
+// 存在父评，即回复
+if(!empty($parent)){
+
     $fields = (object) array(
-        'post' => $_POST['parent']
+        'post' => $parent
     );
     $curl_url = '/api/3.0/posts/details.json?';
     $data = curl_get($curl_url, $fields);
-    $post = post_format($data->response);
-    if($data->response->author->isAnonymous == false){
+    $isAnonParent = $data->response->author->isAnonymous;
+    if( $isAnonParent == false ){
+        // 防止重复发邮件
         $approved = null;
     }
 }
@@ -40,8 +44,8 @@ $post_message = $emoji->toUnicode($_POST['message']);
 if( isset($access_token) ){
 
     $post_data = (object) array(
-        'thread' => $_POST['thread'],
-        'parent' => $_POST['parent'],
+        'thread' => $thread,
+        'parent' => $parent,
         'message' => $post_message,
         'ip_address' => $_SERVER['REMOTE_ADDR']
     );
@@ -49,8 +53,8 @@ if( isset($access_token) ){
 } else {
 
     $post_data = (object) array(
-        'thread' => $_POST['thread'],
-        'parent' => $_POST['parent'],
+        'thread' => $thread,
+        'parent' => $parent,
         'message' => $post_message,
         'author_name' => $author_name,
         'author_email' => $author_email,
@@ -64,37 +68,56 @@ if( isset($access_token) ){
 
 $data = curl_post($curl_url, $post_data);
 
-$output = $data -> code == 0 ? array(
-    'code' => $data -> code,
-    'thread' => $_POST['thread'],
-    'response' => post_format($data -> response)
-) : $data;
+if( $data -> code == 0 ){
 
-/*
-if ( !empty($_POST['parent']) && $data -> code == 0 ){
-
-    $fields = (object) array(
-        'parent'=> $_POST['parent'],
-        'id'=> $data -> response -> id
+    $output = array(
+        'code' => $data -> code,
+        'thread' => $thread,
+        'response' => post_format($data -> response)
     );
 
-    $fields_string = fields_format($fields);
+    $id = $data -> response -> id;
+    $parentEmail = $forum_data -> emails -> $parent;
 
-    $ch = curl_init();
-    $options = array(
-        CURLOPT_URL => getCurrentDir().'/sendemail.php',
-        CURLOPT_RETURNTRANSFER => 1,
-        CURLOPT_POST => count($fields),
-        CURLOPT_POSTFIELDS => $fields_string,
-        CURLOPT_TIMEOUT => 1
-    );
-    curl_setopt_array($ch, $options);
-    curl_exec($ch);
-    $errno = curl_errno($ch);
-    if ($errno == 60 || $errno == 77) {
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
-        curl_exec($ch);
+    // 匿名用户暂存邮箱号
+    if( !isset($access_token) ){
+        $forum_data -> emails -> $id = $author_email;
+        file_put_contents($data_path, json_encode($forum_data));
     }
-    curl_close($ch);
-}*/
+
+    // 父评是匿名且邮箱号存在
+    if( $isAnonParent && isset($parentEmail) ){
+
+        $fields = (object) array(
+            'parent' => $parent,
+            'parentEmail' => $parentEmail,
+            'id' => $id
+        );
+
+        $fields_string = fields_format($fields);
+
+        $ch = curl_init();
+        $options = array(
+            CURLOPT_URL => getCurrentDir().'/sendemail.php',
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_POST => count($fields),
+            CURLOPT_POSTFIELDS => $fields_string,
+            CURLOPT_TIMEOUT => 1
+        );
+        curl_setopt_array($ch, $options);
+        curl_exec($ch);
+        $errno = curl_errno($ch);
+        if ($errno == 60 || $errno == 77) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+            curl_exec($ch);
+        }
+        curl_close($ch);
+    }
+
+} else {
+
+    $output = $data;
+
+}
+
 print_r(json_encode($output));
