@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:48:12
+ * @version  2018-06-03 11:15:54
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -39,11 +39,13 @@ define('DISQUS_APPROVED', true);
  * 图片设置
  *
  * GRAVATAR_CDN     Gravatar 头像 CDN
+ * GRAVATAR_DEFAULT Gravatar 默认头像，即 d 参数，可参考 https://www.gravatar.com/site/implement/images/ 
  * EMOJI_PATH       Emoji 表情 PNG 资源路径
  *
  */
  
 define('GRAVATAR_CDN', '//cn.gravatar.com/avatar/');
+define('GRAVATAR_DEFAULT', 'retro');
 define('EMOJI_PATH', 'https://assets-cdn.github.com/images/icons/emoji/unicode/');
 
 /*

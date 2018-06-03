@@ -276,8 +276,15 @@ function post_format( $post ){
     $isMod = ($post -> author -> username == DISQUS_USERNAME || $post -> author -> email == DISQUS_EMAIL ) && $post -> author -> isAnonymous == false ? true : false;
 
     // 访客指定 Gravatar 头像
-    /*$avatar_url = GRAVATAR_CDN.md5($post -> author -> email).'?d='.$avatar_default;
-    $post -> author -> avatar -> cache = $post -> author -> isAnonymous ? $avatar_url : $post -> author -> avatar -> cache;*/
+    
+    if( defined('GRAVATAR_DEFAULT') ){
+        $avatar_default = GRAVATAR_DEFAULT;
+    } else {
+        $avatar_default = strpos($forum_data -> forum -> avatar, 'https') !== false ? $forum_data -> forum -> avatar : 'https:'.$forum_data -> forum -> avatar;
+    }
+
+    $avatar_url = GRAVATAR_CDN.md5($post -> author -> name).'?d='.$avatar_default.'&s=92&f=y';
+    $post -> author -> avatar -> cache = $post -> author -> isAnonymous ? $avatar_url : $post -> author -> avatar -> cache;
 
     // 表情
     $post -> message = $emoji -> toImage($post -> message);

@@ -1,5 +1,5 @@
 /*!
- * v 0.2.13
+ * v 0.2.14
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -457,7 +457,7 @@
             '                    </div>\n'+
             '                </div>\n'+
             '            </div>\n'+
-            '            <div class="comment-form-user">'+ ( _.opts.mode != 1 ? '<div class="comment-form-auth"><button class="comment-form-login" title="使用 Disqus 帐号登录"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 200 200"><path fill="#2E9FFF" d="M102.535 167.5c-16.518 0-31.621-6.036-43.298-16.021L30.5 155.405l11.102-27.401A67.658 67.658 0 0 1 35.564 100c0-37.277 29.984-67.5 66.971-67.5 36.984 0 66.965 30.223 66.965 67.5 0 37.284-29.98 67.5-66.965 67.5zm36.567-67.693v-.188c0-19.478-13.736-33.367-37.42-33.367h-25.58v67.5h25.201c23.868.001 37.799-14.468 37.799-33.945zm-37.138 17.361h-7.482V82.841h7.482c10.989 0 18.283 6.265 18.283 17.07v.188c0 10.896-7.294 17.069-18.283 17.069z"/></svg></button></div><span> 或 </span>' : '' ) + '<div class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" name="name" placeholder="名字（必填）" autocomplete="name"><input class="comment-form-input comment-form-email" type="email" name="email" placeholder="邮箱（必填）" autocomplete="email"><input class="comment-form-input comment-form-url" type="url" name="url" placeholder="网址（可选）" autocomplete="url"></div></div>\n'+
+            '            <div class="comment-form-user">'+ ( _.opts.mode != 1 ? '<div class="comment-form-auth"><button class="comment-form-login" title="使用 Disqus 帐号登录"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 200 200"><path fill="#2E9FFF" d="M102.535 167.5c-16.518 0-31.621-6.036-43.298-16.021L30.5 155.405l11.102-27.401A67.658 67.658 0 0 1 35.564 100c0-37.277 29.984-67.5 66.971-67.5 36.984 0 66.965 30.223 66.965 67.5 0 37.284-29.98 67.5-66.965 67.5zm36.567-67.693v-.188c0-19.478-13.736-33.367-37.42-33.367h-25.58v67.5h25.201c23.868.001 37.799-14.468 37.799-33.945zm-37.138 17.361h-7.482V82.841h7.482c10.989 0 18.283 6.265 18.283 17.07v.188c0 10.896-7.294 17.069-18.283 17.069z"/></svg></button></div><span> 或 </span>' : '' ) + '<form class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" name="name" placeholder="名字（必填）" autocomplete="name"><input class="comment-form-input comment-form-email" type="email" name="email" placeholder="邮箱（必填）" autocomplete="email"><input class="comment-form-input comment-form-url" type="url" name="url" placeholder="网址（可选）" autocomplete="url"></form></div>\n'+
             '        </div>\n'+
             '    </div>\n'+
             '    <ul id="comments" class="comment-list"></ul>\n'+
@@ -598,6 +598,7 @@
         _.addListener('comment-form-textarea', 'focus',  _.handle.focus);
         _.addListener('comment-form-textarea', 'input',  _.handle.input);
         _.addListener('comment-form-textarea', 'keyup',  _.handle.mention);
+        _.addListener('comment-form-name', 'blur',  _.handle.verify);
         _.addListener('comment-form-email', 'blur',  _.handle.verify);
         _.addListener('comment-form-submit', 'click',  _.handle.post);
         _.addListener('comment-form-login', 'click',  _.handle.login);
@@ -673,7 +674,7 @@
                 if (data.code === 0) {
                     _.stat.offsetTop = d.documentElement.scrollTop || d.body.scrollTop;
                     _.stat.thread = data.thread;
-                    _.stat.count = data.posts;
+                    _.stat.total = data.cursor.total;
                     _.opts.avatar = data.forum.avatar;
                     _.dom.querySelector('.comment-avatar-image').dataset.avatar = data.forum.avatar;
                     if( _.user.logged_in == 'false' ){
@@ -682,7 +683,7 @@
                     _.opts.badge =  data.forum.moderatorBadgeText;
                     _.dom.querySelector('#idisqus').classList.remove('loading');
                     _.dom.querySelector('#comment-link').href = data.link;
-                    _.dom.querySelector('#comment-count').innerHTML = _.stat.count + ' 条评论';
+                    _.dom.querySelector('#comment-count').innerHTML = _.stat.total + ' 条评论';
                     var loadmore = _.dom.querySelector('.comment-loadmore');
                     var posts = !!data.response ? data.response : [];
                     _.stat.root = [];
@@ -1065,13 +1066,25 @@
     // 验证表单
     iDisqus.prototype.verify = function(e){
         var _ = this;
-        var box  = e.currentTarget.closest('.comment-box');
-        var avatar = box.querySelector('.comment-avatar-image');
-        var email = box.querySelector('.comment-form-email');
+        var $this = e.currentTarget;
+        var box  = $this.closest('.comment-box');
+        var $avatar = box.querySelector('.comment-avatar-image');
+        var $name = box.querySelector('.comment-form-name');
+        var $email = box.querySelector('.comment-form-email');
         var alertmsg = box.querySelector('.comment-form-alert');
-        if(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email.value) == false){
-            _.errorTips('您所填写的邮箱地址有误。', email);
-        }
+        getAjax(
+            _.opts.api + '/getgravatar.php?email=' + $email.value + '&name=' + $name.value,
+            function(resp) {
+                var data  = JSON.parse(resp);
+                if ( !data.isEmail && $this == $email) {
+                    _.errorTips('您所填写的邮箱地址有误。', $email);
+                }
+                if ($name.value != '') {
+                    $avatar.src = data.gravatar;
+                }
+            }, function(){
+            }
+        );
     }
 
     // 上传图片
@@ -1387,8 +1400,8 @@
                 var data = JSON.parse(resp);
                 if (data.code === 0) {
                     _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
-                    _.stat.count += 1;
-                    _.dom.querySelector('#comment-count').innerHTML = _.stat.count + ' 条评论';
+                    _.stat.total += 1;
+                    _.dom.querySelector('#comment-count').innerHTML = _.stat.total + ' 条评论';
                     var post = data.response;
                     post.isPost = true;
                     _.load(post);
@@ -1550,6 +1563,7 @@
         _.removeListener('comment-form-textarea', 'blur', _.handle.focus);
         _.removeListener('comment-form-textarea', 'focus', _.handle.focus);
         _.removeListener('comment-form-textarea', 'keyup', _.handle.mention);
+        _.removeListener('comment-form-name', 'blur', _.handle.verify);
         _.removeListener('comment-form-email', 'blur', _.handle.verify);
         _.removeListener('comment-form-submit', 'click', _.handle.post);
         _.removeListener('comment-image-input', 'change', _.handle.upload);
