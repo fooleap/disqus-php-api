@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-03 16:02:20
+ * @version  2018-06-04 22:51:26
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -77,20 +77,15 @@ if( $data -> code == 0 ){
     );
 
     $id = $data -> response -> id;
-    $parentEmail = $forum_data -> emails -> $parent;
+    $createdAt = $data -> response ->createdAt;
+    $parentPost = $forum_data -> posts -> $parent;
 
-    // 匿名用户暂存邮箱号
-    if( !isset($access_token) ){
-        $forum_data -> emails -> $id = $author_email;
-        file_put_contents($data_path, json_encode($forum_data));
-    }
-
-    // 父评是匿名且邮箱号存在
-    if( $isAnonParent && isset($parentEmail) ){
+    // 父评邮箱号存在
+    if( isset($parentPost) ){
 
         $fields = (object) array(
             'parent' => $parent,
-            'parentEmail' => $parentEmail,
+            'parentEmail' => $parentPost -> email,
             'id' => $id
         );
 
@@ -112,6 +107,20 @@ if( $data -> code == 0 ){
             curl_exec($ch);
         }
         curl_close($ch);
+    }
+
+    // 匿名用户暂存邮箱号
+    if( !isset($access_token) ){
+        foreach ( $forum_data -> posts as $key => $post ){
+            if(strtotime('-1 month') > strtotime($post -> createdAt)){
+                unset($forum_data -> posts -> $key);
+            }
+        }
+        $forum_data -> posts -> $id = (object) array(
+            'email' => $author_email,
+            'createdAt' => $createdAt
+        );
+        file_put_contents($data_path, json_encode($forum_data));
     }
 
 } else {

@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:47:02
+ * @version  2018-06-04 23:23:17
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -369,12 +369,13 @@ function getForumData(){
     );
     $curl_url = '/api/3.0/forums/details.json?';
     $data = curl_get($curl_url, $fields);
+    $modText = $data -> response -> moderatorBadgeText;
     $forum = array(
         'founder' => $data -> response -> founder,
         'name' => $data -> response -> name,
         'url' => $data -> response -> url,
         'avatar' => $data -> response -> avatar -> large -> cache,
-        'moderatorBadgeText' =>  $data -> response -> moderatorBadgeText,
+        'moderatorBadgeText' =>  !!$modText ? $modText : 'Moderator',
         'expires' => time() + 3600*24
     );
     if( $data -> code == 0 ){
