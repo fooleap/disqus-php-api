@@ -3,11 +3,12 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-04 23:23:17
+ * @version  2018-06-13 21:47:04
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 require_once('config.php');
+require_once('cache.php');
 require_once('jwt.php');
 require_once('emoji.php');
 
@@ -24,16 +25,18 @@ if(preg_match('(localhost|'.$ipRegex.'|'.domain(DISQUS_WEBSITE).')', $origin)){
     header('Access-Control-Allow-Origin: '.$origin);
 }
 
+try {
+    $cache = new Cache();
+} catch (Exception $e) {
+    die('没有权限');
+}
+
 $jwt = new JWT();
 $emoji = new Emoji();
 
 $approved = DISQUS_APPROVED == 1 ? 'approved' : null;
 $url = parse_url(DISQUS_WEBSITE);
 $website = $url['scheme'].'://'.$url['host'];
-
-// 缓存文件
-$data_path = sys_get_temp_dir().'/disqus_'.DISQUS_SHORTNAME.'.json';
-$forum_data = json_decode(file_get_contents($data_path));
 
 $user = $_COOKIE['access_token'];
 
@@ -64,7 +67,7 @@ if ( isset($user) ){
 
 function adminLogin(){
 
-    global $data_path, $forum_data;
+    global $cache;
 
     $fields = (object) array(
         'username' => DISQUS_EMAIL,
@@ -105,14 +108,14 @@ function adminLogin(){
 
     }
 
-    $forum_data -> cookie = $cookie;
+    // 更新缓存
+    $cache -> update($cookie,'cookie');
 
-    file_put_contents($data_path, json_encode($forum_data));
 }
 
 // 鉴权
 function getAccessToken($fields){
-    global $data_path, $forum_data, $access_token, $jwt;
+    global $access_token, $jwt;
 
     extract($_POST);
     $url = 'https://disqus.com/api/oauth/2.0/access_token/?';
@@ -174,10 +177,10 @@ function fields_format($fields){
 
 function curl_get($url, $fields){
 
-    global $forum_data;
+    global $cache;
 
     $fields -> api_key = DISQUS_PUBKEY;
-    $cookies = 'sessionid='.$forum_data -> cookie -> sessionid;
+    $cookies = 'sessionid='.$cache -> get('cookie') -> sessionid;
 
     $fields_string = fields_format($fields);
 
@@ -212,7 +215,7 @@ function curl_get($url, $fields){
 
 function curl_post($url, $fields){
 
-    global $access_token, $forum_data;
+    global $access_token, $cache;
 
     if( isset($access_token) && strpos($url, 'threads/create') === false && strpos($url, 'media') === false ){
 
@@ -222,7 +225,7 @@ function curl_post($url, $fields){
     } else {
 
         $fields -> api_key = DISQUS_PUBKEY;
-        $cookies = 'sessionid='.$forum_data -> cookie -> sessionid;
+        $cookies = 'sessionid='.$cache -> get('cookie') -> sessionid;
     }
 
     if( strpos($url, 'media') !== false ){
@@ -270,17 +273,18 @@ function curl_post($url, $fields){
 }
 
 function post_format( $post ){
-    global $emoji, $forum_data;
+    global $emoji, $cache;
 
     // 是否是管理员
     $isMod = ($post -> author -> username == DISQUS_USERNAME || $post -> author -> email == DISQUS_EMAIL ) && $post -> author -> isAnonymous == false ? true : false;
 
     // 访客指定 Gravatar 头像
-    
+    $avatar = $cache -> get('forum') -> avatar;
+
     if( defined('GRAVATAR_DEFAULT') ){
         $avatar_default = GRAVATAR_DEFAULT;
     } else {
-        $avatar_default = strpos($forum_data -> forum -> avatar, 'https') !== false ? $forum_data -> forum -> avatar : 'https:'.$forum_data -> forum -> avatar;
+        $avatar_default = strpos($avatar, 'https') !== false ? $avatar : 'https:'.$avatar;
     }
 
     $avatar_url = GRAVATAR_CDN.md5($post -> author -> name).'?d='.$avatar_default.'&s=92&f=y';
@@ -318,17 +322,14 @@ function post_format( $post ){
     foreach ( $post -> media as $key => $image ){
         
         $imgArr[$key] = (object) array(
+            'thumbUrl' => $image -> thumbnailUrl,
             'thumbWidth' => $image -> thumbnailWidth,
             'thumbHeight' => $image -> thumbnailHeight,
             'provider' => $image -> providerName
         );
 
         if( $image -> url !== 'https://disqus.com' && $image -> url !== 'disqus.com' ){
-            if( strpos($image -> url, 'giphy.gif') !== false ){
-                $imgArr[$key] = '//a.disquscdn.com/get?url='.urlencode($image -> url).'&key=Hx_Z1IMzKElPuRPVmpnfsQ';
-            } else {
-                $imgArr[$key] = $image -> url;
-            }
+            $imgArr[$key] = $image -> thumbnailUrl;
         }
     };
     $imgArr = array_reverse($imgArr);
@@ -336,7 +337,7 @@ function post_format( $post ){
     // 是否已删除
     if(!!$post -> isDeleted){
         $post -> message = '';
-        $post -> author -> avatar -> cache =  $forum_data -> forum -> avatar;
+        $post -> author -> avatar -> cache =  $avatar;
         $post -> author -> username = '';
         $post -> author -> name = '';
         $post -> author -> url = '';
@@ -362,7 +363,7 @@ function post_format( $post ){
 
 function getForumData(){
 
-    global $data_path, $forum_data;
+    global $cache;
 
     $fields = (object) array(
         'forum' => DISQUS_SHORTNAME
@@ -375,12 +376,11 @@ function getForumData(){
         'name' => $data -> response -> name,
         'url' => $data -> response -> url,
         'avatar' => $data -> response -> avatar -> large -> cache,
-        'moderatorBadgeText' =>  !!$modText ? $modText : 'Moderator',
+        'moderatorBadgeText' =>  !!$modText ? $modText : 'Mod',
         'expires' => time() + 3600*24
     );
     if( $data -> code == 0 ){
-        $forum_data -> forum = $forum;
-        file_put_contents($data_path, json_encode($forum_data));
+        $cache -> update($forum,'forum');
     }
 }
 
@@ -400,10 +400,10 @@ function getCurrentDir (){
 
 }
 
-if( time() > strtotime($forum_data -> cookie -> expires) || !$forum_data -> cookie){
+if( time() > strtotime($cache -> get('cookie') -> expires) || !$cache -> get('cookie') ){
     adminLogin();
 }
 
-if( time() > $forum_data -> forum -> expires || !$forum_data -> forum){
+if( time() > $cache -> get('forum') -> expires || !$cache -> get('forum')){
     getForumData();
 }

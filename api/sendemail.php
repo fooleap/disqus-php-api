@@ -7,7 +7,7 @@
  * @param id           该评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-03 16:31:28
+ * @version  2018-06-13 21:54:29
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -36,8 +36,9 @@ $data = curl_get($curl_url, $fields);
 $post = post_format($data->response);
 $reply_name    = $post['name']; //回复者人名
 $reply_message = $post['message']; //回复者留言
+$forum_name = $cache -> get('forum') -> name;
 
-$content = '<p>' . $parent_name . '，您在<a target="_blank" href="'.$website.'">「'. $forum_data -> forum -> name.'」</a>的评论：</p>';
+$content = '<p>' . $parent_name . '，您在<a target="_blank" href="'.$website.'">「'. $forum_name .'」</a>的评论：</p>';
 $content .= $parent_message;
 $content .= '<p>' . $reply_name . ' 的回复如下：</p>';
 $content .= $reply_message;
@@ -57,11 +58,11 @@ $mail->Host       = SMTP_HOST;
 $mail->Port       = SMTP_PORT;
 $mail->Username   = SMTP_USERNAME;
 $mail->Password   = SMTP_PASSWORD;
-$mail->Subject = '您在「'.$forum_data -> forum -> name.'」的评论有了新回复';
+$mail->Subject = '您在「' . $forum_name . '」的评论有了新回复';
 $mail->MsgHTML($content);
 $mail->AddAddress($parent_email, $parent_name);
 $from = defined('SMTP_FROM') ? SMTP_FROM : SMTP_USERNAME;
-$from_name = defined('SMTP_FROMNAME') ? SMTP_FROMNAME : $forum_data -> forum -> name;
+$from_name = defined('SMTP_FROMNAME') ? SMTP_FROMNAME : $forum_name;
 $mail->SetFrom($from, $from_name);
 if(!$mail->Send()) {
     echo "发送失败：" . $mail->ErrorInfo;

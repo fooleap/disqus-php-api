@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-04 22:51:26
+ * @version  2018-06-13 21:52:53
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -61,7 +61,7 @@ if( isset($access_token) ){
         'author_url' => $author_url
     );
 
-    if(!!$forum_data -> cookie){
+    if(!!$cache -> get('cookie')){
         $post_data -> state = $approved;
     }
 }
@@ -78,7 +78,8 @@ if( $data -> code == 0 ){
 
     $id = $data -> response -> id;
     $createdAt = $data -> response ->createdAt;
-    $parentPost = $forum_data -> posts -> $parent;
+    $posts = $cache -> get('posts');
+    $parentPost = $posts -> $parent;
 
     // 父评邮箱号存在
     if( isset($parentPost) ){
@@ -111,16 +112,16 @@ if( $data -> code == 0 ){
 
     // 匿名用户暂存邮箱号
     if( !isset($access_token) ){
-        foreach ( $forum_data -> posts as $key => $post ){
+        foreach ( $posts as $key => $post ){
             if(strtotime('-1 month') > strtotime($post -> createdAt)){
-                unset($forum_data -> posts -> $key);
+                unset($posts -> $key);
             }
         }
-        $forum_data -> posts -> $id = (object) array(
+        $posts -> $id = (object) array(
             'email' => $author_email,
             'createdAt' => $createdAt
         );
-        file_put_contents($data_path, json_encode($forum_data));
+        $cache -> update($posts, 'posts');
     }
 
 } else {
