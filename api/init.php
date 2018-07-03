@@ -296,15 +296,18 @@ function post_format( $post ){
     // 链接
     $post -> author -> url = !!$post -> author -> url ? $post -> author -> url : $post -> author -> profileUrl;
 
-    // 去除链接重定向
-    $urlPat = '/<a.*?href="(.*?[disq\.us][disqus\.com].*?)".*?>(.*?)<\/a>/mi';
+    $urlPat = '/<a.*?href="(.*?[disq\.us][disqus\.com][disquscdn\.com][media.giphy\.com].*?)".*?>(.*?)<\/a>/mi';
     preg_match_all($urlPat, $post -> message, $urlArr);    
     if( count($urlArr[0]) > 0 ){
         $linkArr = array();
         foreach ( $urlArr[1] as $item => $urlItem){
+            // 去除链接重定向
             if(preg_match('/^(http|https):\/\/disq\.us/i', $urlItem)){
                 parse_str(parse_url($urlItem,PHP_URL_QUERY),$out);
                 $linkArr[$item] = '<a href="'.join(':', explode(':',$out['url'],-1)).'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
+            // 去掉图片链接
+            } elseif ( preg_match('/^(http|https):\/\/.*(disquscdn.com|media.giphy.com).*\.(jpg|gif|png)$/i', $urlItem) ){
+                $linkArr[$item] = '';
             } elseif ( strpos($urlItem, 'https://disqus.com/by/') !== false ){
                 $linkArr[$item] = '<a href="'.$urlItem.'" target="_blank" title="'.$urlArr[2][$item].'">@'.$urlArr[2][$item].'</a>';
             } else {
@@ -313,10 +316,6 @@ function post_format( $post ){
         }
         $post -> message = str_replace($urlArr[0],$linkArr,$post -> message);
     }
-
-    // 去掉图片链接
-    $imgpat = '/<a(.*?)href="(.*?(disquscdn.com|media.giphy.com).*?\.(jpg|gif|png))"(.*?)>(.*?)<\/a>/i';
-    $post -> message = preg_replace($imgpat,'',$post -> message);
 
     $imgArr = array();
     foreach ( $post -> media as $key => $image ){
