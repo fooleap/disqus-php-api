@@ -10,15 +10,15 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-13 21:52:53
+ * @version  2018-08-18 16:24:05
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 require_once('init.php');
 
-$author_name = $_POST['name'];
-$author_email = $_POST['email'];
-$author_url = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
+$authorName = $_POST['name'];
+$authorEmail = $_POST['email'];
+$authorUrl = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
 $thread = $_POST['thread'];
 $parent = $_POST['parent'];
 
@@ -30,15 +30,16 @@ if(!empty($parent)){
     );
     $curl_url = '/api/3.0/posts/details.json?';
     $data = curl_get($curl_url, $fields);
-    $isAnonParent = $data->response->author->isAnonymous;
-    if( $isAnonParent == false ){
+    $pAuthor = $data->response->author;
+    $pUid = md5($pAuthor->name.$pAuthor->email);
+    if( $pAuthor->isAnonymous == false ){
         // 防止重复发邮件
         $approved = null;
     }
 }
 
 $curl_url = '/api/3.0/posts/create.json';
-$post_message = $emoji->toUnicode($_POST['message']);
+$postMessage = $emoji->toUnicode($_POST['message']);
 
 // 已登录
 if( isset($access_token) ){
@@ -46,7 +47,7 @@ if( isset($access_token) ){
     $post_data = (object) array(
         'thread' => $thread,
         'parent' => $parent,
-        'message' => $post_message,
+        'message' => $postMessage,
         'ip_address' => $_SERVER['REMOTE_ADDR']
     );
 
@@ -55,10 +56,10 @@ if( isset($access_token) ){
     $post_data = (object) array(
         'thread' => $thread,
         'parent' => $parent,
-        'message' => $post_message,
-        'author_name' => $author_name,
-        'author_email' => $author_email,
-        'author_url' => $author_url
+        'message' => $postMessage,
+        'author_name' => $authorName,
+        'author_email' => $authorEmail,
+        'author_url' => $authorUrl
     );
 
     if(!!$cache -> get('cookie')){
@@ -76,18 +77,15 @@ if( $data -> code == 0 ){
         'response' => post_format($data -> response)
     );
 
-    $id = $data -> response -> id;
-    $createdAt = $data -> response ->createdAt;
-    $posts = $cache -> get('posts');
-    $parentPost = $posts -> $parent;
+    $authors = $cache -> get('authors');
 
-    // 父评邮箱号存在
-    if( isset($parentPost) ){
+    // 父评邮箱号存在 & 父评是匿名用户
+    if( isset($authors -> $pUid) && $pAuthor->isAnonymous){
 
         $fields = (object) array(
             'parent' => $parent,
-            'parentEmail' => $parentPost -> email,
-            'id' => $id
+            'parentEmail' => $authors -> $pUid,
+            'id' => $data -> response -> id
         );
 
         $fields_string = fields_format($fields);
@@ -112,16 +110,9 @@ if( $data -> code == 0 ){
 
     // 匿名用户暂存邮箱号
     if( !isset($access_token) ){
-        foreach ( $posts as $key => $post ){
-            if(strtotime('-1 month') > strtotime($post -> createdAt)){
-                unset($posts -> $key);
-            }
-        }
-        $posts -> $id = (object) array(
-            'email' => $author_email,
-            'createdAt' => $createdAt
-        );
-        $cache -> update($posts, 'posts');
+        $uid = md5($authorName.email_format($authorEmail));
+        $authors -> $uid = $authorEmail;
+        $cache -> update($authors, 'authors');
     }
 
 } else {

@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-13 21:47:04
+ * @version  2018-08-17 23:45:07
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -161,6 +161,14 @@ function encodeURIComponent($str){
     return strtr(rawurlencode($str), $replacers);
 }
 
+function email_format($email){
+    $index = strrpos($email, '@');
+    $start = $index > 1 ? 1 : 0;
+    $length = $index - $start;
+    $star = str_repeat('*', $length);
+    return substr_replace($email, $star, $start, $length);
+}
+
 function fields_format($fields){
     foreach($fields as $key=>$value) { 
         if (is_array($value)) {
@@ -275,8 +283,16 @@ function curl_post($url, $fields){
 function post_format( $post ){
     global $emoji, $cache;
 
+    $author = $post -> author;
+
     // 是否是管理员
-    $isMod = ($post -> author -> username == DISQUS_USERNAME || $post -> author -> email == DISQUS_EMAIL ) && $post -> author -> isAnonymous == false ? true : false;
+    $isMod = ($author -> username == DISQUS_USERNAME || $author -> email == DISQUS_EMAIL ) && $author -> isAnonymous == false ? true : false;
+
+    $uid = md5($author -> name.$author -> email);
+
+    // 访客数据
+    $authors = $cache -> get('authors');
+    $email = isset($authors -> $uid) ? $authors -> $uid : $author -> name;
 
     // 访客指定 Gravatar 头像
     $avatar = $cache -> get('forum') -> avatar;
@@ -284,17 +300,18 @@ function post_format( $post ){
     if( defined('GRAVATAR_DEFAULT') ){
         $avatar_default = GRAVATAR_DEFAULT;
     } else {
-        $avatar_default = strpos($avatar, 'https') !== false ? $avatar : 'https:'.$avatar;
+        $avatar_default = substr($avatar, 0, 2) === '//' ? 'https:'.$avatar : $avatar;
     }
 
-    $avatar_url = GRAVATAR_CDN.md5($post -> author -> name).'?d='.$avatar_default.'&s=92&f=y';
-    $post -> author -> avatar -> cache = $post -> author -> isAnonymous ? $avatar_url : $post -> author -> avatar -> cache;
+    if($author -> isAnonymous){
+        $author -> avatar -> cache = GRAVATAR_CDN.md5($email).'?d='.$avatar_default.'&s=92';
+    }
 
     // 表情
     $post -> message = $emoji -> toImage($post -> message);
 
     // 链接
-    $post -> author -> url = !!$post -> author -> url ? $post -> author -> url : $post -> author -> profileUrl;
+    $author -> url = !!$author -> url ? $author -> url : $author -> profileUrl;
 
     $urlPat = '/<a.*?href="(.*?[disq\.us][disqus\.com][disquscdn\.com][media.giphy\.com].*?)".*?>(.*?)<\/a>/mi';
     preg_match_all($urlPat, $post -> message, $urlArr);    
@@ -336,25 +353,25 @@ function post_format( $post ){
     // 是否已删除
     if(!!$post -> isDeleted){
         $post -> message = '';
-        $post -> author -> avatar -> cache =  $avatar;
-        $post -> author -> username = '';
-        $post -> author -> name = '';
-        $post -> author -> url = '';
+        $author -> avatar -> cache =  $avatar;
+        $author -> username = '';
+        $author -> name = '';
+        $author -> url = '';
         $isMod = '';
     }
 
     $data = array( 
-        'avatar' => $post -> author -> avatar -> cache,
+        'avatar' => $author -> avatar -> cache,
         'isMod' => $isMod,
         'isDeleted' => $post -> isDeleted,
-        'username' => $post -> author -> username,
+        'username' => $author -> username,
         'createdAt' => $post -> createdAt.'+00:00',
         'id' => $post -> id,
         'media' => $imgArr,
         'message' => $post -> message,
-        'name' => $post -> author -> name,
+        'name' => $author -> name,
         'parent' => $post -> parent,
-        'url' => $post -> author -> url
+        'url' => $author -> url
     );
 
     return $data;
@@ -370,11 +387,13 @@ function getForumData(){
     $curl_url = '/api/3.0/forums/details.json?';
     $data = curl_get($curl_url, $fields);
     $modText = $data -> response -> moderatorBadgeText;
+    $avatar = $data -> response -> avatar -> large -> cache;
+    
     $forum = array(
         'founder' => $data -> response -> founder,
         'name' => $data -> response -> name,
         'url' => $data -> response -> url,
-        'avatar' => $data -> response -> avatar -> large -> cache,
+        'avatar' => substr($avatar, 0, 2) === '//' ? 'https:'.$avatar : $avatar,
         'moderatorBadgeText' =>  !!$modText ? $modText : 'Mod',
         'expires' => time() + 3600*24
     );

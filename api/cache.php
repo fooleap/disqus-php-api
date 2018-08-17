@@ -3,7 +3,7 @@
  * 缓存类
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-13 21:47:32
+ * @version  2018-08-17 19:58:08
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -36,7 +36,7 @@ class Cache {
                 throw new Exception('没有权限');
             }
         }
-        self::$data = (object) array("cookie"=>null, "forum"=>null, "posts"=>null);
+        self::$data = (object) array("cookie"=>null, "forum"=>null, "authors"=>null);
         self::save();
 
     }

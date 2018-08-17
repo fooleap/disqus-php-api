@@ -6,20 +6,21 @@
  * @param email 邮箱号
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-03 11:13:10
+ * @version  2018-08-17 20:00:19
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 require_once('init.php');
+$email = $_GET['email'];
 $avatar = $cache -> get('forum') -> avatar;
 if( defined('GRAVATAR_DEFAULT') ){
     $avatar_default = GRAVATAR_DEFAULT;
 } else {
     $avatar_default = strpos($avatar, 'https') !== false ? $avatar : 'https:'.$avatar;
 }
-$gravatar =  GRAVATAR_CDN.md5($_GET['name']).'?d='.$avatar_default.'&s=92&f=y';
+$gravatar =  GRAVATAR_CDN.md5($email).'?d='.$avatar_default.'&s=92';
 
-$mailpart = explode('@',$_GET['email']);
+$mailpart = explode('@',$email);
 $isEmail = checkdnsrr(array_pop($mailpart),'MX') ? true : false;
 
 $output = array(
