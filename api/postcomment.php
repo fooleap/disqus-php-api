@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-18 16:24:05
+ * @version  2018-08-28 13:38:53
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -31,7 +31,6 @@ if(!empty($parent)){
     $curl_url = '/api/3.0/posts/details.json?';
     $data = curl_get($curl_url, $fields);
     $pAuthor = $data->response->author;
-    $pUid = md5($pAuthor->name.$pAuthor->email);
     if( $pAuthor->isAnonymous == false ){
         // 防止重复发邮件
         $approved = null;
@@ -77,14 +76,11 @@ if( $data -> code == 0 ){
         'response' => post_format($data -> response)
     );
 
-    $authors = $cache -> get('authors');
-
-    // 父评邮箱号存在 & 父评是匿名用户
-    if( isset($authors -> $pUid) && $pAuthor->isAnonymous){
+    // 父评是匿名用户
+    if( $pAuthor->isAnonymous ){
 
         $fields = (object) array(
             'parent' => $parent,
-            'parentEmail' => $authors -> $pUid,
             'id' => $data -> response -> id
         );
 
@@ -96,7 +92,8 @@ if( $data -> code == 0 ){
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_POST => count($fields),
             CURLOPT_POSTFIELDS => $fields_string,
-            CURLOPT_TIMEOUT => 1
+            CURLOPT_NOSIGNAL => 1,
+            CURLOPT_TIMEOUT_MS => 500
         );
         curl_setopt_array($ch, $options);
         curl_exec($ch);
@@ -110,6 +107,7 @@ if( $data -> code == 0 ){
 
     // 匿名用户暂存邮箱号
     if( !isset($access_token) ){
+        $authors = $cache -> get('authors');
         $uid = md5($authorName.email_format($authorEmail));
         $authors -> $uid = $authorEmail;
         $cache -> update($authors, 'authors');

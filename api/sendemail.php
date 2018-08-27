@@ -2,47 +2,62 @@
 /**
  * 发送电子邮件
  *
- * @param parent       被回复评论 ID
- * @param parentEmail  被回复评论者邮箱
- * @param id           该评论 ID
+ * @param parent       父评论 ID
+ * @param id           评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-13 21:54:29
+ * @version  2018-08-28 13:48:44
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 date_default_timezone_set("Asia/Shanghai");
 require_once('init.php');
 
+$authors = $cache -> get('authors');
+$forumName = $cache -> get('forum') -> name;
+$pId = $_POST['parent'];
+$id = $_POST['id'];
+
 // 获取被回复人信息
 $curl_url = '/api/3.0/posts/details.json?';
 $fields = (object) array(
-    'post' => $_POST['parent'],
+    'post' => $pId,
     'related' => 'thread'
 );
 $data = curl_get($curl_url, $fields);
+
+$title = $data->response->thread->clean_title;
+$pAuthor = $data->response->author;
+$pLink = $data->response->url; // 被回复链接
+
+$pUid = md5($pAuthor->name.$pAuthor->email);
+$pEmail = $authors -> $pUid; // 被回复邮箱
+
 $post = post_format($data->response);
-$parent_email   = $_POST['parentEmail']; //被回复邮箱
-$thread = $data->response->thread;
-$parent_link = $data->response->url;
-$parent_name    = $post['name']; //被回复人名
-$parent_message = $post['message']; //被回复留言
+$pName    = $post['name']; // 被回复人名
+$pMessage = $post['message']; // 被回复留言
+
+// 不存在邮箱
+if(isset($pEmail) == false){
+    exit(0);
+}
 
 // 获取回复信息
 $fields = (object) array(
-    'post' => $_POST['id']
+    'post' => $id
 );
 $data = curl_get($curl_url, $fields);
 $post = post_format($data->response);
-$reply_name    = $post['name']; //回复者人名
-$reply_message = $post['message']; //回复者留言
-$forum_name = $cache -> get('forum') -> name;
+$rName    = $post['name']; // 回复者人名
+$rMessage = $post['message']; // 回复者留言
 
-$content = '<p>' . $parent_name . '，您在<a target="_blank" href="'.$website.'">「'. $forum_name .'」</a>的评论：</p>';
-$content .= $parent_message;
-$content .= '<p>' . $reply_name . ' 的回复如下：</p>';
-$content .= $reply_message;
-$content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$parent_link. '">'. $thread -> clean_title . '</a></p>';
+$content = '<p>' . $pName . '，您在<a target="_blank" href="'.$website.'">「'. $forumName .'」</a>的评论：</p>';
+$content .= $pMessage;
+$content .= '<p>' . $rName . ' 的回复如下：</p>';
+$content .= $rMessage;
+$content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$pLink. '">'. $title . '</a></p>';
+
+sleep(5);
 
 use PHPMailer;
 
@@ -58,14 +73,20 @@ $mail->Host       = SMTP_HOST;
 $mail->Port       = SMTP_PORT;
 $mail->Username   = SMTP_USERNAME;
 $mail->Password   = SMTP_PASSWORD;
-$mail->Subject = '您在「' . $forum_name . '」的评论有了新回复';
+$mail->Subject = '您在「' . $forumName . '」的评论有了新回复';
 $mail->MsgHTML($content);
-$mail->AddAddress($parent_email, $parent_name);
+$mail->AddAddress($pEmail, $pName);
 $from = defined('SMTP_FROM') ? SMTP_FROM : SMTP_USERNAME;
-$from_name = defined('SMTP_FROMNAME') ? SMTP_FROMNAME : $forum_name;
-$mail->SetFrom($from, $from_name);
+$fromName = defined('SMTP_FROMNAME') ? SMTP_FROMNAME : $forumName;
+$mail->SetFrom($from, $fromName);
+
+$debug = '';
+$mail->SMTPDebug = 2;
+$mail->Debugoutput = function($str, $level) {
+    $GLOBALS['debug'] .= '$level: $str\n';
+};
 if(!$mail->Send()) {
-    echo "发送失败：" . $mail->ErrorInfo;
+    file_put_contents('./cache/phpmailer_error.log', $debug);
 } else {
     echo "恭喜，邮件发送成功！";
 }
