@@ -3,14 +3,14 @@
  * 缓存类
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-17 19:58:08
+ * @version  2018-08-29 13:52:10
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 
 class Cache {
 
-    protected static $dir = './cache/';
+    protected static $dir =  __DIR__ . '/cache/';
     protected static $filename;
     protected static $file;
     protected static $data;

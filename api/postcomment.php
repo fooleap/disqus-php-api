@@ -10,23 +10,26 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-28 13:38:53
+ * @version  2018-08-29 14:33:45
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 require_once('init.php');
+require_once('sendemail.php');
 
 $authorName = $_POST['name'];
 $authorEmail = $_POST['email'];
 $authorUrl = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
 $thread = $_POST['thread'];
 $parent = $_POST['parent'];
+$authors = $cache -> get('authors');
 
 // 存在父评，即回复
 if(!empty($parent)){
 
     $fields = (object) array(
-        'post' => $parent
+        'post' => $parent,
+        'related' => 'thread'
     );
     $curl_url = '/api/3.0/posts/details.json?';
     $data = curl_get($curl_url, $fields);
@@ -35,6 +38,14 @@ if(!empty($parent)){
         // 防止重复发邮件
         $approved = null;
     }
+    
+    $title = $data->response->thread->clean_title; // 文章标题
+    $pLink = $data->response->url; // 被回复链接
+    $pUid = md5($pAuthor->name.$pAuthor->email);
+    $pEmail = $authors -> $pUid; // 被回复邮箱
+    $pPost = post_format($data->response);
+    $pName    = $pPost['name']; // 被回复人名
+    $pMessage = $pPost['message']; // 被回复留言
 }
 
 $curl_url = '/api/3.0/posts/create.json';
@@ -69,40 +80,25 @@ if( isset($access_token) ){
 $data = curl_post($curl_url, $post_data);
 
 if( $data -> code == 0 ){
+    $rPost = post_format($data->response);
+    $rName = $rPost['name']; // 回复者人名
+    $rMessage = $rPost['message']; // 回复者留言
 
     $output = array(
         'code' => $data -> code,
         'thread' => $thread,
-        'response' => post_format($data -> response)
+        'response' => $rPost
     );
 
-    // 父评是匿名用户
-    if( $pAuthor->isAnonymous ){
+    print_r(json_encode($output));
 
-        $fields = (object) array(
-            'parent' => $parent,
-            'id' => $data -> response -> id
-        );
+    if( function_exists('fastcgi_finish_request') ){
+        fastcgi_finish_request();
+    }
 
-        $fields_string = fields_format($fields);
-
-        $ch = curl_init();
-        $options = array(
-            CURLOPT_URL => getCurrentDir().'/sendemail.php',
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_POST => count($fields),
-            CURLOPT_POSTFIELDS => $fields_string,
-            CURLOPT_NOSIGNAL => 1,
-            CURLOPT_TIMEOUT_MS => 500
-        );
-        curl_setopt_array($ch, $options);
-        curl_exec($ch);
-        $errno = curl_errno($ch);
-        if ($errno == 60 || $errno == 77) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
-            curl_exec($ch);
-        }
-        curl_close($ch);
+    // 父评邮箱号存在且父评是匿名用户
+    if( isset($pEmail) && $pAuthor->isAnonymous ){
+        sendEmail($title, $pLink, $pName, $pEmail, $pMessage, $rName, $rMessage);
     }
 
     // 匿名用户暂存邮箱号
@@ -116,7 +112,7 @@ if( $data -> code == 0 ){
 } else {
 
     $output = $data;
+    print_r(json_encode($output));
 
 }
 
-print_r(json_encode($output));
