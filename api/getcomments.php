@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-13 22:10:09
+ * @version  2018-08-30 01:34:59
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -57,7 +57,7 @@ $output = $data -> code == 0 ? (object) array(
     'forum' => $cache -> get('forum'),
     'link' => 'https://disqus.com/home/discussion/'.DISQUS_SHORTNAME.'/'.$detail -> response -> slug.'/?l=zh',
     'response' => $posts,
-    'thread' => $detail -> response -> id
+    'thread' => thread_format($detail -> response)
 ) : $data;
 
 print_r(json_encode($output));

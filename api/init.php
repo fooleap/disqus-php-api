@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-17 23:45:07
+ * @version  2018-08-30 01:35:21
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -280,6 +280,33 @@ function curl_post($url, $fields){
     return json_decode($data);
 }
 
+function forum_format( $forum ){
+    $modText = $forum -> moderatorBadgeText;
+    $avatar = $forum -> avatar -> large -> cache;
+    return (object) array(
+        'founder' => $forum -> founder,
+        'name' => $forum -> name,
+        'url' => $forum -> url,
+        'id' => $forum -> id,
+        'avatar' => substr($avatar, 0, 2) === '//' ? 'https:'.$avatar : $avatar,
+        'moderatorBadgeText' =>  !!$modText ? $modText : '管理员',
+    );
+}
+
+function thread_format( $thread ){
+    return (object) array(
+        'author' => $thread -> author,
+        'dislikes' => $thread -> dislikes,
+        'id' => $thread -> id,
+        'identifiers' => $thread -> identifiers,
+        'likes' => $thread -> likes,
+        'link' => $thread -> link,
+        'posts' => $thread -> posts,
+        'title' => $thread -> clean_title
+    );
+}
+
+
 function post_format( $post ){
     global $emoji, $cache;
 
@@ -360,7 +387,7 @@ function post_format( $post ){
         $isMod = '';
     }
 
-    $data = array( 
+    return (object) array( 
         'avatar' => $author -> avatar -> cache,
         'isMod' => $isMod,
         'isDeleted' => $post -> isDeleted,
@@ -370,11 +397,9 @@ function post_format( $post ){
         'media' => $imgArr,
         'message' => $post -> message,
         'name' => $author -> name,
-        'parent' => $post -> parent,
-        'url' => $author -> url
+        'url' => $author -> url,
+        'parent' => $post -> parent
     );
-
-    return $data;
 }
 
 function getForumData(){
@@ -386,18 +411,10 @@ function getForumData(){
     );
     $curl_url = '/api/3.0/forums/details.json?';
     $data = curl_get($curl_url, $fields);
-    $modText = $data -> response -> moderatorBadgeText;
-    $avatar = $data -> response -> avatar -> large -> cache;
     
-    $forum = array(
-        'founder' => $data -> response -> founder,
-        'name' => $data -> response -> name,
-        'url' => $data -> response -> url,
-        'avatar' => substr($avatar, 0, 2) === '//' ? 'https:'.$avatar : $avatar,
-        'moderatorBadgeText' =>  !!$modText ? $modText : 'Mod',
-        'expires' => time() + 3600*24
-    );
     if( $data -> code == 0 ){
+        $forum = forum_format($data -> response);
+        $forum -> expires = time() + 3600*24;
         $cache -> update($forum,'forum');
     }
 }

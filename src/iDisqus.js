@@ -1,5 +1,5 @@
 /*!
- * v 0.2.14
+ * v 0.2.15
  * 
  * https://github.com/fooleap/disqus-php-api
  *
@@ -1072,6 +1072,9 @@
         var $name = box.querySelector('.comment-form-name');
         var $email = box.querySelector('.comment-form-email');
         var alertmsg = box.querySelector('.comment-form-alert');
+        if($email.val() == ''){
+            return;
+        }
         getAjax(
             _.opts.api + '/getgravatar.php?email=' + $email.value + '&name=' + $name.value,
             function(resp) {
@@ -1389,7 +1392,7 @@
             })
         } else {
             var postData = {
-                thread:  _.stat.thread,
+                thread:  _.stat.thread.id,
                 parent: parentId,
                 message: message,
                 name: _.user.name,
@@ -1406,6 +1409,18 @@
                     post.isPost = true;
                     _.load(post);
                     _.timeAgo();
+                    if(!!data.verifyCode){
+                        var postData = {
+                            post: JSON.stringify(post),
+                            thread: JSON.stringify(data.thread),
+                            parent: JSON.stringify(data.parent),
+                            code: data.verifyCode
+                        }
+                        // 异步发送邮件
+                        postAjax( _.opts.api + '/sendemail.php', postData, function(resp){
+                            console.info('邮件发送成功！');
+                        })
+                    }
                 } else if (data.code === 2) {
                     alertmsg.innerHTML = data.response;
                     _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';

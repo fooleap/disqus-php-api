@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-29 14:33:45
+ * @version  2018-08-30 07:47:42
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -20,7 +20,7 @@ require_once('sendemail.php');
 $authorName = $_POST['name'];
 $authorEmail = $_POST['email'];
 $authorUrl = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
-$thread = $_POST['thread'];
+$threadId = $_POST['thread'];
 $parent = $_POST['parent'];
 $authors = $cache -> get('authors');
 
@@ -39,13 +39,10 @@ if(!empty($parent)){
         $approved = null;
     }
     
-    $title = $data->response->thread->clean_title; // 文章标题
-    $pLink = $data->response->url; // 被回复链接
+    $thread = thread_format($data->response->thread); // 文章信息
     $pUid = md5($pAuthor->name.$pAuthor->email);
     $pEmail = $authors -> $pUid; // 被回复邮箱
     $pPost = post_format($data->response);
-    $pName    = $pPost['name']; // 被回复人名
-    $pMessage = $pPost['message']; // 被回复留言
 }
 
 $curl_url = '/api/3.0/posts/create.json';
@@ -55,7 +52,7 @@ $postMessage = $emoji->toUnicode($_POST['message']);
 if( isset($access_token) ){
 
     $post_data = (object) array(
-        'thread' => $thread,
+        'thread' => $threadId,
         'parent' => $parent,
         'message' => $postMessage,
         'ip_address' => $_SERVER['REMOTE_ADDR']
@@ -64,7 +61,7 @@ if( isset($access_token) ){
 } else {
 
     $post_data = (object) array(
-        'thread' => $thread,
+        'thread' => $threadId,
         'parent' => $parent,
         'message' => $postMessage,
         'author_name' => $authorName,
@@ -81,25 +78,30 @@ $data = curl_post($curl_url, $post_data);
 
 if( $data -> code == 0 ){
     $rPost = post_format($data->response);
-    $rName = $rPost['name']; // 回复者人名
-    $rMessage = $rPost['message']; // 回复者留言
 
     $output = array(
         'code' => $data -> code,
         'thread' => $thread,
+        'parent' => $pPost,
         'response' => $rPost
     );
 
-    print_r(json_encode($output));
-
     if( function_exists('fastcgi_finish_request') ){
+        print_r(json_encode($output));
         fastcgi_finish_request();
+        // 父评邮箱号存在且父评是匿名用户
+        if( isset($pEmail) && $pAuthor->isAnonymous ){
+            sendEmail($thread, $pPost, $rPost, $pEmail);
+        }
+    } else {
+        session_start();
+        $chars = str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+        $code = substr($chars, mt_rand(0, strlen($chars) - 1), 8);  
+        $_SESSION[$code] = $pEmail;
+        $output['verifyCode'] = $code;
+        print_r(json_encode($output));
     }
 
-    // 父评邮箱号存在且父评是匿名用户
-    if( isset($pEmail) && $pAuthor->isAnonymous ){
-        sendEmail($title, $pLink, $pName, $pEmail, $pMessage, $rName, $rMessage);
-    }
 
     // 匿名用户暂存邮箱号
     if( !isset($access_token) ){
