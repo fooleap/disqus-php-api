@@ -12,7 +12,7 @@ module.exports = function(env, argv) {
         devtool: argv.mode == 'production' ? 'source-maps' : 'eval',
 
         entry: {
-            'iDisqus': './index.js',
+            'iDisqus': './src/iDisqus.js',
         },
 
         output: {

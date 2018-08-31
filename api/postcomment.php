@@ -94,11 +94,13 @@ if( $data -> code == 0 ){
             sendEmail($thread, $pPost, $rPost, $pEmail);
         }
     } else {
-        session_start();
-        $chars = str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-        $code = substr($chars, mt_rand(0, strlen($chars) - 1), 8);  
-        $_SESSION[$code] = $pEmail;
-        $output['verifyCode'] = $code;
+        if( isset($pEmail) && $pAuthor->isAnonymous ){
+            session_start();
+            $chars = str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            $code = substr($chars, mt_rand(0, strlen($chars) - 1), 8);  
+            $_SESSION[$code] = $pEmail;
+            $output['verifyCode'] = $code;
+        }
         print_r(json_encode($output));
     }
 

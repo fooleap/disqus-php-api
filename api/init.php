@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-30 01:35:21
+ * @version  2018-08-31 13:26:09
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -280,19 +280,6 @@ function curl_post($url, $fields){
     return json_decode($data);
 }
 
-function forum_format( $forum ){
-    $modText = $forum -> moderatorBadgeText;
-    $avatar = $forum -> avatar -> large -> cache;
-    return (object) array(
-        'founder' => $forum -> founder,
-        'name' => $forum -> name,
-        'url' => $forum -> url,
-        'id' => $forum -> id,
-        'avatar' => substr($avatar, 0, 2) === '//' ? 'https:'.$avatar : $avatar,
-        'moderatorBadgeText' =>  !!$modText ? $modText : '管理员',
-    );
-}
-
 function thread_format( $thread ){
     return (object) array(
         'author' => $thread -> author,
@@ -302,7 +289,8 @@ function thread_format( $thread ){
         'likes' => $thread -> likes,
         'link' => $thread -> link,
         'posts' => $thread -> posts,
-        'title' => $thread -> clean_title
+        'title' => $thread -> clean_title,
+        'createdAt' => $thread -> createdAt.'+00:00'
     );
 }
 
@@ -313,7 +301,7 @@ function post_format( $post ){
     $author = $post -> author;
 
     // 是否是管理员
-    $isMod = ($author -> username == DISQUS_USERNAME || $author -> email == DISQUS_EMAIL ) && $author -> isAnonymous == false ? true : false;
+    $isMod = $author -> username == DISQUS_USERNAME ? true : false;
 
     $uid = md5($author -> name.$author -> email);
 
@@ -396,27 +384,11 @@ function post_format( $post ){
         'id' => $post -> id,
         'media' => $imgArr,
         'message' => $post -> message,
+        'raw_message' => $post -> raw_message,
         'name' => $author -> name,
         'url' => $author -> url,
         'parent' => $post -> parent
     );
-}
-
-function getForumData(){
-
-    global $cache;
-
-    $fields = (object) array(
-        'forum' => DISQUS_SHORTNAME
-    );
-    $curl_url = '/api/3.0/forums/details.json?';
-    $data = curl_get($curl_url, $fields);
-    
-    if( $data -> code == 0 ){
-        $forum = forum_format($data -> response);
-        $forum -> expires = time() + 3600*24;
-        $cache -> update($forum,'forum');
-    }
 }
 
 // 取得当前目录
@@ -439,6 +411,63 @@ if( time() > strtotime($cache -> get('cookie') -> expires) || !$cache -> get('co
     adminLogin();
 }
 
-if( time() > $cache -> get('forum') -> expires || !$cache -> get('forum')){
-    getForumData();
+class Forum {
+    public $founder;
+    public $name;
+    public $url;
+    public $id;
+    public $avatar;
+    public $moderatorBadgeText = '管理员';
+    public $settings;
+    public $expires;
+
+    public function __construct(){
+    }
+
+    protected static function convert($oForum){
+        $forum = new self();
+        $avatar = $oForum -> avatar -> large -> cache;
+        $modText = $oForum -> moderatorBadgeText;
+        $forum->moderatorBadgeText = !!$modText ? $modText : '管理员';
+        $forum->founder = $oForum -> founder;
+        $forum->name = $oForum -> name;
+        $forum->url = $oForum -> url;
+        $forum->id = $oForum -> id;
+        $forum->avatar = substr($avatar, 0, 2) === '//' ? 'https:'.$avatar : $avatar;
+        $forum->settings = $oForum -> settings;
+        return $forum;
+    }
+
+    protected static function isOld($cForum){
+        if(!$cForum){
+            return true;
+        }
+        $forum = new self();
+        if(count(array_diff_key((array)$forum, (array)$cForum)) != 0){
+            return true;
+        }
+        if( $cForum -> expires < time() ){
+            return true;
+        }
+        return false;
+    }
+
+    public function update($cache){
+        if(self::isOld($cache -> get('forum'))){
+            $fields = (object) array(
+                'forum' => DISQUS_SHORTNAME
+            );
+            $curl_url = '/api/3.0/forums/details.json?';
+            $data = curl_get($curl_url, $fields);
+
+            if( $data -> code == 0 ){
+                $forum = self::convert($data -> response);
+                $forum -> expires = time() + 3600*2;
+                $cache -> update($forum,'forum');
+            }
+        }
+    }
 }
+
+$forum = new Forum();
+$forum -> update($cache);

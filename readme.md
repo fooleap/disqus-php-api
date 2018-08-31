@@ -196,7 +196,3 @@ var disq = new iDisqus('comment', {
 
 * 加载评论数
 * 用法：创建容器（可多个），加属性 data-disqus-url 值放页面链接，创建实例后执行则可显示评论数，具体可查看DEMO 页面
-
-#### popular
-
-* 最近热门列表
