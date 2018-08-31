@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-30 01:34:59
+ * @version  2018-08-31 19:44:27
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -41,6 +41,10 @@ $fields = (object) array(
 
 $curl_url = '/api/3.0/threads/details.json?';
 $detail = curl_get($curl_url, $fields);
+
+if( !$detail -> response -> ipAddress){
+    adminLogin();
+}
 
 $posts = array();
 if (is_array($data -> response) || is_object($data -> response)){

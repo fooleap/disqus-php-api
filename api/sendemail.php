@@ -7,7 +7,7 @@
  * @param post    当前评论信息
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-31 13:40:37
+ * @version  2018-09-01 10:51:59
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -72,7 +72,7 @@ function sendEmail($thread, $pPost, $rPost, $pEmail){
     $mail->SetFrom($from, $fromName);
     $mail->SMTPDebug = 2;
     $mail->Debugoutput = function($str, $level) {
-        $GLOBALS['debug'] .= $level.': '.$str.'\n';
+        $GLOBALS['debug'] .= "$level: .$str.\n";
     };
     if(!$mail->Send()) {
         file_put_contents(__DIR__.'/cache/phpmailer_error.log', $GLOBALS['debug']);

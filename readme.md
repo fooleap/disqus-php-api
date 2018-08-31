@@ -182,6 +182,13 @@ var disq = new iDisqus('comment', {
 * {Boolean}
 * 默认：`false`
 
+##### relatedType
+
+* 相关文章类型，可选相关文章或热门文章
+* {String}
+* 默认：`Related`，可选`Popular`
+
+
 ### 实例方法
 
 #### init

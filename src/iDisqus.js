@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2018-08-31 13:42:06
- * @version 0.2.16
+ * @update 2018-09-01 04:26:14
+ * @version 0.2.17
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
@@ -218,6 +218,7 @@ require('./iDisqus.scss');
         _.opts.timeout = _.opts.timeout || 3000;
         _.opts.toggle = !!_.opts.toggle ? d.getElementById(_.opts.toggle) : null;
         _.opts.autoCreate = !!_.opts.autoCreate || !!_.opts.auto;
+        _.opts.relatedType = !!_.opts.relatedType ? _.opts.relatedType : 'Related'
 
         // emoji 表情
         _.opts.emojiPath = _.opts.emojiPath || _.opts.emoji_path || 'https://assets-cdn.github.com/images/icons/emoji/unicode/';
@@ -469,7 +470,7 @@ require('./iDisqus.scss');
             '    </div>\n'+
             '    <ul id="comments" class="comment-list"></ul>\n'+
             '    <a href="javascript:;" class="comment-loadmore">加载更多</a>\n'+
-            '    <div class="comment-popular"></div>'+
+            '    <div class="comment-related"></div>'+
             '</div>\n'+
             '<div class="comment" id="disqus_thread"></div>';
 
@@ -647,10 +648,10 @@ require('./iDisqus.scss');
     };
 
     // 热门话题
-    iDisqus.prototype.popular = function(){
+    iDisqus.prototype.related = function(){
         var _ = this;
         getAjax(
-            _.opts.api + '/popular.php', 
+            _.opts.api + '/list'+ _.opts.relatedType +'.php' + '?thread=' + _.stat.thread.id, 
             function(resp) {
                 var data = JSON.parse(resp);
                 if(data.code == 0){
@@ -658,22 +659,22 @@ require('./iDisqus.scss');
                     var popHtml = '';
                     threads.forEach(function(item){
                         item.topPost.raw_message = item.topPost.raw_message.replace(/(\@\w+):disqus/,'$1');
-                        popHtml += '<li class="popular-item">'+
-                            '<a class="popular-item-link" href="' + item.link  + '" title="' + item.title + '">'+
-                            '<div class="popular-item-title">' + item.title + '</div>'+
-                            '<div class="popular-item-desc">'+item.posts + '条评论<span class="popular-item-bullet"> • </span><time class="popular-item-time" datetime="' + item.createdAt + '"></time></div></a>'+
-                            '<a class="popular-item-link" href="' + item.link  +'?#comment-' + item.topPost.id + '" title="' + item.topPost.raw_message + '">'+
-                            '<div class="popular-item-post">'+
-                            '<div class="popular-item-avatar"><img src="'+item.topPost.avatar+'" /></div>'+
-                            '<div class="popular-item-main">'+
-                            '<div class="popular-item-name">'+item.topPost.name+'</div>'+
-                            '<div class="popular-item-message">'+item.topPost.raw_message+'</div>'+
+                        popHtml += '<li class="related-item">'+
+                            '<a class="related-item-link" href="' + item.link  + '" title="' + item.title + '">'+
+                            '<div class="related-item-title">' + item.title + '</div>'+
+                            '<div class="related-item-desc">'+item.posts + '条评论<span class="related-item-bullet"> • </span><time class="related-item-time" datetime="' + item.createdAt + '"></time></div></a>'+
+                            '<a class="related-item-link" href="' + item.link  +'?#comment-' + item.topPost.id + '" title="' + item.topPost.raw_message + '">'+
+                            '<div class="related-item-post">'+
+                            '<div class="related-item-avatar"><img src="'+item.topPost.avatar+'" /></div>'+
+                            '<div class="related-item-main">'+
+                            '<div class="related-item-name">'+item.topPost.name+'</div>'+
+                            '<div class="related-item-message">'+item.topPost.raw_message+'</div>'+
                             '</div>'+
                             '</div></a>'+
                             '</li>';
                     });
-                    popHtml = '<div class="comment-popular-title">在<span class="comment-popular-forumname">'+_.forum.name+'</span>上还有</div><div class="comment-popular-content"><ul class="popular-list">'+popHtml+'</ul></div>';
-                    _.dom.querySelector('.comment-popular').innerHTML = popHtml;
+                    popHtml = '<div class="comment-related-title">在<span class="comment-related-forumname">'+_.forum.name+'</span>上还有</div><div class="comment-related-content"><ul class="related-list">'+popHtml+'</ul></div>';
+                    _.dom.querySelector('.comment-related').innerHTML = popHtml;
                     _.timeAgo();
                 }
             },function(){
@@ -731,6 +732,11 @@ require('./iDisqus.scss');
                         _.stat.next = null;
                         loadmore.classList.add('hide');
                     }
+
+                    if(_.forum.settings.organicDiscoveryEnabled){
+                        _.related();
+                    }
+
                     if (posts.length == 0) {
                         return;
                     }
@@ -739,9 +745,6 @@ require('./iDisqus.scss');
 
                     _.timeAgo();
 
-                    if(_.forum.settings.organicDiscoveryEnabled){
-                        _.popular();
-                    }
 
                     if (/^#disqus|^#comment-/.test(location.hash) && !data.cursor.hasPrev && !_.stat.disqusLoaded && !_.stat.loaded) {
                         var el = _.dom.querySelector('#idisqus ' + location.hash)
