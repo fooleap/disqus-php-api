@@ -7,7 +7,7 @@
  * @param post    当前评论信息
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-01 10:51:59
+ * @version  2018-09-01 14:11:50
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -18,16 +18,15 @@ require_once('PHPMailer/class.smtp.php');
 
 use PHPMailer;
 
+$authors = $cache -> get('authors');
 $code = $_POST['code'];
 if(!empty($code)){
-    session_start();
-    if(isset($_SESSION[$code])){
-        $pEmail = $_SESSION[$code];
+    if(isset($authors -> $code)){
+        $pEmail = $authors -> $code;
         $thread = json_decode($_POST['thread']);
         $pPost = json_decode($_POST['parent']);
         $rPost = json_decode($_POST['post']);
         sendEmail($thread, $pPost, $rPost, $pEmail);
-        session_destroy();
     }
 }
 
@@ -60,10 +59,29 @@ function sendEmail($thread, $pPost, $rPost, $pEmail){
     $mail->IsSMTP();
     $mail->SMTPAuth   = true;
     $mail->SMTPSecure = SMTP_SECURE;
-    $mail->Host       = SMTP_HOST;
+    $mail->Host       = gethostbyname(SMTP_HOST);
     $mail->Port       = SMTP_PORT;
     $mail->Username   = SMTP_USERNAME;
     $mail->Password   = SMTP_PASSWORD;
+    if(!extension_loaded('openssl')){
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+    } else {
+        $mail->SMTPOptions = array(
+            'ssl' => array (
+                'verify_peer' => true,
+                'verify_depth' => 3,
+                'allow_self_signed' => true,
+                'peer_name' => SMTP_HOST,
+                'cafile' => './cacert.pem',
+             )
+        );
+    }
     $mail->Subject = '您在「' . $forumName . '」的评论有了新回复';
     $mail->MsgHTML($content);
     $mail->AddAddress($pEmail, $pName);
@@ -72,7 +90,7 @@ function sendEmail($thread, $pPost, $rPost, $pEmail){
     $mail->SetFrom($from, $fromName);
     $mail->SMTPDebug = 2;
     $mail->Debugoutput = function($str, $level) {
-        $GLOBALS['debug'] .= "$level: .$str.\n";
+        $GLOBALS['debug'] .= "$level: $str\n";
     };
     if(!$mail->Send()) {
         file_put_contents(__DIR__.'/cache/phpmailer_error.log', $GLOBALS['debug']);
