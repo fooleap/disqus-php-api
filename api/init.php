@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-31 13:26:09
+ * @version  2018-09-03 14:18:53
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -147,6 +147,14 @@ function getAccessToken($fields){
     setcookie('access_token', $jwt -> encode($payload, DISQUS_PASSWORD), $expires, substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT'])), $_SERVER['HTTP_HOST'], false, true); 
 
     return $access_token;
+}
+
+if(!function_exists("array_column"))
+{
+    function array_column($array,$column_name)
+    {
+        return array_map(function($element) use($column_name){return $element[$column_name];}, $array);
+    }
 }
 
 function encodeURIComponent($str){
@@ -417,7 +425,7 @@ class Forum {
     public $url;
     public $id;
     public $avatar;
-    public $moderatorBadgeText = '管理员';
+    public $moderatorBadgeText;
     public $settings;
     public $expires;
 

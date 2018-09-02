@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-01 13:45:32
+ * @version  2018-09-03 07:14:53
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -24,12 +24,19 @@ $threadId = $_POST['thread'];
 $parent = $_POST['parent'];
 $authors = $cache -> get('authors');
 
+$fields = (object) array(
+    'forum' => DISQUS_SHORTNAME,
+    'thread' => $threadId
+);
+$curl_url = '/api/3.0/threads/details.json?';
+$data = curl_get($curl_url, $fields);
+$thread = thread_format($data -> response); // 文章信息
+
 // 存在父评，即回复
 if(!empty($parent)){
 
     $fields = (object) array(
         'post' => $parent,
-        'related' => 'thread'
     );
     $curl_url = '/api/3.0/posts/details.json?';
     $data = curl_get($curl_url, $fields);
@@ -39,7 +46,6 @@ if(!empty($parent)){
         $approved = null;
     }
     
-    $thread = thread_format($data->response->thread); // 文章信息
     $pUid = md5($pAuthor->name.$pAuthor->email);
     $pEmail = $authors -> $pUid; // 被回复邮箱
     $pPost = post_format($data->response);
@@ -86,7 +92,7 @@ if( $data -> code == 0 ){
         'response' => $rPost
     );
 
-    if( !function_exists('fastcgi_finish_request') ){
+    if( function_exists('fastcgi_finish_request') ){
         print_r(json_encode($output));
         fastcgi_finish_request();
         // 父评邮箱号存在且父评是匿名用户
