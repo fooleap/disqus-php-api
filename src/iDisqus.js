@@ -8,10 +8,10 @@
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
-require('./iDisqus.scss');
+//require('./iDisqus.scss');
 (function (global) {
     'use strict';
-
+    document.write("<script type='text/javascript' src='https://pv.sohu.com/cityjson?ie=utf-8'></script>");
     var d = document,
         l = localStorage,
         scripts = d.scripts,
@@ -1420,52 +1420,61 @@ require('./iDisqus.scss');
                 _.stat.editing = false;
             })
         } else {
-            var postData = {
-                thread:  _.stat.thread.id,
-                parent: parentId,
-                message: message,
-                name: _.user.name,
-                email: _.user.email,
-                url:  _.user.url,
+            var ipTemp = returnCitySN["cip"];
+            var postip ={
+                ip: ipTemp,
             }
-            postAjax( _.opts.api + '/postcomment.php', postData, function(resp){
-                var data = JSON.parse(resp);
-                if (data.code === 0) {
-                    _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
-                    _.stat.total += 1;
-                    _.dom.querySelector('#comment-count').innerHTML = _.stat.total + ' 条评论';
-                    var post = data.response;
-                    post.isPost = true;
-                    _.load(post);
-                    _.timeAgo();
-                    if(!!data.verifyCode){
-                        var postData = {
-                            post: JSON.stringify(post),
-                            thread: JSON.stringify(data.thread),
-                            parent: JSON.stringify(data.parent),
-                            code: data.verifyCode
+            postAjax( _.opts.api + '/ipBlackList.php', postip, function(resp){
+                if(resp == 0){
+                    var postData = {
+                    thread:  _.stat.thread.id,
+                    parent: parentId,
+                    message: message,
+                    name: _.user.name,
+                    email: _.user.email,
+                    url:  _.user.url,
+                    }
+                    postAjax( _.opts.api + '/postcomment.php', postData, 
+                        function(resp){
+                            var data = JSON.parse(resp);
+                            if (data.code === 0) {
+                                _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
+                                _.stat.total += 1;
+                                _.dom.querySelector('#comment-count').innerHTML = _.stat.total + ' 条评论';
+                                var post = data.response;
+                                post.isPost = true;
+                                _.load(post);
+                                _.timeAgo();
+                            } else if (data.code === 2) {
+                                alertmsg.innerHTML = data.response;
+                                _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
+                                _.reEdit(item);
+
+                                if( data.response.indexOf('author') > -1){
+                                    _.handle.logout();
+                                }
+                            } else {
+                                alertmsg.innerHTML = '提交失败，请稍后重试，错误代码：' + data.code;
+                                alertClear();
+
+                                _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
+                                _.reEdit(item);
+                            }
+                        }, 
+                        function(){
+                            alertmsg.innerHTML = '提交出错，请稍后重试。';
+                            alertClear();
+
+                            _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
+                            _.reEdit(item);
                         }
-                        // 异步发送邮件
-                        postAjax( _.opts.api + '/sendemail.php', postData, function(resp){
-                            console.info('邮件发送成功！');
-                        })
-                    }
-                } else if (data.code === 2) {
-                    alertmsg.innerHTML = data.response;
-                    _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
-                    _.reEdit(item);
-
-                    if( data.response.indexOf('author') > -1){
-                        _.handle.logout();
-                    }
-                } else {
-                    alertmsg.innerHTML = '提交失败，请稍后重试，错误代码：' + data.code;
-                    alertClear();
-
+                    )
+                }else{
+                    alertmsg.innerHTML = '您已被禁言';
                     _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
                     _.reEdit(item);
                 }
-
+                
             }, function(){
                 alertmsg.innerHTML = '提交出错，请稍后重试。';
                 alertClear();

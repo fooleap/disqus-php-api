@@ -26,13 +26,13 @@
  */
 
 define('DISQUS_PUBKEY', 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F');
-define('PUBLIC_KEY', '');
-define('SECRET_KEY', '');
-define('DISQUS_USERNAME', '');
-define('DISQUS_EMAIL', '');
-define('DISQUS_PASSWORD', '');
-define('DISQUS_WEBSITE', '');
-define('DISQUS_SHORTNAME', '');
+define('PUBLIC_KEY', '8PIvpxY2WmHli7f7pbDNjmNlltAPcEUnJIvg5VIv5DuImPGxBYtP3754NHDfadu5');
+define('SECRET_KEY', '5bayQgy2abIr0KF5uUxKVEODvnsiK7B4bTeEqvmByXYkNdE3FMqwLNZhWTtKzeK1');
+define('DISQUS_USERNAME', 'TrickLin');
+define('DISQUS_EMAIL', 'lin1296794438@gmail.com');
+define('DISQUS_PASSWORD', 'linux001');
+define('DISQUS_WEBSITE', 'https://zh.kcwiki.org');
+define('DISQUS_SHORTNAME', 'kcwikizh');
 define('DISQUS_APPROVED', true);
 
 /*
