@@ -3,14 +3,14 @@
  * 缓存类
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-03 13:52:12
+ * @version  2018-08-29 13:52:10
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 
 class Cache {
 
-    protected static $dir;
+    protected static $dir =  __DIR__ . '/cache/';
     protected static $filename;
     protected static $file;
     protected static $data;
@@ -18,7 +18,6 @@ class Cache {
     // 初始化
     public function __construct(){
 
-        self::$dir = dirname(__FILE__) . '/cache/';
         self::$filename = 'disqus_' . DISQUS_SHORTNAME . '.php';
         self::$file = self::$dir . self::$filename;
         if(!file_exists(self::$file)){

@@ -1,0 +1,120 @@
+<!DOCTYPE>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	<title></title>
+	<style type="text/css">
+		.button{
+			width: 5%;
+		}
+		.ip{
+			width: 10%;
+		}
+	</style>
+    <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+    	var ipdata;
+    	var ipbldata;
+		$.ajax({
+			 url: './getipcache.php',
+			 type: 'POST',
+			 dataType: 'json',
+			 data: {
+			 },
+		}).done(function(res){
+			ipdata = res;
+			$.ajax({
+				 url: './getipblacklistcache.php',
+				 type: 'POST',
+				 dataType: 'json',
+				 data: {
+				 },
+			}).done(function(res){
+				ipbldata = res;
+
+				$.ajax({
+					 url: 'https://disqus.com/api/3.0/forums/listPosts.json?',
+					 dataType: 'json',
+					 data: {
+					   'forum': '',
+					   'api_key': '',
+					   'limit': ''//显示最近评论的个数 max:100
+					 },
+				}).done(function(res) {
+					for (var i = 0; i < res.response.length; i++) {
+					    var temp = '<tr><td class="name">' + res.response[i].author.name+ '</td><td class="ip">'+ ipdata[res.response[i].id] +'</td><td class = "message"> '+res.response[i].message+'</td><td class = "button">';
+					   		var inblacklist = false;
+					　　　　for(var key in ipbldata){
+								if(ipbldata[key].ip == ipdata[res.response[i].id]){
+									inblacklist = true;
+									break;
+								}
+					　　　　}
+					   	if(inblacklist){
+					   		temp += '<button class="btn btn-outline-secondary" type="button" data-type="baned"  data-id="' + res.response[i].id + '" data-ip = "' + ipdata[res.response[i].id] + '">解封</button></td></tr>'	
+					   	}else{
+					   		temp += '<button class="btn btn-outline-primary" type="button" data-type="unbaned" data-id="' + res.response[i].id + '" data-ip = "' + ipdata[res.response[i].id] + '">封禁</button></td></tr>'
+					   	}
+					   	$(temp).appendTo('#recentComments');
+					   	
+					 };
+					 $('#recentComments').toggleClass('show');
+
+					 for (var key in ipbldata) {
+					    var temp = '<tr><td class="ip">' + ipbldata[key].ip + '</td><td class="time">'+ ipbldata[key].time +'</td><td class = "button"><button class="btn btn-outline-secondary" type="button" data-type="baned"  data-id="' + key + '" data-ip = "' + ipbldata[key].ip + '">解封</button></td></tr>';
+					   	$(temp).appendTo('#banedComments');
+					   	
+					 };
+					 $('#banedComments').toggleClass('show');
+
+					 $().ready(function(){
+						$('.btn').click(function(event){
+							if($(event.target).attr('data-type') == "unbaned"){
+								$.post("./addtoblacklist.php",{id: $(event.target).attr('data-id')});
+								$("[data-ip='"+$(event.target).attr('data-ip')+"']").attr('class','btn btn-outline-secondary');
+								$("[data-ip='"+$(event.target).attr('data-ip')+"']").attr('data-type', 'baned');
+								$("[data-ip='"+$(event.target).attr('data-ip')+"']").html("解封");
+							}else{
+								$.post("./deletefromblacklist.php",{ip: $(event.target).attr('data-ip')});
+								$("[data-ip='"+$(event.target).attr('data-ip')+"']").attr('class','btn btn-outline-primary');
+								$("[data-ip='"+$(event.target).attr('data-ip')+"']").attr('data-type', 'unbaned');
+								$("[data-ip='"+$(event.target).attr('data-ip')+"']").html("封禁");
+							}
+						});
+					});
+				}).fail(function(event) {
+				});
+			});
+		});
+	</script>
+</head>
+<body>
+	<nav>
+	  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+		    <a class="nav-item nav-link active" id="nav-addtoblacklist-tab" data-toggle="tab" href="#addtoblacklist" role="tab" aria-controls="nav-home" aria-selected="true">封禁</a>
+		    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">已封列表</a>
+		    <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
+	  </div>
+	</nav>
+	<div class="tab-content" id="nav-tabContent">
+			<div class="tab-pane fade show active" id="addtoblacklist" role="tabpanel" aria-labelledby="nav-home-tab">
+		  		<table class="table table-hover table-sm" id="recentComments">
+				
+				</table>
+			</div>
+			<div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+				<table class="table table-hover table-sm" id="banedComments">
+				
+				</table>
+			</div>
+			<div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
+	</div>
+</body>
+</html>
+	
