@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-06-03 11:15:54
+ * @version  2018-09-08 13:38:39
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -20,6 +20,7 @@
  * DISQUS_WEBSITE   网站域名，如：'http://blog.fooleap.org'
  * DISQUS_SHORTNAME 网站在 Disqus 对应的 shortname
  * DISQUS_APPROVED  评论是否免审核，true 即跳过评论预审核，false 则按后台设置
+ * DISQUS_BLACKLIST 评论发表应用官方的 IP 黑名单，true 即启用，false 则跳过
  *
  * 填写正确的账号信息之后，将以网站管理员的身份去获取评论数据。
  *
@@ -34,6 +35,7 @@ define('DISQUS_PASSWORD', '');
 define('DISQUS_WEBSITE', '');
 define('DISQUS_SHORTNAME', '');
 define('DISQUS_APPROVED', true);
+define('DISQUS_BLACKLIST', false);
 
 /*
  * 图片设置

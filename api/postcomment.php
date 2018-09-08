@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-08 10:40:05
+ * @version  2018-09-08 13:38:12
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -23,14 +23,34 @@ $authorUrl = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url
 $threadId = $_POST['thread'];
 $parent = $_POST['parent'];
 $authors = $cache -> get('authors');
+$approved = DISQUS_APPROVED == 1 ? 'approved' : null;
 
+// 黑名单
+if(DISQUS_BLACKLIST == 1){
+    $fields = (object) array(
+        'forum' => DISQUS_SHORTNAME,
+        'type' => 'ip',
+        'query' => get_ip()
+    );
+    $curl_url = '/api/3.0/blacklists/list.json?';
+    $data = curl_get($curl_url, $fields);
+    if(count($data -> response) != 0){
+        $output = array(
+            'code' => '12',
+            'response' => 'You do not have permission to post on this thread'
+        );
+        print_r(json_encode($output));
+        exit(0);
+    }
+}
+
+// 文章信息
 $fields = (object) array(
-    'forum' => DISQUS_SHORTNAME,
     'thread' => $threadId
 );
 $curl_url = '/api/3.0/threads/details.json?';
 $data = curl_get($curl_url, $fields);
-$thread = thread_format($data -> response); // 文章信息
+$thread = thread_format($data -> response);
 
 // 存在父评，即回复
 if(!empty($parent)){
@@ -61,7 +81,7 @@ if( isset($access_token) ){
         'thread' => $threadId,
         'parent' => $parent,
         'message' => $postMessage,
-        'ip_address' => $_SERVER['REMOTE_ADDR']
+        'ip_address' => get_ip()
     );
 
 } else {

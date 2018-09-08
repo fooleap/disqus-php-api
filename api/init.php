@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-08 10:41:36
+ * @version  2018-09-08 13:38:29
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -34,10 +34,8 @@ try {
 $jwt = new JWT();
 $emoji = new Emoji();
 
-$approved = DISQUS_APPROVED == 1 ? 'approved' : null;
 $url = parse_url(DISQUS_WEBSITE);
 $website = $url['scheme'].'://'.$url['host'];
-
 $user = $_COOKIE['access_token'];
 
 if ( isset($user) ){
@@ -155,6 +153,18 @@ if(!function_exists("array_column"))
     {
         return array_map(function($element) use($column_name){return $element[$column_name];}, $array);
     }
+}
+
+function get_ip(){
+    $ip = '';
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
 }
 
 function encodeURIComponent($str){
