@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-03 14:18:53
+ * @version  2018-09-08 10:41:36
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -395,6 +395,7 @@ function post_format( $post ){
         'raw_message' => $post -> raw_message,
         'name' => $author -> name,
         'url' => $author -> url,
+        'thread' => $post -> thread,
         'parent' => $post -> parent
     );
 }

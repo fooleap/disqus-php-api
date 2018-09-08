@@ -116,7 +116,7 @@ var disq = new iDisqus('comment', {
 
 ##### url
 
-* 页面链接，一般不需要填写
+* 页面链接，按需填写
 * {String}
 * 默认：`location.pathname + location.search`
 

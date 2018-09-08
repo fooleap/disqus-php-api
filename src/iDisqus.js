@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2018-09-01 04:26:14
- * @version 0.2.17
+ * @update 2018-09-08 11:02:43
+ * @version 0.2.18
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
@@ -329,6 +329,18 @@ require('./iDisqus.scss');
                     _.opts.toggle.addEventListener('change', _.handle.toggle, false);
                 }
             });
+            // 原生评论框发邮件
+            this.callbacks.onNewComment = [function(comment, a) { 
+                var postData = {
+                    id: comment.id
+                }
+                // 异步发送邮件
+                setTimeout(function(){
+                    postAjax( _.opts.api + '/sendemail.php', postData, function(resp){
+                        console.info('邮件发送成功！');
+                    })
+                }, 2000);
+            }];
         }
 
         // 自动初始化
@@ -529,7 +541,7 @@ require('./iDisqus.scss');
         var _ = this;
         var _tip = _.dom.querySelector('.loading-container').dataset.tip;
         if(_.opts.site != location.origin){
-            //console.log('本地环境不加载 Disqus 评论框！');
+            console.log('本地环境不加载 Disqus 评论框！');
             if( _.opts.mode == 1 ){
                 _.getlist();
             }

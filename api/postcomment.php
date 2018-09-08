@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-03 07:14:53
+ * @version  2018-09-08 10:40:05
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -95,12 +95,12 @@ if( $data -> code == 0 ){
     if( function_exists('fastcgi_finish_request') ){
         print_r(json_encode($output));
         fastcgi_finish_request();
-        // 父评邮箱号存在且父评是匿名用户
-        if( isset($pEmail) && $pAuthor->isAnonymous ){
+        // 父评是匿名用户
+        if( $pAuthor->isAnonymous ){
             sendEmail($thread, $pPost, $rPost, $pEmail);
         }
     } else {
-        if( isset($pEmail) && $pAuthor->isAnonymous ){
+        if( $pAuthor->isAnonymous ){
             $output['verifyCode'] = $pUid;
         }
         print_r(json_encode($output));

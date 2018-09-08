@@ -7,7 +7,7 @@
  * @param post    当前评论信息
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-01 14:11:50
+ * @version  2018-09-08 11:00:54
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -20,6 +20,41 @@ use PHPMailer;
 
 $authors = $cache -> get('authors');
 $code = $_POST['code'];
+$id = $_POST['id'];
+
+if(!empty($id)){
+
+    $fields = (object) array(
+        'post' => $id,
+    );
+    $curl_url = '/api/3.0/posts/details.json?';
+    $data = curl_get($curl_url, $fields);
+    $rPost = post_format($data->response); // 回复评论
+    
+    $fields = (object) array(
+        'thread' => $rPost -> thread
+    );
+    $curl_url = '/api/3.0/threads/details.json?';
+    $data = curl_get($curl_url, $fields);
+    $thread = thread_format($data -> response); // 文章信息
+
+    if( isset($rPost -> parent) ){
+        $fields = (object) array(
+            'post' => $rPost -> parent,
+        );
+        $curl_url = '/api/3.0/posts/details.json?';
+        $data = curl_get($curl_url, $fields);
+        $pPost = post_format($data->response); // 被回复评论
+
+        $pAuthor = $data->response->author;
+        $pUid = md5($pAuthor->name.$pAuthor->email);
+        if( $pAuthor->isAnonymous && strtotime($rPost -> createdAt) - time() < 600){
+            $pEmail = $authors -> $pUid; // 被回复邮箱
+            sendEmail($thread, $pPost, $rPost, $pEmail);
+        }
+    }
+}
+
 if(!empty($code)){
     if(isset($authors -> $code)){
         $pEmail = $authors -> $code;
@@ -34,6 +69,9 @@ $debug = '';
 function sendEmail($thread, $pPost, $rPost, $pEmail){
     global $cache;
 
+    if(isset($pEmail) == false){
+        return;
+    }
     $forum = $cache -> get('forum');
     $forumName = $forum -> name;
     $forumUrl = $forum -> url;
