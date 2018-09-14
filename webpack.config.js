@@ -3,7 +3,6 @@ const autoprefixer = require('autoprefixer');
 const path = require('path');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = function(env, argv) {
 
@@ -48,12 +47,9 @@ module.exports = function(env, argv) {
             new MiniCssExtractPlugin({
                 filename: argv.mode == 'production' ? '[name].min.css' : '[name].css'
             }),
-            new CleanWebpackPlugin(['dist'], {
-                watch: true
-            }),
             new HtmlWebpackPlugin({
                 template: './src/demo.html',
-                filename: 'disqus-php-api.html',
+                filename: 'index.html',
                 inject: 'head'
             })
         ],
@@ -62,7 +58,7 @@ module.exports = function(env, argv) {
             contentBase: path.join(__dirname, 'dist'),
             compress: true,
             port: 9000,
-            openPage: '/disqus-php-api.html'
+            openPage: '/index.html'
         }
     }
 };
