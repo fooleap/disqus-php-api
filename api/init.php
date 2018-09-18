@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-08 13:38:29
+ * @version  2018-09-19 09:56:41
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -243,7 +243,7 @@ function curl_post($url, $fields){
 
     global $access_token, $cache;
 
-    if( isset($access_token) && strpos($url, 'threads/create') === false && strpos($url, 'media') === false ){
+    if( isset($access_token) && strpos($url, 'threads/create') === false && strpos($url, 'media/create') === false ){
 
         $fields -> api_secret = SECRET_KEY;
         $fields -> access_token = $access_token;
@@ -254,7 +254,7 @@ function curl_post($url, $fields){
         $cookies = 'sessionid='.$cache -> get('cookie') -> sessionid;
     }
 
-    if( strpos($url, 'media') !== false ){
+    if( strpos($url, 'media/create') !== false ){
 
         $curl_url = 'https://uploads.services.disqus.com'.$url;
         $curl_host = 'uploads.services.disqus.com';
@@ -312,6 +312,18 @@ function thread_format( $thread ){
     );
 }
 
+function media_format( $media ){
+    if( $media -> html == '' ){
+        $media -> html = '<a class="comment-item-image" href="'.$media -> url.'" target="_blank" rel="nofollow" title="'.$media -> title.'" ><img src="https:'. $media -> thumbnailUrl .'" /></a>';
+    }
+    return $media;
+}
+
+function realUrl($url)
+{
+    $url = htmlspecialchars_decode(urldecode($url));
+    return preg_replace('/^(http|https):\/\/disq\.us\/url\?url=(.*?):[A-Za-z0-9_-]{27}&cuid=\d*/', '$2', $url);
+}
 
 function post_format( $post ){
     global $emoji, $cache;
@@ -342,46 +354,32 @@ function post_format( $post ){
 
     // 表情
     $post -> message = $emoji -> toImage($post -> message);
-
+    
     // 链接
     $author -> url = !!$author -> url ? $author -> url : $author -> profileUrl;
 
-    $urlPat = '/<a.*?href="(.*?[disq\.us][disqus\.com][disquscdn\.com][media.giphy\.com].*?)".*?>(.*?)<\/a>/mi';
-    preg_match_all($urlPat, $post -> message, $urlArr);    
-    if( count($urlArr[0]) > 0 ){
-        $linkArr = array();
-        foreach ( $urlArr[1] as $item => $urlItem){
-            // 去除链接重定向
-            if(preg_match('/^(http|https):\/\/disq\.us/i', $urlItem)){
-                parse_str(parse_url($urlItem,PHP_URL_QUERY),$out);
-                $linkArr[$item] = '<a href="'.join(':', explode(':',$out['url'],-1)).'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
-            // 去掉图片链接
-            } elseif ( preg_match('/^(http|https):\/\/.*(disquscdn.com|media.giphy.com).*\.(jpg|gif|png)$/i', $urlItem) ){
-                $linkArr[$item] = '';
-            } elseif ( strpos($urlItem, 'https://disqus.com/by/') !== false ){
-                $linkArr[$item] = '<a href="'.$urlItem.'" target="_blank" title="'.$urlArr[2][$item].'">@'.$urlArr[2][$item].'</a>';
-            } else {
-                $linkArr[$item] = '<a href="'.$urlItem.'" target="_blank" title="'.$urlArr[2][$item].'">'.$urlArr[2][$item].'</a>';
+    // 链接及图片
+    $urlPat = '/<a.*?href="(.*?)".*?title="(.*?)".*?>(.*?)<\/a>/mi';
+    if( preg_match_all($urlPat, $post -> message, $urlMatches) ){
+        $urlMatches[1] = array_map('realUrl', $urlMatches[1]);
+        $mediaUrl = array_filter(array_column($post -> media, 'url'), function($var) {
+            return $var != 'http://disqus.com' && $var != 'https://disqus.com' && $var != 'https://www.google.com';
+        });
+        foreach( $urlMatches[0] as $key => $item ){
+            $imgKey = array_search($urlMatches[1][$key], $mediaUrl );
+            $linkItem = '<a href="'.$urlMatches[1][$key].'" title="'.$urlMatches[2][$key].'" target="_blank" rel="nofollow">'.$urlMatches[3][$key].'</a>';
+            if( strpos($urlMatches[1][$key], 'disqus.com/by') !== false ){
+                $linkItem = '<a href="'.$urlMatches[1][$key].'" title="'.$urlMatches[2][$key].'" target="_blank" rel="nofollow">@'.$urlMatches[3][$key].'</a>';
             }
+            if( filter_var($urlMatches[1][$key], FILTER_VALIDATE_URL) === false ){
+                $linkItem = $urlMatches[3][$key];
+            }
+            if( $imgKey !== false ){
+                $linkItem = media_format($post -> media[$imgKey]) -> html;
+            }
+            $post -> message = str_replace($urlMatches[0][$key], $linkItem, $post -> message);
         }
-        $post -> message = str_replace($urlArr[0],$linkArr,$post -> message);
     }
-
-    $imgArr = array();
-    foreach ( $post -> media as $key => $image ){
-        
-        $imgArr[$key] = (object) array(
-            'thumbUrl' => $image -> thumbnailUrl,
-            'thumbWidth' => $image -> thumbnailWidth,
-            'thumbHeight' => $image -> thumbnailHeight,
-            'provider' => $image -> providerName
-        );
-
-        if( $image -> url !== 'https://disqus.com' && $image -> url !== 'disqus.com' ){
-            $imgArr[$key] = $image -> thumbnailUrl;
-        }
-    };
-    $imgArr = array_reverse($imgArr);
 
     // 是否已删除
     if(!!$post -> isDeleted){
@@ -400,7 +398,6 @@ function post_format( $post ){
         'username' => $author -> username,
         'createdAt' => $post -> createdAt.'+00:00',
         'id' => $post -> id,
-        'media' => $imgArr,
         'message' => $post -> message,
         'raw_message' => $post -> raw_message,
         'name' => $author -> name,
