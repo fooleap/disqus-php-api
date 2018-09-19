@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-19 09:56:41
+ * @version  2018-09-19 15:42:43
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -384,9 +384,10 @@ function post_format( $post ){
     // 是否已删除
     if(!!$post -> isDeleted){
         $post -> message = '';
+        $post -> raw_message = '';
         $author -> avatar -> cache =  $avatar;
         $author -> username = '';
-        $author -> name = '';
+        $author -> name = 'Guest';
         $author -> url = '';
         $isMod = '';
     }
@@ -399,7 +400,7 @@ function post_format( $post ){
         'createdAt' => $post -> createdAt.'+00:00',
         'id' => $post -> id,
         'message' => $post -> message,
-        'raw_message' => $post -> raw_message,
+        'raw_message' => htmlentities($post -> raw_message),
         'name' => $author -> name,
         'url' => $author -> url,
         'thread' => $post -> thread,

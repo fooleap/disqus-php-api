@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2018-09-19 00:09:05
- * @version 0.2.19
+ * @update 2018-09-19 15:55:31
+ * @version 0.2.20
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
@@ -327,6 +327,7 @@ require('./iDisqus.scss');
             message: null,      // 新评论
             mediaHtml: null,    // 新上传图片
             media: {},          // 媒体信息
+            comment: {},        // 评论数据
             root: [],           // 根评论
             count: 0,           // 评论数
             users: [],          // Disqus 会员
@@ -442,71 +443,76 @@ require('./iDisqus.scss');
         _.emojiList.forEach(function(item){
             emojiList += '<li class="emojione-item" title="'+ item.title+'" data-code=":'+item.code+':"><img class="emojione-item-image" src="'+_.opts.emojiPath + item.unicode+'.png" /></li>';
         })
-        _.dom.innerHTML = '<div class="comment loading" id="idisqus">\n'+
-            '    <div class="comment-reactions"></div>'+
-            '    <div class="loading-container" data-tips="正在加载评论……"><svg class="loading-bg" width="72" height="72" viewBox="0 0 720 720" version="1.1" xmlns="http://www.w3.org/2000/svg"><path class="ring" fill="none" stroke="#9d9ea1" d="M 0 -260 A 260 260 0 1 1 -80 -260" transform="translate(400,400)" stroke-width="50" /><polygon transform="translate(305,20)" points="50,0 0,100 18,145 50,82 92,145 100,100" style="fill:#9d9ea1"/></svg></div>\n'+
-            '    <div class="comment-header"><span class="comment-header-item" id="comment-count">评论</span><a target="_blank" class="comment-header-item" id="comment-link">Disqus 讨论区</a></div>\n'+
-            '    <div class="comment-box">\n'+
-            '        <div class="comment-avatar avatar"><img class="comment-avatar-image" src="//a.disquscdn.com/images/noavatar92.png" data-avatar="//a.disquscdn.com/images/noavatar92.png"></div>\n'+
-            '        <div class="comment-form">\n'+
-            '            <div class="comment-form-wrapper">\n'+
-            '                <textarea class="comment-form-textarea" placeholder="加入讨论……"></textarea>\n'+
-            '                <div class="comment-form-alert"></div>\n'+
-            '                <div class="comment-image">\n'+
-            '                    <ul class="comment-image-list"></ul>\n'+
-            '                    <div class="comment-image-progress">\n'+
-            '                        <div class="comment-image-loaded"></div>\n'+
-            '                    </div>\n'+
-            '                </div>\n'+
-            '                <div class="comment-actions">\n'+
-            '                    <div class="comment-actions-group">\n'+
-            '                        <input id="emoji-input" class="comment-actions-input" type="checkbox"> \n'+
-            '                        <label class="comment-actions-label emojione" for="emoji-input">\n'+
-            '                            <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">\n'+
-            '                                <g>\n'+
-            '                                <title>选择表情</title>\n'+
-            '                                <path d="M512 1024c-282.713043 0-512-229.286957-512-512s229.286957-512 512-512c282.713043 0 512 229.286957 512 512S792.486957 1024 512 1024zM512 44.521739c-258.226087 0-467.478261 209.252174-467.478261 467.478261 0 258.226087 209.252174 467.478261 467.478261 467.478261s467.478261-209.252174 467.478261-467.478261C979.478261 253.773913 768 44.521739 512 44.521739z"></path>\n'+
-            '                                <path d="M801.391304 554.295652c0 160.278261-129.113043 289.391304-289.391304 289.391304s-289.391304-129.113043-289.391304-289.391304L801.391304 554.295652z"></path>\n'+
-            '                                <path d="M674.504348 349.495652m-57.878261 0a2.6 2.6 0 1 0 115.756522 0 2.6 2.6 0 1 0-115.756522 0Z"></path>\n'+
-            '                                <path d="M347.269565 349.495652m-57.878261 0a2.6 2.6 0 1 0 115.756522 0 2.6 2.6 0 1 0-115.756522 0Z"></path>\n'+
-            '                                </g>\n'+
-            '                            </svg>\n'+
-            '                            <ul class="emojione-list">'+emojiList+'</ul>\n'+
-            '                        </label>\n'+
-            '                        <input id="upload-input" class="comment-actions-input comment-image-input" type="file" accept="image/*" name="file"> \n'+
-            '                        <label class="comment-actions-label" for="upload-input">\n'+
-            '                            <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">\n'+
-            '                                <g>\n'+
-            '                                <title>上传图片</title>\n'+
-            '                                <path d="M15.515152 15.515152 15.515152 15.515152 15.515152 15.515152Z"></path>\n'+
-            '                                <path d="M15.515152 139.636364l0 806.787879 992.969697 0 0-806.787879-992.969697 0zM946.424242 884.363636l-868.848485 0 0-682.666667 868.848485 0 0 682.666667zM698.181818 356.848485c0-51.417212 41.673697-93.090909 93.090909-93.090909s93.090909 41.673697 93.090909 93.090909c0 51.417212-41.673697 93.090909-93.090909 93.090909s-93.090909-41.673697-93.090909-93.090909zM884.363636 822.30303l-744.727273 0 186.181818-496.484848 248.242424 310.30303 124.121212-93.090909z"></path>\n'+
-            '                                </g>\n'+
-            '                            </svg>\n'+
-            '                        </label>\n'+
-            '                    </div>\n'+
-            '                    <div class="comment-actions-form">\n'+
-            '                        <label class="comment-actions-label exit" title="退出登录">\n'+
-            '                            <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48">\n'+
-            '                                <path d="M348.870666 210.685443l378.570081 0c32.8205 0 58.683541 26.561959 58.683541 58.683541 0 162.043606 0 324.804551 0 486.848157 0 32.81129-26.561959 58.674331-58.683541 58.674331L348.870666 814.891472c-10.477632 0-18.850323-8.363482-18.850323-18.841114l0-37.728276c0-10.477632 8.372691-18.841114 18.850323-18.841114l343.645664 0c10.477632 0 18.850323-8.372691 18.850323-18.850323L711.366653 304.983109c0-10.477632-8.372691-18.841114-18.850323-18.841114L348.870666 286.141996c-10.477632 0-18.850323-8.363482-18.850323-18.841114l0-37.728276C329.98248 219.095997 338.393034 210.685443 348.870666 210.685443z"></path>\n'+
-            '                                <path d="M128.152728 526.436804l112.450095 112.450095c6.985088 6.985088 19.567661 6.985088 26.552749 0l26.561959-26.561959c6.985088-6.985088 6.985088-19.567661 0-26.552749l-34.925441-34.925441L494.168889 550.84675c10.477632 0 18.850323-8.372691 18.850323-18.850323l0-37.719066c0-10.477632-8.372691-18.850323-18.850323-18.850323L258.754229 475.427036l34.925441-34.925441c6.985088-6.985088 6.985088-19.567661 0-26.552749l-26.561959-26.524097c-6.985088-6.985088-19.567661-6.985088-26.552749 0L128.152728 499.875868C120.431883 506.859933 120.431883 519.451716 128.152728 526.436804z"></path>\n'+
-            '                            </svg>\n'+
-            '                        </label>\n'+
-            '                        <button class="comment-form-submit">\n'+
-            '                            <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">\n'+
-            '                                <path d="M565.747623 792.837176l260.819261 112.921839 126.910435-845.424882L66.087673 581.973678l232.843092 109.933785 562.612725-511.653099-451.697589 563.616588-5.996574 239.832274L565.747623 792.837176z" fill="#ffffff"></path>\n'+
-            '                            </svg>\n'+
-            '                        </button>\n'+
-            '                    </div>\n'+
-            '                </div>\n'+
-            '            </div>\n'+
-            '            <div class="comment-form-user">'+ ( _.opts.mode != 1 ? '<div class="comment-form-auth"><button class="comment-form-login" title="使用 Disqus 帐号登录"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 200 200"><path fill="#2E9FFF" d="M102.535 167.5c-16.518 0-31.621-6.036-43.298-16.021L30.5 155.405l11.102-27.401A67.658 67.658 0 0 1 35.564 100c0-37.277 29.984-67.5 66.971-67.5 36.984 0 66.965 30.223 66.965 67.5 0 37.284-29.98 67.5-66.965 67.5zm36.567-67.693v-.188c0-19.478-13.736-33.367-37.42-33.367h-25.58v67.5h25.201c23.868.001 37.799-14.468 37.799-33.945zm-37.138 17.361h-7.482V82.841h7.482c10.989 0 18.283 6.265 18.283 17.07v.188c0 10.896-7.294 17.069-18.283 17.069z"/></svg></button></div><span> 或 </span>' : '' ) + '<form class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" name="name" placeholder="名字（必填）" autocomplete="name"><input class="comment-form-input comment-form-email" type="email" name="email" placeholder="邮箱（必填）" autocomplete="email"><input class="comment-form-input comment-form-url" type="url" name="url" placeholder="网址（可选）" autocomplete="url"></form></div>\n'+
-            '        </div>\n'+
-            '    </div>\n'+
-            '    <ul id="comments" class="comment-list"></ul>\n'+
-            '    <a href="javascript:;" class="comment-loadmore">加载更多</a>\n'+
-            '    <div class="comment-related"></div>'+
-            '</div>\n'+
-            '<div class="comment" id="disqus_thread"></div>';
+        _.dom.innerHTML = `<div class="comment loading" id="idisqus">
+            <div class="comment-reactions"></div>
+            <div class="loading-container" data-tips="正在加载评论……"><svg class="loading-bg" width="72" height="72" viewBox="0 0 720 720" version="1.1" xmlns="http://www.w3.org/2000/svg"><path class="ring" fill="none" stroke="#9d9ea1" d="M 0 -260 A 260 260 0 1 1 -80 -260" transform="translate(400,400)" stroke-width="50" /><polygon transform="translate(305,20)" points="50,0 0,100 18,145 50,82 92,145 100,100" style="fill:#9d9ea1"/></svg></div>
+            <div class="comment-header"><span class="comment-header-item" id="comment-count">评论</span><a target="_blank" class="comment-header-item" id="comment-link">Disqus 讨论区</a></div>
+            <div class="comment-box">
+                <div class="comment-avatar avatar"><img class="comment-avatar-image" src="//a.disquscdn.com/images/noavatar92.png" data-avatar="//a.disquscdn.com/images/noavatar92.png"></div>
+                <div class="comment-form">
+                    <div class="comment-form-wrapper">
+                        <textarea class="comment-form-textarea" placeholder="加入讨论……"></textarea>
+                        <div class="comment-form-alert"></div>
+                        <div class="comment-image">
+                            <ul class="comment-image-list"></ul>
+                            <div class="comment-image-progress"><div class="comment-image-loaded"></div></div>
+                        </div>
+        
+                        <div class="comment-actions">
+        
+                            <div class="comment-actions-group">
+                                <input id="emoji-input" class="comment-actions-input" type="checkbox">
+                                <label class="comment-actions-label emojione" for="emoji-input">
+                                    <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">
+                                        <g>
+                                            <title>选择表情</title>
+                                            <path d="M512 1024c-282.713043 0-512-229.286957-512-512s229.286957-512 512-512c282.713043 0 512 229.286957 512 512S792.486957 1024 512 1024zM512 44.521739c-258.226087 0-467.478261 209.252174-467.478261 467.478261 0 258.226087 209.252174 467.478261 467.478261 467.478261s467.478261-209.252174 467.478261-467.478261C979.478261 253.773913 768 44.521739 512 44.521739z"></path>
+                                            <path d="M801.391304 554.295652c0 160.278261-129.113043 289.391304-289.391304 289.391304s-289.391304-129.113043-289.391304-289.391304L801.391304 554.295652z"></path>
+                                            <path d="M674.504348 349.495652m-57.878261 0a2.6 2.6 0 1 0 115.756522 0 2.6 2.6 0 1 0-115.756522 0Z"></path>
+                                            <path d="M347.269565 349.495652m-57.878261 0a2.6 2.6 0 1 0 115.756522 0 2.6 2.6 0 1 0-115.756522 0Z"></path>
+                                        </g>
+                                    </svg>
+                                    <ul class="emojione-list">${ emojiList }</ul>
+                                </label>
+                                <input id="upload-input" class="comment-actions-input comment-image-input" type="file" accept="image/*" name="file">
+                                <label class="comment-actions-label" for="upload-input">
+                                    <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">
+                                        <g>
+                                            <title>上传图片</title>
+                                            <path d="M15.515152 15.515152 15.515152 15.515152 15.515152 15.515152Z"></path>
+                                            <path d="M15.515152 139.636364l0 806.787879 992.969697 0 0-806.787879-992.969697 0zM946.424242 884.363636l-868.848485 0 0-682.666667 868.848485 0 0 682.666667zM698.181818 356.848485c0-51.417212 41.673697-93.090909 93.090909-93.090909s93.090909 41.673697 93.090909 93.090909c0 51.417212-41.673697 93.090909-93.090909 93.090909s-93.090909-41.673697-93.090909-93.090909zM884.363636 822.30303l-744.727273 0 186.181818-496.484848 248.242424 310.30303 124.121212-93.090909z"></path>
+                                        </g>
+                                    </svg>
+                                </label>
+                            </div>
+        
+                            <div class="comment-actions-form">
+                                <label class="comment-actions-label exit" title="退出登录">
+                                    <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48">
+                                        <path d="M348.870666 210.685443l378.570081 0c32.8205 0 58.683541 26.561959 58.683541 58.683541 0 162.043606 0 324.804551 0 486.848157 0 32.81129-26.561959 58.674331-58.683541 58.674331L348.870666 814.891472c-10.477632 0-18.850323-8.363482-18.850323-18.841114l0-37.728276c0-10.477632 8.372691-18.841114 18.850323-18.841114l343.645664 0c10.477632 0 18.850323-8.372691 18.850323-18.850323L711.366653 304.983109c0-10.477632-8.372691-18.841114-18.850323-18.841114L348.870666 286.141996c-10.477632 0-18.850323-8.363482-18.850323-18.841114l0-37.728276C329.98248 219.095997 338.393034 210.685443 348.870666 210.685443z"></path>
+                                        <path d="M128.152728 526.436804l112.450095 112.450095c6.985088 6.985088 19.567661 6.985088 26.552749 0l26.561959-26.561959c6.985088-6.985088 6.985088-19.567661 0-26.552749l-34.925441-34.925441L494.168889 550.84675c10.477632 0 18.850323-8.372691 18.850323-18.850323l0-37.719066c0-10.477632-8.372691-18.850323-18.850323-18.850323L258.754229 475.427036l34.925441-34.925441c6.985088-6.985088 6.985088-19.567661 0-26.552749l-26.561959-26.524097c-6.985088-6.985088-19.567661-6.985088-26.552749 0L128.152728 499.875868C120.431883 506.859933 120.431883 519.451716 128.152728 526.436804z"></path>
+                                    </svg>
+                                </label>
+                                <button class="comment-form-submit">
+                                    <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">
+                                        <path d="M565.747623 792.837176l260.819261 112.921839 126.910435-845.424882L66.087673 581.973678l232.843092 109.933785 562.612725-511.653099-451.697589 563.616588-5.996574 239.832274L565.747623 792.837176z" fill="#ffffff"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+        
+                    </div>
+                    <div class="comment-form-user">
+                        ${( _.opts.mode != 1 ? '<div class="comment-form-auth"><button class="comment-form-login" title="使用 Disqus 帐号登录"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 200 200"><path fill="#2E9FFF" d="M102.535 167.5c-16.518 0-31.621-6.036-43.298-16.021L30.5 155.405l11.102-27.401A67.658 67.658 0 0 1 35.564 100c0-37.277 29.984-67.5 66.971-67.5 36.984 0 66.965 30.223 66.965 67.5 0 37.284-29.98 67.5-66.965 67.5zm36.567-67.693v-.188c0-19.478-13.736-33.367-37.42-33.367h-25.58v67.5h25.201c23.868.001 37.799-14.468 37.799-33.945zm-37.138 17.361h-7.482V82.841h7.482c10.989 0 18.283 6.265 18.283 17.07v.188c0 10.896-7.294 17.069-18.283 17.069z"/></svg></button></div><span> 或 </span>' : '' )}
+                            <form class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" name="name" placeholder="名字（必填）" autocomplete="name" /><input class="comment-form-input comment-form-email" type="email" name="email" placeholder="邮箱（必填）" autocomplete="email" /><input class="comment-form-input comment-form-url" type="url" name="url" placeholder="网址（可选）" autocomplete="url" /></form>
+                    </div>
+                </div>
+            </div>
+            <ul id="comments" class="comment-list"></ul>
+            <a href="javascript:;" class="comment-loadmore">加载更多</a>
+            <div class="comment-related"></div>
+        </div>
+        <div class="comment" id="disqus_thread"></div>`;
 
         _.user = new User(_.dom,_.opts);
         _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/,'').replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
@@ -526,7 +532,8 @@ require('./iDisqus.scss');
             keySelect: _.keySelect.bind(_),
             field: _.field.bind(_),
             focus: _.focus,
-            input: _.input.bind(_)
+            input: _.input.bind(_),
+            parentShow: _.parentShow.bind(_)
         };
 
         var $iDisqus = _.dom.querySelector('#idisqus');
@@ -546,6 +553,7 @@ require('./iDisqus.scss');
         $iDisqus.on('click', '.comment-item-cancel',  _.handle.show);
         $iDisqus.on('click','.comment-item-avatar', _.handle.jump);
         $iDisqus.on('click','.comment-item-pname', _.handle.jump);
+        $iDisqus.on('mouseover','.comment-item-pname', _.handle.parentShow);
         $iDisqus.on('click', '.comment-loadmore', _.handle.loadMore);
         $iDisqus.on('click', '#thread-submit', _.handle.threadCreate);
 
@@ -644,20 +652,6 @@ require('./iDisqus.scss');
         });
     }
 
-    // 移除事件监听
-    iDisqus.prototype.removeListener = function (els, evt, func){
-        var _ = this;
-        var el = _.dom.getElementsByClassName(els);
-        [].forEach.call(el, function(item){
-            item.removeEventListener(evt, func, false);
-        });
-    }
-
-    // 添加所有事件监听
-    iDisqus.prototype.addAllListeners = function (){
-        var _ = this;
-    }
-
     // 评论计数
     iDisqus.prototype.count = function (){
         var _ = this;
@@ -706,19 +700,19 @@ require('./iDisqus.scss');
                     var popHtml = '';
                     threads.forEach(function(item){
                         item.topPost.raw_message = item.topPost.raw_message.replace(/(\@\w+):disqus/,'$1');
-                        popHtml += `<li class="related-item">`+
-                            `<a class="related-item-link" href="${item.link}" title="${item.title}">`+
-                            `<div class="related-item-title">${item.title}</div>`+
-                            `<div class="related-item-desc">${item.posts}条评论<span class="related-item-bullet"> • </span><time class="related-item-time" datetime="${item.createdAt}"></time></div></a>`+
-                            `<a class="related-item-link" href="${item.link}?#comment-${item.topPost.id}" title="${item.topPost.raw_message}">`+
-                            `<div class="related-item-post">`+
-                            `<div class="related-item-avatar"><img src="${item.topPost.avatar}" /></div>`+
-                            `<div class="related-item-main">`+
-                            `<div class="related-item-name">${item.topPost.name}</div>`+
-                            `<div class="related-item-message">${item.topPost.raw_message}</div>`+
-                            `</div>`+
-                            `</div></a>`+
-                            `</li>`;
+                        popHtml += `<li class="related-item">
+                        <a class="related-item-link" href="${item.link}" title="${item.title}">
+                        <div class="related-item-title">${item.title}</div>
+                        <div class="related-item-desc">${item.posts}条评论<span class="related-item-bullet"> • </span><time class="related-item-time" datetime="${item.createdAt}"></time></div></a>
+                        <a class="related-item-link" href="${item.link}?#comment-${item.topPost.id}" title="${item.topPost.raw_message}">
+                        <div class="related-item-post">
+                        <div class="related-item-avatar"><img src="${item.topPost.avatar}" /></div>
+                        <div class="related-item-main">
+                        <div class="related-item-name">${item.topPost.name}</div>
+                        <div class="related-item-message">${item.topPost.raw_message}</div>
+                        </div>
+                        </div></a>
+                        </li>`;
                     });
                     popHtml = `<div class="comment-related-title">在<span class="comment-related-forumname">${_.forum.name}</span>上还有</div><div class="comment-related-content"><ul class="related-list">${popHtml}</ul></div>`;
                     _.dom.querySelector('.comment-related').innerHTML = popHtml;
@@ -836,6 +830,8 @@ require('./iDisqus.scss');
 
         var _ = this;
 
+        _.stat.comment[post.id] = post;
+
         var parentPostDom = _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]');
 
         var user = {
@@ -848,7 +844,7 @@ require('./iDisqus.scss');
         }
         
         var parentPost = !!post.parent ? {
-            name: `<a class="comment-item-pname" href="#${parentPostDom.id}"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1.664 902.144s97.92-557.888 596.352-557.888V129.728L1024 515.84l-425.984 360.448V628.8c-270.464 0-455.232 23.872-596.352 273.28"></path></svg>${parentPostDom.dataset.name}</a>`,
+            name: `<a class="comment-item-pname" data-parent="${post.parent}" href="#${parentPostDom.id}"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1.664 902.144s97.92-557.888 596.352-557.888V129.728L1024 515.84l-425.984 360.448V628.8c-270.464 0-455.232 23.872-596.352 273.28"></path></svg>${parentPostDom.dataset.name}</a>`,
             dom: parentPostDom.querySelector('.comment-item-children'),
             insert: 'afterbegin'
         } : {
@@ -858,25 +854,25 @@ require('./iDisqus.scss');
         };
 
 
-        var html = `<li class="comment-item" data-id="${ post.id }" data-name="${ post.name }" id="comment-${ post.id }">` +
-            `<div class="comment-item-body">`+
-            `<a class="comment-item-avatar" href="#comment-${ post.id }"><img src="${ post.avatar }"></a>`+
-            `<div class="comment-item-main">`+
-            `<div class="comment-item-header"><a class="comment-item-name" title="${ post.name }" rel="nofollow" target="_blank" href="${(post.url || 'javascript:;')}">${ post.name }</a>${( post.isMod ? `<span class="comment-item-badge">${_.opts.badge}</span>` : ``)}${ parentPost.name }<span class="comment-item-bullet"> • </span><time class="comment-item-time" datetime="${ post.createdAt }"></time></div>`+
-            `<div class="comment-item-content">${ post.message }</div>`+
-            `<div class="comment-item-footer">${!!post.isPost ? `<span class="comment-item-manage"><a class="comment-item-edit" href="javascript:;">编辑</a><span class="comment-item-bullet"> • </span><a class="comment-item-delete" href="javascript:;">删除</a><span class="comment-item-bullet"> • </span></span>` : ``}<a class="comment-item-reply" href="javascript:;">回复</a></div>`+
-            `</div></div>`+
-            `<ul class="comment-item-children"></ul>`+
-            `</li>`;
+        var html = `<li class="comment-item" data-id="${ post.id }" data-name="${ post.name }" id="comment-${ post.id }">
+        <div class="comment-item-body">
+        <a class="comment-item-avatar" href="#comment-${ post.id }"><img src="${ post.avatar }"></a>
+        <div class="comment-item-main">
+        <div class="comment-item-header"><a class="comment-item-name" title="${ post.name }" rel="nofollow" target="_blank" href="${(post.url || 'javascript:;')}">${ post.name }</a>${( post.isMod ? `<span class="comment-item-badge">${_.opts.badge}</span>` : ``)}${ parentPost.name }<span class="comment-item-bullet"> • </span><time class="comment-item-time" datetime="${ post.createdAt }"></time></div>
+        <div class="comment-item-content">${ post.message }</div>
+        <div class="comment-item-footer">${!!post.isPost ? `<span class="comment-item-manage"><a class="comment-item-edit" href="javascript:;">编辑</a><span class="comment-item-bullet"> • </span><a class="comment-item-delete" href="javascript:;">删除</a><span class="comment-item-bullet"> • </span></span>` : ``}<a class="comment-item-reply" href="javascript:;">回复</a></div>
+        </div></div>
+        <ul class="comment-item-children"></ul>
+        </li>`;
 
         // 已删除评论
         if(!!post.isDeleted){
-            html = `<li class="comment-item" data-id="${ post.id }" id="comment-${ post.id }" data-name="已删除">`+
-                `<div class="comment-item-body">`+
-                `<a class="comment-item-avatar" href="#comment-${ post.id }"><img src="${ post.avatar }"></a>`+
-                `<div class="comment-item-main" data-message="此评论已被删除。"></div></div>`+
-                `<ul class="comment-item-children"></ul>`+
-                `</li>`;
+            html = `<li class="comment-item" data-id="${ post.id }" id="comment-${ post.id }" data-name="${ post.name }">
+            <div class="comment-item-body">
+            <a class="comment-item-avatar" href="#comment-${ post.id }"><img src="${ post.avatar }"></a>
+            <div class="comment-item-main" data-message="此评论已被删除。"></div></div>
+            <ul class="comment-item-children"></ul>
+            </li>`;
         }
 
 
@@ -1116,6 +1112,20 @@ require('./iDisqus.scss');
         e.preventDefault();
     }
 
+    // 显示父评论
+    iDisqus.prototype.parentShow = function(e, target){
+        var _ = this;
+        if(!!target.querySelector('.comment-item-parent')){
+            return;
+        }
+        var comment = _.stat.comment[target.dataset.parent];
+        if( comment.isDeleted ){
+            return;
+        }
+        var parentHtml = `<div class="comment-item-parent"><a class="comment-item-avatar" href="javascript:;"><img src="${comment.avatar}"></a><div class="comment-item-pmain"><div class="comment-item-pheader">${comment.name}</div><div class="comment-item-pcontent" title="${comment.raw_message}">${comment.raw_message}</div></div></div>`;
+        target.insertAdjacentHTML('beforeend', parentHtml);
+    }
+
     // 点选表情
     iDisqus.prototype.field = function(e, target){
         var _ = this;
@@ -1271,26 +1281,25 @@ require('./iDisqus.scss');
         xhrUpload.upload.addEventListener('load', function(e){
             loaded.style.width = 0;
             progress.style.width = 0;
-            var imageItem = `<li class="comment-image-item loading" data-image-size="${ size }">\n`+
-                `    <svg version="1.1" class="comment-image-object" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"\n`+
-                `        width="24px" height="30px" viewBox="0 0 24 30" style="enable-background: new 0 0 50 50;" xml:space="preserve">\n`+
-                `        <rect x="0" y="10" width="4" height="10" fill="rgba(127,145,158,1)" opacity="0.2">\n`+
-                `            <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `            <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `            <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `        </rect>\n`+
-                `        <rect x="8" y="10" width="4" height="10" fill="rgba(127,145,158,1)" opacity="0.2">\n`+
-                `            <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `            <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `            <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `        </rect>\n`+
-                `        <rect x="16" y="10" width="4" height="10" fill="rgba(127,145,158,1)" opacity="0.2">\n`+
-                `            <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `            <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `            <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />\n`+
-                `        </rect>\n`+
-                `    </svg>\n`+
-                `</li>\n`;
+            var imageItem = `<li class="comment-image-item loading" data-image-size="${ size }">
+            <svg version="1.1" class="comment-image-object" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="30px" viewBox="0 0 24 30" style="enable-background: new 0 0 50 50;" xml:space="preserve">
+            <rect x="0" y="10" width="4" height="10" fill="rgba(127,145,158,1)" opacity="0.2">
+            <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0s" dur="0.6s" repeatCount="indefinite" />
+            <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />
+            <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0s" dur="0.6s" repeatCount="indefinite" />
+            </rect>
+            <rect x="8" y="10" width="4" height="10" fill="rgba(127,145,158,1)" opacity="0.2">
+            <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.15s" dur="0.6s" repeatCount="indefinite" />
+            <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />
+            <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.15s" dur="0.6s" repeatCount="indefinite" />
+            </rect>
+            <rect x="16" y="10" width="4" height="10" fill="rgba(127,145,158,1)" opacity="0.2">
+            <animate attributeName="opacity" attributeType="XML" values="0.2; 1; .2" begin="0.3s" dur="0.6s" repeatCount="indefinite" />
+            <animate attributeName="height" attributeType="XML" values="10; 20; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />
+            <animate attributeName="y" attributeType="XML" values="10; 5; 10" begin="0.3s" dur="0.6s" repeatCount="indefinite" />
+            </rect>
+            </svg>
+            </li>`;
             form.querySelector('.comment-image-list').insertAdjacentHTML('beforeend', imageItem);
             $item = form.querySelector('[data-image-size="'+size+'"]');
         }, false);
@@ -1606,15 +1615,15 @@ require('./iDisqus.scss');
             return;
         }
         _.dom.querySelector('#idisqus').classList.remove('loading');
-        var threadForm = `<div class="comment-header"><span class="comment-header-item">创建 Thread</span></div>`+
-            `<div class="comment-thread-form">`+
-            `<p>由于 Disqus 没有本页面的相关 Thread，故需先创建 Thread</p>`+
-            `<div class="comment-form-item"><label class="comment-form-label">url:</label><input class="comment-form-input" id="thread-url" name="url" value="${ _.opts.link }" disabled /></div>`+
-            `<div class="comment-form-item"><label class="comment-form-label">identifier:</label><input class="comment-form-input" id="thread-identifier" name="identifier" value="${ _.opts.identifier }" disabled /></div>`+
-            `<div class="comment-form-item"><label class="comment-form-label">title:</label><input class="comment-form-input" id="thread-title" name="title" value="${ _.opts.title }" disabled /></div>`+
-            `<div class="comment-form-item"><label class="comment-form-label">slug:</label><input class="comment-form-input" id="thread-slug" name="slug" value="${ _.opts.slug }" /></div>`+
-            `<div class="comment-form-item"><label class="comment-form-label">message:</label><textarea class="comment-form-textarea" id="thread-message" name="message">${ _.opts.desc }</textarea></div>`+
-            `<button id="thread-submit" class="comment-form-submit">提交</button></div>`;
+        var threadForm = `<div class="comment-header"><span class="comment-header-item">创建 Thread</span></div>
+        <div class="comment-thread-form">
+        <p>由于 Disqus 没有本页面的相关 Thread，故需先创建 Thread</p>
+        <div class="comment-form-item"><label class="comment-form-label">url:</label><input class="comment-form-input" id="thread-url" name="url" value="${ _.opts.link }" disabled /></div>
+        <div class="comment-form-item"><label class="comment-form-label">identifier:</label><input class="comment-form-input" id="thread-identifier" name="identifier" value="${ _.opts.identifier }" disabled /></div>
+        <div class="comment-form-item"><label class="comment-form-label">title:</label><input class="comment-form-input" id="thread-title" name="title" value="${ _.opts.title }" disabled /></div>
+        <div class="comment-form-item"><label class="comment-form-label">slug:</label><input class="comment-form-input" id="thread-slug" name="slug" value="${ _.opts.slug }" /></div>
+        <div class="comment-form-item"><label class="comment-form-label">message:</label><textarea class="comment-form-textarea" id="thread-message" name="message">${ _.opts.desc }</textarea></div>
+        <button id="thread-submit" class="comment-form-submit">提交</button></div>`;
         _.dom.querySelector('#idisqus').innerHTML = threadForm;
     }
 
@@ -1664,17 +1673,6 @@ require('./iDisqus.scss');
     // 销毁评论框
     iDisqus.prototype.destroy = function(){
         var _ = this;
-        _.removeListener('exit', 'click', _.handle.logout);
-        _.removeListener('comment-form-textarea', 'blur', _.handle.focus);
-        _.removeListener('comment-form-textarea', 'focus', _.handle.focus);
-        _.removeListener('comment-form-textarea', 'keyup', _.handle.mention);
-        _.removeListener('comment-form-name', 'blur', _.handle.verify);
-        _.removeListener('comment-form-email', 'blur', _.handle.verify);
-        _.removeListener('comment-form-submit', 'click', _.handle.post);
-        _.removeListener('comment-image-input', 'change', _.handle.upload);
-        _.removeListener('comment-item-reply', 'click', _.handle.show);
-        _.removeListener('comment-loadmore', 'click', _.handle.loadMore);
-        _.removeListener('emojione-item', 'click', _.handle.field);
         _.dom.innerHTML = '';
         delete _.box;
         delete _.dom;
