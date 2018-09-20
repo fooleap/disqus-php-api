@@ -720,7 +720,9 @@
         }
     }
     .comment-item-image{
-        display: inline-block;
+        a{
+            display: inline-block;
+        }
         img{
             display: block;
             border-radius: 3px;
@@ -776,7 +778,7 @@
     .comment-item-main{
         width: calc(100% - 60px);
         &:empty{
-            padding-bottom: 5px;
+            line-height: 48px;
         }
         &:empty:after{
             content: attr(data-message);
@@ -796,6 +798,9 @@
         padding-left: 60px;
         .comment-item-main{
             width: calc(100% - 42px);
+            &:empty{
+                line-height: 36px;
+            }
         }
         .comment-item-children, .comment-item-body + .comment-box{
             padding-left: 42px; 

@@ -37,6 +37,13 @@ App 设置方面，回调链接请填写 `login.php` 文件的绝对地址，主
 
 ![Disqus API 相关设置](https://uploads.disquscdn.com/images/013aa0590d3d091408c06d3d42b9e2fa15d6731f6c1e2cff5c8495fe23b21e80.png)
 
+### 邮件发送
+
+简易评论框及 Disqus 评论框皆可实现，规则如下：
+
+1. 匿名者的回复提醒邮件（只有邮箱号存在才会发送）
+2. 管理员的留言提醒邮件（只有[设置](https://disqus.com/home/settings/moderation/)未勾选站点邮件提醒时发送，管理员回复不发提醒）
+
 ## 前端
 
 DEMO: http://blog.fooleap.org/disqus-php-api.html

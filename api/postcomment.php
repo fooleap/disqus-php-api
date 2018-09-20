@@ -10,7 +10,7 @@
  * @param url     访客网址，可为空
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-08 13:38:12
+ * @version  2018-09-20 13:39:20
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -24,6 +24,7 @@ $threadId = $_POST['thread'];
 $parent = $_POST['parent'];
 $authors = $cache -> get('authors');
 $approved = DISQUS_APPROVED == 1 ? 'approved' : null;
+$pPost = null;
 
 // 黑名单
 if(DISQUS_BLACKLIST == 1){
@@ -115,14 +116,13 @@ if( $data -> code == 0 ){
     if( function_exists('fastcgi_finish_request') ){
         print_r(json_encode($output));
         fastcgi_finish_request();
+        sendModEmail($thread, $pPost, $rPost);
         // 父评是匿名用户
         if( $pAuthor->isAnonymous ){
-            sendEmail($thread, $pPost, $rPost, $pEmail);
+            sendAnonEmail($thread, $pPost, $rPost, $pEmail);
         }
     } else {
-        if( $pAuthor->isAnonymous ){
-            $output['verifyCode'] = $pUid;
-        }
+        $output['verifyCode'] = $pAuthor->isAnonymous ? $pUid : time();
         print_r(json_encode($output));
     }
 

@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2018-09-19 15:55:31
- * @version 0.2.20
+ * @update 2018-09-20 13:38:07
+ * @version 0.2.21
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
@@ -41,9 +41,11 @@ require('./iDisqus.scss');
     }
     
     function postAjax(url, data, success, error) {
-        var params = typeof data == 'string' ? data : Object.keys(data).map(
-            function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) }
-        ).join('&');
+        var params = typeof data == 'string' ? data : Object.keys(data).filter(function(k){
+            return data[k] != null;
+        }).map(function(k){ 
+            return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
+        }).join('&');
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', url);
@@ -327,7 +329,7 @@ require('./iDisqus.scss');
             message: null,      // 新评论
             mediaHtml: null,    // 新上传图片
             media: {},          // 媒体信息
-            comment: {},        // 评论数据
+            post: {},        // 评论数据
             root: [],           // 根评论
             count: 0,           // 评论数
             users: [],          // Disqus 会员
@@ -699,17 +701,17 @@ require('./iDisqus.scss');
                     var threads = data.response;
                     var popHtml = '';
                     threads.forEach(function(item){
-                        item.topPost.raw_message = item.topPost.raw_message.replace(/(\@\w+):disqus/,'$1');
+                        var message = item.topPost.message.replace(/<[^>]*>/g, '');
                         popHtml += `<li class="related-item">
                         <a class="related-item-link" href="${item.link}" title="${item.title}">
                         <div class="related-item-title">${item.title}</div>
                         <div class="related-item-desc">${item.posts}条评论<span class="related-item-bullet"> • </span><time class="related-item-time" datetime="${item.createdAt}"></time></div></a>
-                        <a class="related-item-link" href="${item.link}?#comment-${item.topPost.id}" title="${item.topPost.raw_message}">
+                        <a class="related-item-link" href="${item.link}?#comment-${item.topPost.id}" title="${ message }">
                         <div class="related-item-post">
                         <div class="related-item-avatar"><img src="${item.topPost.avatar}" /></div>
                         <div class="related-item-main">
-                        <div class="related-item-name">${item.topPost.name}</div>
-                        <div class="related-item-message">${item.topPost.raw_message}</div>
+                        <div class="related-item-name">${ item.topPost.name }</div>
+                        <div class="related-item-message">${ message }</div>
                         </div>
                         </div></a>
                         </li>`;
@@ -780,10 +782,6 @@ require('./iDisqus.scss');
                         loadmore.classList.add('hide');
                     }
 
-                    if (posts.length == 0) {
-                        return;
-                    }
-
                     _.loadRelated();
                     _.loadReactions();
                     _.timeAgo();
@@ -830,7 +828,7 @@ require('./iDisqus.scss');
 
         var _ = this;
 
-        _.stat.comment[post.id] = post;
+        _.stat.post[post.id] = post;
 
         var parentPostDom = _.dom.querySelector('.comment-item[data-id="'+post.parent+'"]');
 
@@ -1118,11 +1116,12 @@ require('./iDisqus.scss');
         if(!!target.querySelector('.comment-item-parent')){
             return;
         }
-        var comment = _.stat.comment[target.dataset.parent];
+        var comment = _.stat.post[target.dataset.parent];
         if( comment.isDeleted ){
             return;
         }
-        var parentHtml = `<div class="comment-item-parent"><a class="comment-item-avatar" href="javascript:;"><img src="${comment.avatar}"></a><div class="comment-item-pmain"><div class="comment-item-pheader">${comment.name}</div><div class="comment-item-pcontent" title="${comment.raw_message}">${comment.raw_message}</div></div></div>`;
+        var message = comment.message.replace(/<[^>]*>/g, '');
+        var parentHtml = `<div class="comment-item-parent"><a class="comment-item-avatar" href="javascript:;"><img src="${comment.avatar}"></a><div class="comment-item-pmain"><div class="comment-item-pheader">${comment.name}</div><div class="comment-item-pcontent" title="${ message }">${ message }</div></div></div>`;
         target.insertAdjacentHTML('beforeend', parentHtml);
     }
 
@@ -1505,18 +1504,19 @@ require('./iDisqus.scss');
                 if (data.code === 0) {
                     _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
                     _.stat.total += 1;
+                    _.stat.thread = data.thread;
                     _.dom.querySelector('#comment-count').innerHTML = _.stat.total + ' 条评论';
                     var post = data.response;
                     post.isPost = true;
                     _.load(post);
                     _.timeAgo();
+                    var postData = {
+                        post: JSON.stringify(post),
+                        thread: JSON.stringify(_.stat.thread),
+                        parent: JSON.stringify(_.stat.post[parentId]),
+                        code: data.verifyCode
+                    }
                     if(!!data.verifyCode){
-                        var postData = {
-                            post: JSON.stringify(post),
-                            thread: JSON.stringify(data.thread),
-                            parent: JSON.stringify(data.parent),
-                            code: data.verifyCode
-                        }
                         // 异步发送邮件
                         postAjax( _.opts.api + '/sendemail.php', postData, function(resp){
                             console.info('邮件发送成功！');
