@@ -34,21 +34,21 @@
     .hide {
         display: none;
     }
-    .loading-bg{
+    .init-bg{
         display: none;
     }
-    &.loading{
+    &.init{
         & > * {
             display: none;
         }
         display: block;
-        .loading-container{
-            .loading-bg{
+        .init-container{
+            .init-bg{
                 display: block;
                 transform: rotate(-135deg);
                 margin: 0 auto;
             }
-            margin: 20px auto 40px;
+            margin: 20px auto 20px;
             color: rgb(157,158,161);
             text-align: center;
             display: block;
@@ -85,6 +85,11 @@
             }
         }
     }
+    &.loading{
+        .comment-order{
+            pointer-events: none;
+        }
+    }
 }
 .comment-box{
     display: flex;
@@ -94,11 +99,35 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 40px;
+    height: 48px;
     .comment-navbar-item {
         display: flex;
     }
-    .comment-sort-label {
+    .comment-recommend{
+        display: flex;
+        align-items: center;
+        line-height: 27px;
+        height: 27px;
+        border: 1px solid #656c7a;
+        padding: 0 5px;
+        border-radius: 3px;
+        color: #656c7a;
+        font-size: 12px;
+        .icon{
+            fill: #656c7a;
+            width: 16px;
+            height: 16px;
+        }
+        &.voted{
+            .icon{
+                fill: #f05f70;
+            }
+        }
+    }
+    .comment-recommend-text{
+        margin: 0 5px;
+    }
+    .comment-order-label {
         display: block;
         height: 20px;
         line-height: 20px;
@@ -112,9 +141,9 @@
             margin-right: 0;
         }
     }
-    .comment-sort-radio {
+    .comment-order-radio {
         display: none;
-        &:checked + .comment-sort-label{
+        &:checked + .comment-order-label{
             color: #fff;
             background-color: #c2c6cc;
         }
@@ -145,8 +174,14 @@
     }
     #comment-user{
         display: none;
-        &:checked + .comment-user .comment-logout{
-            display: block;
+        &:checked + .comment-user {
+            color: #2a2a2a;
+            &:after{
+                border-top-color: #2a2a2a;
+            }
+            .comment-logout {
+                display: block;
+            }
         }
     }
     .comment-login{
@@ -167,6 +202,9 @@
             top: 50%;
             right: 0;
             margin-top: 0;
+        }
+        &:hover:after{
+            border-top-color: #2a2a2a;
         }
     }
     .comment-logout{
@@ -290,9 +328,6 @@
         &:hover .icon {
             fill: #1d2f3a!important;
         }
-    }
-    .exit{
-        display:none;
     }
     .emojione-list {
         cursor: default;
@@ -849,6 +884,7 @@
         width: 36px;
         height: 36px;
         margin-right: 6px;
+        box-shadow: 0 .5px .5px 0 rgba(0, 0, 0, .05);
     }
     .comment-form-textarea {
         height: 32px;

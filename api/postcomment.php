@@ -8,9 +8,10 @@
  * @param name    访客名字
  * @param email   访客邮箱
  * @param url     访客网址，可为空
+ * @param unique  匿名用户 unique
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-20 13:39:20
+ * @version  2018-09-22 13:58:14
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */

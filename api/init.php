@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-21 08:02:26
+ * @version  2018-09-22 14:05:03
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -208,6 +208,10 @@ function curl_get($url, $fields = array()){
     $fields -> api_key = DISQUS_PUBKEY;
     $cookies = 'sessionid='.$cache -> get('cookie') -> sessionid;
 
+    if( strpos($url, 'threads/listUsersVotedThread') ){
+        unset($cookies);
+    }
+
     $fields_string = fields_format($fields);
 
     $curl_url = 'https://disqus.com'.$url.$fields_string;
@@ -252,7 +256,12 @@ function curl_post($url, $fields){
 
         $fields -> api_key = DISQUS_PUBKEY;
         $cookies = 'sessionid='.$cache -> get('cookie') -> sessionid;
+        if( isset($fields -> unique) ){
+            $cookies = 'disqus_unique='.$fields -> unique;
+        } 
     }
+    unset($fields -> unique);
+
 
     if( strpos($url, 'media/create') !== false ){
 
@@ -303,6 +312,7 @@ function thread_format( $thread ){
         'author' => $thread -> author,
         'dislikes' => $thread -> dislikes,
         'id' => $thread -> id,
+        'slug' => $thread -> slug,
         'identifiers' => $thread -> identifiers,
         'likes' => $thread -> likes,
         'link' => $thread -> link,

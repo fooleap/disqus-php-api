@@ -1,6 +1,6 @@
 {
     "name": "disqus-php-api",
-    "version": "0.2.22",
+    "version": "0.2.23",
     "description": "disqus-php-api 利用 PHP cURL 转发 Disqus API 请求",
     "main": "dist/iDisqus.js",
     "dependencies": {},
@@ -19,6 +19,7 @@
         "postcss": "^7.0.2",
         "postcss-loader": "^3.0.0",
         "sass-loader": "^7.1.0",
+        "style-loader": "^0.23.0",
         "webpack": "^4.19.0",
         "webpack-cli": "^3.1.0",
         "webpack-dev-server": "^3.1.8"

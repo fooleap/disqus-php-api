@@ -4,9 +4,10 @@
  *
  * @param id       评论 ID
  * @param message  评论内容
+ * @param unique   匿名用户 unique
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:47:44
+ * @version  2018-09-22 13:58:49
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */

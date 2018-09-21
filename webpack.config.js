@@ -31,7 +31,7 @@ module.exports = function(env, argv) {
                 {
                     test: /\.scss$/,
                     use: [
-                        MiniCssExtractPlugin.loader,
+                        argv.mode == 'production' ? MiniCssExtractPlugin.loader : 'style-loader',
                         'css-loader',
                         {
                             loader: 'postcss-loader',
@@ -45,7 +45,8 @@ module.exports = function(env, argv) {
 
         plugins: [
             new MiniCssExtractPlugin({
-                filename: argv.mode == 'production' ? '[name].min.css' : '[name].css'
+                filename: argv.mode == 'production' ? '[name].min.css' : '[name].css',
+                chunkFilename: '[name].css'
             }),
             new HtmlWebpackPlugin({
                 template: './src/demo.html',
