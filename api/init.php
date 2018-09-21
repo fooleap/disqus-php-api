@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-20 13:38:54
+ * @version  2018-09-21 08:02:26
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -331,7 +331,7 @@ function post_format( $post ){
     $author = $post -> author;
 
     // 是否是管理员
-    $isMod = $author -> username == DISQUS_USERNAME ? true : false;
+    $isMod = $author -> username == DISQUS_USERNAME || $author -> name == DISQUS_USERNAME ? true : false;
 
     $uid = md5($author -> name.$author -> email);
 
@@ -434,6 +434,7 @@ class Forum {
     public $url;
     public $id;
     public $pk;
+    public $sort;
     public $avatar;
     public $moderatorBadgeText;
     public $settings;
@@ -452,6 +453,7 @@ class Forum {
         $forum->url = $oForum -> url;
         $forum->id = $oForum -> id;
         $forum->pk = $oForum -> pk;
+        $forum->sort = $oForum->sort;
         $forum->avatar = substr($avatar, 0, 2) === '//' ? 'https:'.$avatar : $avatar;
         $forum->settings = $oForum -> settings;
         return $forum;

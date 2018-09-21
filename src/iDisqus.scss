@@ -88,24 +88,105 @@
 }
 .comment-box{
     display: flex;
-    margin: 20px 0;
+    margin: 0 0 20px;
+}
+.comment-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    .comment-navbar-item {
+        display: flex;
+    }
+    .comment-sort-label {
+        display: block;
+        height: 20px;
+        line-height: 20px;
+        margin-right: 10px;
+        font-size: 12px;
+        border-radius: 2px;
+        padding: 0 5px;
+        background-color: rgb(231, 233, 238);
+        cursor: pointer;
+        &:last-child{
+            margin-right: 0;
+        }
+    }
+    .comment-sort-radio {
+        display: none;
+        &:checked + .comment-sort-label{
+            color: #fff;
+            background-color: #c2c6cc;
+        }
+    }
 }
 .comment-header {
-    height: 36px;
-    line-height: 36px;
-    font-weight: bold;
-    font-size: 15px;
     display: flex;
     justify-content: space-between;
     border-bottom: 2px solid rgb(231, 233, 238);
     .comment-header-item {
+        height: 36px;
+        line-height: 36px;
+        font-weight: bold;
+        font-size: 15px;
         color: #656c7a;
         display: inline-block;
         border-bottom: 2px solid #656c7a;
         margin-bottom: -2px;
-        padding: 0 7px;
-        &#comment-link{
-            border-bottom-color: transparent!important;
+        margin-right: 10px;
+        padding: 0 5px;
+        &:last-child{
+            margin-right: 0;
+            border-bottom-color: transparent;
+            &:hover{
+                color: #2a2a2a;
+            }
+        }
+    }
+    #comment-user{
+        display: none;
+        &:checked + .comment-user .comment-logout{
+            display: block;
+        }
+    }
+    .comment-login{
+        cursor: pointer;
+    }
+    .comment-user{
+        cursor: pointer;
+        position: relative;
+        padding-right: 15px;
+        &:after{
+            content: "";
+            display: block;
+            position: absolute;
+            height: 0;
+            width: 0;
+            border: 5px solid transparent;
+            border-top-color: #656c7a;
+            top: 50%;
+            right: 0;
+            margin-top: 0;
+        }
+    }
+    .comment-logout{
+        cursor: pointer;
+        z-index: 1;
+        display: none;
+        position: absolute;
+        border-radius: 3px;
+        border: 2px solid #c2c6cc;
+        width: 80px;
+        background-color: #fff;
+        height: 32px;
+        line-height: 32px;
+        text-align:center;
+        right: 0;
+        top: 80%;
+        color: #656c7a;
+        font-size: 13px;
+        &:hover{
+            color: #0095dd;
         }
     }
     .comment-show {
@@ -573,7 +654,7 @@
 .comment-list {
     font-size: 14px;
     &:empty:after{
-        content: "来做第一个留言的人吧！";
+        content: attr(data-tips);
         display: block;
         opacity: .6;
         line-height: 80px;

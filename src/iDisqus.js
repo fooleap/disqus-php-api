@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2018-09-20 13:38:07
- * @version 0.2.21
+ * @update 2018-09-21 07:57:55
+ * @version 0.2.22
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
@@ -138,6 +138,14 @@ require('./iDisqus.scss');
             if( _.logged_in == 'true' ) {
                 [].forEach.call(boxarr,function(item){
                     if(_.type == '1'){
+                        var $login = _.dom.querySelector('.comment-login');
+                        if(!!$login){
+                            $login.innerHTML = _.name + '<label class="comment-logout"  title="退出" for="comment-user">退出登录</label>';
+                            $login.title = _.name;
+                            $login.classList.add('comment-user');
+                            $login.classList.remove('comment-login');
+                            _.dom.querySelector('#comment-user').checked = false;
+                        }
                         item.querySelector('.comment-form-wrapper').classList.add('logged-in');
                     }
                     item.querySelector('.comment-form-name').value = _.name;
@@ -146,6 +154,13 @@ require('./iDisqus.scss');
                     item.querySelector('.comment-avatar-image').src = _.avatar;
                 });
             } else {
+                var $user = _.dom.querySelector('.comment-user');
+                if(!!$user){
+                    $user.innerHTML = '登录';
+                    $user.title = '使用 Disqus 帐号授权登录';
+                    $user.classList.add('comment-login');
+                    $user.classList.remove('comment-user');
+                }
                 [].forEach.call(boxarr,function(item){
                     item.querySelector('.comment-form-wrapper').classList.remove('logged-in');
                     item.querySelector('.comment-form-name').value = '';
@@ -448,7 +463,27 @@ require('./iDisqus.scss');
         _.dom.innerHTML = `<div class="comment loading" id="idisqus">
             <div class="comment-reactions"></div>
             <div class="loading-container" data-tips="正在加载评论……"><svg class="loading-bg" width="72" height="72" viewBox="0 0 720 720" version="1.1" xmlns="http://www.w3.org/2000/svg"><path class="ring" fill="none" stroke="#9d9ea1" d="M 0 -260 A 260 260 0 1 1 -80 -260" transform="translate(400,400)" stroke-width="50" /><polygon transform="translate(305,20)" points="50,0 0,100 18,145 50,82 92,145 100,100" style="fill:#9d9ea1"/></svg></div>
-            <div class="comment-header"><span class="comment-header-item" id="comment-count">评论</span><a target="_blank" class="comment-header-item" id="comment-link">Disqus 讨论区</a></div>
+            <div class="comment-header">
+                <div class="comment-header-primary">
+                    <span class="comment-header-item" id="comment-count">评论</span>
+                    <a class="comment-header-item" id="comment-link" target="_blank">在线讨论</a>
+                </div>
+                <div class="comment-header-menu">
+                    <input class="comment-header-checkbox" type="checkbox" id="comment-user">
+                    <label class="comment-header-item comment-login" title="使用 Disqus 帐号授权登录" for="comment-user">登录</label>
+                </div>
+            </div>
+            <div class="comment-navbar">
+                <div class="comment-navbar-item"></div>
+                <div class="comment-navbar-item">
+                  <input class="comment-sort-radio" id="order-popular" type="radio" name="comment-sort" value="popular" />
+                  <label class="comment-sort-label" for="order-popular">最佳</label>
+                  <input class="comment-sort-radio" id="order-desc" type="radio" name="comment-sort" value="desc" />
+                  <label class="comment-sort-label" for="order-desc">最新</label>
+                  <input class="comment-sort-radio" id="order-asc" type="radio" name="comment-sort" value="asc" />
+                  <label class="comment-sort-label" for="order-asc">最早</label>
+                </div>
+            </div>
             <div class="comment-box">
                 <div class="comment-avatar avatar"><img class="comment-avatar-image" src="//a.disquscdn.com/images/noavatar92.png" data-avatar="//a.disquscdn.com/images/noavatar92.png"></div>
                 <div class="comment-form">
@@ -489,12 +524,6 @@ require('./iDisqus.scss');
                             </div>
         
                             <div class="comment-actions-form">
-                                <label class="comment-actions-label exit" title="退出登录">
-                                    <svg class="icon" fill="#c2c6cc" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48">
-                                        <path d="M348.870666 210.685443l378.570081 0c32.8205 0 58.683541 26.561959 58.683541 58.683541 0 162.043606 0 324.804551 0 486.848157 0 32.81129-26.561959 58.674331-58.683541 58.674331L348.870666 814.891472c-10.477632 0-18.850323-8.363482-18.850323-18.841114l0-37.728276c0-10.477632 8.372691-18.841114 18.850323-18.841114l343.645664 0c10.477632 0 18.850323-8.372691 18.850323-18.850323L711.366653 304.983109c0-10.477632-8.372691-18.841114-18.850323-18.841114L348.870666 286.141996c-10.477632 0-18.850323-8.363482-18.850323-18.841114l0-37.728276C329.98248 219.095997 338.393034 210.685443 348.870666 210.685443z"></path>
-                                        <path d="M128.152728 526.436804l112.450095 112.450095c6.985088 6.985088 19.567661 6.985088 26.552749 0l26.561959-26.561959c6.985088-6.985088 6.985088-19.567661 0-26.552749l-34.925441-34.925441L494.168889 550.84675c10.477632 0 18.850323-8.372691 18.850323-18.850323l0-37.719066c0-10.477632-8.372691-18.850323-18.850323-18.850323L258.754229 475.427036l34.925441-34.925441c6.985088-6.985088 6.985088-19.567661 0-26.552749l-26.561959-26.524097c-6.985088-6.985088-19.567661-6.985088-26.552749 0L128.152728 499.875868C120.431883 506.859933 120.431883 519.451716 128.152728 526.436804z"></path>
-                                    </svg>
-                                </label>
                                 <button class="comment-form-submit">
                                     <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">
                                         <path d="M565.747623 792.837176l260.819261 112.921839 126.910435-845.424882L66.087673 581.973678l232.843092 109.933785 562.612725-511.653099-451.697589 563.616588-5.996574 239.832274L565.747623 792.837176z" fill="#ffffff"></path>
@@ -502,15 +531,14 @@ require('./iDisqus.scss');
                                 </button>
                             </div>
                         </div>
-        
+
                     </div>
                     <div class="comment-form-user">
-                        ${( _.opts.mode != 1 ? '<div class="comment-form-auth"><button class="comment-form-login" title="使用 Disqus 帐号登录"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 200 200"><path fill="#2E9FFF" d="M102.535 167.5c-16.518 0-31.621-6.036-43.298-16.021L30.5 155.405l11.102-27.401A67.658 67.658 0 0 1 35.564 100c0-37.277 29.984-67.5 66.971-67.5 36.984 0 66.965 30.223 66.965 67.5 0 37.284-29.98 67.5-66.965 67.5zm36.567-67.693v-.188c0-19.478-13.736-33.367-37.42-33.367h-25.58v67.5h25.201c23.868.001 37.799-14.468 37.799-33.945zm-37.138 17.361h-7.482V82.841h7.482c10.989 0 18.283 6.265 18.283 17.07v.188c0 10.896-7.294 17.069-18.283 17.069z"/></svg></button></div><span> 或 </span>' : '' )}
-                            <form class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" name="name" placeholder="名字（必填）" autocomplete="name" /><input class="comment-form-input comment-form-email" type="email" name="email" placeholder="邮箱（必填）" autocomplete="email" /><input class="comment-form-input comment-form-url" type="url" name="url" placeholder="网址（可选）" autocomplete="url" /></form>
+                        <form class="comment-form-guest"><input class="comment-form-input comment-form-name" type="text" name="name" placeholder="名字（必填）" autocomplete="name" /><input class="comment-form-input comment-form-email" type="email" name="email" placeholder="邮箱（必填）" autocomplete="email" /><input class="comment-form-input comment-form-url" type="url" name="url" placeholder="网址（可选）" autocomplete="url" /></form>
                     </div>
                 </div>
             </div>
-            <ul id="comments" class="comment-list"></ul>
+            <ul id="comments" class="comment-list" data-tips="来做第一个留言的人吧！"></ul>
             <a href="javascript:;" class="comment-loadmore">加载更多</a>
             <div class="comment-related"></div>
         </div>
@@ -535,7 +563,8 @@ require('./iDisqus.scss');
             field: _.field.bind(_),
             focus: _.focus,
             input: _.input.bind(_),
-            parentShow: _.parentShow.bind(_)
+            parentShow: _.parentShow.bind(_),
+            selectOrder: _.selectOrder.bind(_)
         };
 
         var $iDisqus = _.dom.querySelector('#idisqus');
@@ -547,10 +576,10 @@ require('./iDisqus.scss');
         $iDisqus.on('blur', '.comment-form-name', _.handle.verify);
         $iDisqus.on('blur', '.comment-form-email',  _.handle.verify);
         $iDisqus.on('click', '.comment-form-submit',  _.handle.post);
-        $iDisqus.on('click', '.comment-form-login',  _.handle.login);
+        $iDisqus.on('click', '.comment-login',  _.handle.login);
         $iDisqus.on('change', '.comment-image-input',  _.handle.upload);
         $iDisqus.on('click', '.emojione-item',  _.handle.field);
-        $iDisqus.on('click', '.exit', _.handle.logout);
+        $iDisqus.on('click', '.comment-logout', _.handle.logout);
         $iDisqus.on('click', '.comment-item-reply', _.handle.show);
         $iDisqus.on('click', '.comment-item-cancel',  _.handle.show);
         $iDisqus.on('click','.comment-item-avatar', _.handle.jump);
@@ -558,6 +587,7 @@ require('./iDisqus.scss');
         $iDisqus.on('mouseover','.comment-item-pname', _.handle.parentShow);
         $iDisqus.on('click', '.comment-loadmore', _.handle.loadMore);
         $iDisqus.on('click', '#thread-submit', _.handle.threadCreate);
+        $iDisqus.on('change', '.comment-sort-radio', _.handle.selectOrder);
 
         switch(_.opts.mode){
             case 1:
@@ -735,14 +765,30 @@ require('./iDisqus.scss');
 
     };
 
+    // 排序
+    iDisqus.prototype.selectOrder = function(e, target){
+       var _ = this;
+       var order = target.value;
+       sessionStorage.setItem('order', order);
+       _.dom.querySelector('.comment-list').innerHTML = '';
+       _.dom.querySelector('.comment-loadmore').classList.add('hide');
+       _.stat.next = null;
+       _.getlist();
+    }
+
     // 获取评论列表
     iDisqus.prototype.getlist = function(){
         var _ = this;
+        var $sort =_.dom.querySelectorAll('.comment-sort-radio');
+        [].forEach.call($sort, function(item){
+            item.disabled = 'disabled';
+        })
         _.stat.loading = true;
         _.dom.querySelector('#idisqus').style.display = 'block';
         _.dom.querySelector('#disqus_thread').style.display = 'none';
+        var order = sessionStorage.getItem('order');
         getAjax(
-            _.opts.api + '/getcomments.php?ident=' + _.opts.identifier + '&link=' + _.opts.url + (!!_.stat.next ? '&cursor=' + _.stat.next : ''),
+            _.opts.api + '/getcomments.php?ident=' + _.opts.identifier + '&link=' + _.opts.url + (!!_.stat.next ? '&cursor=' + _.stat.next : '') + (!!order ? '&order=' + order : ''),
             function(resp){
                 var data = JSON.parse(resp);
                 if (data.code === 0) {
@@ -752,6 +798,26 @@ require('./iDisqus.scss');
                     _.forum = data.forum;
                     _.opts.avatar = _.forum.avatar;
                     _.dom.querySelector('.comment-avatar-image').dataset.avatar = _.forum.avatar;
+                    if( !order ){
+                        switch( _.forum.sort ){
+                          case 1:
+                            order = 'asc';
+                            break;
+                          case 2:
+                            order = 'desc';
+                            break;
+                          case 4:
+                            order = 'popular';
+                            break;
+                        }
+                    }
+                    [].forEach.call($sort, function(item){
+                        item.disabled = '';
+                    })
+                    _.dom.querySelector('.comment-sort-radio[value="'+order+'"').checked = true;
+                    _.loadRelated();
+                    _.loadReactions();
+
                     if( _.user.logged_in == 'false' ){
                         _.dom.querySelector('.comment-avatar-image').src = _.forum.avatar;
                     }
@@ -777,13 +843,16 @@ require('./iDisqus.scss');
                     if ( data.cursor.hasNext ){
                         _.stat.next = data.cursor.next;
                         loadmore.classList.remove('loading');
+                        loadmore.classList.remove('hide');
                     } else {
                         _.stat.next = null;
                         loadmore.classList.add('hide');
                     }
 
-                    _.loadRelated();
-                    _.loadReactions();
+                    if(posts.length == 0){
+                        return;
+                    }
+                    _.dom.querySelector('.comment-list').dataset.tips = '评论加载中……';
                     _.timeAgo();
 
                     var iframe =_.dom.querySelectorAll('.comment-item-body iframe');
@@ -791,7 +860,6 @@ require('./iDisqus.scss');
                         item.style.width = item.clientWidth + 'px';
                         item.style.height = item.clientWidth * 9 / 16 + 'px';
                         setTimeout(function(){
-                            console.log(item.contentWindow);
                             item.src = item.src;
                         },1000)
                     })
@@ -1398,7 +1466,7 @@ require('./iDisqus.scss');
             }
 
             if(!_.stat.message && !_.stat.mediaHtml){
-                _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/,'').replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
+                _.box = _.dom.querySelector('.comment-box').outerHTML.replace('comment-form-wrapper','comment-form-wrapper editing').replace(/加入讨论……/,'');
             }
 
             if( /^\s*$/i.test(message)){
@@ -1674,13 +1742,13 @@ require('./iDisqus.scss');
     iDisqus.prototype.destroy = function(){
         var _ = this;
         _.dom.innerHTML = '';
-        delete _.box;
         delete _.dom;
+        delete _.box;
         delete _.emojiList;
         delete _.user;
         delete _.handle;
-        delete _.opts;
         delete _.stat;
+        delete _.opts;
     }
 
     /* CommonJS */

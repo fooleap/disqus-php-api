@@ -7,19 +7,35 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-31 19:44:27
+ * @version  2018-09-20 23:41:28
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 require_once('init.php');
 
 $thread = 'ident:'.$_GET['ident'];
+$order = $_GET['order'];
+$forum = $cache -> get('forum');
+
+if(!!empty($order)){
+    switch($forum -> sort){
+    case 1:
+        $order = 'asc';
+        break;
+    case 2:
+        $order = 'desc';
+        break;
+    case 3:
+        $order = 'popular';
+        break;
+    }
+}
 
 $fields = (object) array(
     'forum' => DISQUS_SHORTNAME,
     'cursor' => $_GET['cursor'],
     'limit' => 50,
-    'order' => 'desc',
+    'order' => $order,
     'thread' => $thread
 );
 
@@ -58,7 +74,7 @@ $data -> cursor -> total = $detail -> response -> posts;
 $output = $data -> code == 0 ? (object) array(
     'code' => 0,
     'cursor' => $data -> cursor,
-    'forum' => $cache -> get('forum'),
+    'forum' => $forum,
     'link' => 'https://disqus.com/home/discussion/'.DISQUS_SHORTNAME.'/'.$detail -> response -> slug.'/?l=zh',
     'response' => $posts,
     'thread' => thread_format($detail -> response)
