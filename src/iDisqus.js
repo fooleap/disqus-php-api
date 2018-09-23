@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2018-09-22 09:57:57
- * @version 0.2.23
+ * @update 2018-09-23 23:44:35
+ * @version 0.2.24
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
@@ -137,7 +137,11 @@ require('./iDisqus.scss');
             if( !l.getItem('vote') ){
                 l.setItem('vote', JSON.stringify({}));
             }
+            if( !l.getItem('reaction_vote') ){
+                l.setItem('reaction_vote', JSON.stringify({}));
+            }
             _.vote = JSON.parse(l.getItem('vote'));
+            _.reactionVote = JSON.parse(l.getItem('reaction_vote'));
 
             var boxarr = _.dom.getElementsByClassName('comment-box');
             if( _.logged_in == 'true' ) {
@@ -238,6 +242,7 @@ require('./iDisqus.scss');
                 l.removeItem('url');
                 l.removeItem('disqus_unique');
                 l.removeItem('vote');
+                l.removeItem('reaction_vote');
                 _.user.init();
             })
         },
@@ -489,7 +494,13 @@ require('./iDisqus.scss');
             emojiList += '<li class="emojione-item" title="'+ item.title+'" data-code=":'+item.code+':"><img class="emojione-item-image" src="'+_.opts.emojiPath + item.unicode+'.png" /></li>';
         })
         _.dom.innerHTML = `<div class="comment init" id="idisqus">
-            <div class="comment-reactions"></div>
+            <div class="comment-reaction">
+                <div class="comment-reaction-header">
+                    <div class="comment-reaction-prompt"></div>
+                    <div class="comment-reaction-total"></div>
+                </div>
+                <div class="comment-reaction-list"></div>
+            </div>
             <div class="init-container" data-tips="正在初始化……"><svg class="init-bg" width="72" height="72" viewBox="0 0 720 720" version="1.1" xmlns="http://www.w3.org/2000/svg"><path class="ring" fill="none" stroke="#9d9ea1" d="M 0 -260 A 260 260 0 1 1 -80 -260" transform="translate(400,400)" stroke-width="50" /><polygon transform="translate(305,20)" points="50,0 0,100 18,145 50,82 92,145 100,100" style="fill:#9d9ea1"/></svg></div>
             <div class="comment-header">
                 <div class="comment-header-primary">
@@ -583,6 +594,7 @@ require('./iDisqus.scss');
             post: _.post.bind(_),
             threadCreate: _.threadCreate.bind(_),
             threadVote: _.threadVote.bind(_),
+            reactionVote: _.reactionVote.bind(_),
             remove: _.remove.bind(_),
             show: _.show.bind(_),
             toggle: _.toggle.bind(_),
@@ -602,6 +614,7 @@ require('./iDisqus.scss');
         $iDisqus.on('blur','.comment-form-textarea', _.handle.focus);
         $iDisqus.on('focus','.comment-form-textarea', _.handle.focus);
         $iDisqus.on('input','.comment-form-textarea', _.handle.input);
+        $iDisqus.on('propertychange','.comment-form-textarea', _.handle.input);
         $iDisqus.on('keyup','.comment-form-textarea', _.handle.mention);
         $iDisqus.on('keydown', '.comment-form-textarea', _.handle.keySelect);
         $iDisqus.on('blur', '.comment-form-name', _.handle.verify);
@@ -619,6 +632,7 @@ require('./iDisqus.scss');
         $iDisqus.on('click', '.comment-loadmore', _.handle.loadMore);
         $iDisqus.on('click', '#thread-submit', _.handle.threadCreate);
         $iDisqus.on('click', '.comment-recommend', _.handle.threadVote);
+        $iDisqus.on('click', '.comment-reaction-btn:not(.selected)', _.handle.reactionVote);
         $iDisqus.on('change', '.comment-order-radio', _.handle.selectOrder);
 
         switch(_.opts.mode){
@@ -690,7 +704,7 @@ require('./iDisqus.scss');
                 xhr.abort();
                 if( _.opts.mode == 1){
                     _tips = '连接超时，加载简易评论框……';
-                    _.theadInit();
+                    _.threadInit();
                 }
             }
             xhr.onerror = function() {
@@ -794,8 +808,44 @@ require('./iDisqus.scss');
         if(_.stat.forum.settings.threadReactionsEnabled == false){
             return;
         }
+        getAjax( _.opts.api + '/threadReactionsLoadReations.php' + '?thread=' + _.stat.thread.id, function(resp) {
+            var data  = JSON.parse(resp);
+            if( data.response.eligible ){
+                _.dom.querySelector('.comment-reaction-prompt').innerHTML = data.response.prompt;
+                var reactions = data.response.reactions;
+                var total = 0;
+                var reaListHtml = '';
+                var selectedId = _.user.reactionVote[_.stat.thread.id];
+                selectedId = selectedId || (!!data.selected ? data.selected.id : 0);
+                reactions.forEach(function(item){
+                    total += item.votes;
+                    reaListHtml += `<li class="comment-reaction-item"><a class="comment-reaction-btn${(selectedId == item.id  ? ' selected' : '')}" data-id="${ item.id }" href="javascript:;"><img class="comment-reaction-image" src="${ item.imageUrl }"> ${ item.text }</a><div class="comment-reaction-count">${ item.votes }</div></li>`;
+                })
+                _.dom.querySelector('.comment-reaction-list').innerHTML = reaListHtml;
+                _.dom.querySelector('.comment-reaction-total').innerHTML = total + ' 人次参与';
+            }
+        },function(){})
 
     };
+
+    // 反应打分事件
+    iDisqus.prototype.reactionVote = function(e, target){
+        var _ = this;
+        var $reaction = target.closest('.comment-reaction-item');
+        var $count = $reaction.querySelector('.comment-reaction-count');
+        var reactionId = target.dataset.id;
+        var postData = {
+            thread: _.stat.thread.id,
+            unique: _.user.unique,
+            reaction: reactionId
+        }
+        postAjax( _.opts.api + '/threadReactionsVote.php', postData, function(resp){
+            _.user.reactionVote[_.stat.thread.id] = reactionId;
+            l.setItem('reaction_vote', JSON.stringify(_.user.reactionVote));
+            target.classList.add('selected');
+            $count.innerHTML ++
+        })
+    }
 
     // 排序
     iDisqus.prototype.selectOrder = function(e, target){
@@ -1698,7 +1748,7 @@ require('./iDisqus.scss');
                             break;
                     }
                 }
-                _.dom.querySelector('.comment-order-radio[value="'+ _.stat.order +'"').checked = true;
+                _.dom.querySelector('.comment-order-radio[value="'+ _.stat.order +'"]').checked = true;
                 
                 var users = data.votedusers;
                 var vote = 0;

@@ -1130,6 +1130,56 @@
     }
 }
 
+.comment-reaction{
+    display: flex;
+    flex-direction: column;
+    .comment-reaction-header{
+        text-align: center;
+        line-height: 25px;
+    }
+    .comment-reaction-list{
+        display: flex;
+        justify-content: center;
+        list-style-type: none;
+        &:not(:empty){
+            padding: 10px 0;
+        }
+        .comment-reaction-item{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #656c7a;
+            margin-right: 10px;
+            &:last-child{
+                margin-right: 0;
+            }
+        }
+        .comment-reaction-btn{
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            border: 1px solid #c2c6cc;
+            border-radius: 3px;
+            height: 30px;
+            max-width: 100px;
+            color: #656c7a;
+            &.selected{
+               border-color: #656c7a;
+            }
+        }
+        .comment-reaction-count{
+            padding: 5px 0;
+        }
+        img{
+            margin-right: 5px;
+            width: 20px;
+            height: 20px;
+        }
+    }
+}
+
 @keyframes disqus-loader-spinner-animation{
     0%{transform:rotate(0)}
     100%{transform:rotate(360deg)}

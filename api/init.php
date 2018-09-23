@@ -205,10 +205,18 @@ function curl_get($url, $fields = array()){
 
     global $cache;
 
-    $fields -> api_key = DISQUS_PUBKEY;
-    $cookies = 'sessionid='.$cache -> get('cookie') -> sessionid;
+    if( isset($access_token) && strpos($url, 'threadReactions/loadReactions') !== false ){
 
-    if( strpos($url, 'threads/listUsersVotedThread') ){
+        $fields -> api_secret = SECRET_KEY;
+        $fields -> access_token = $access_token;
+
+    } else {
+
+        $fields -> api_key = DISQUS_PUBKEY;
+        $cookies = 'sessionid='.$cache -> get('cookie') -> sessionid;
+    }
+
+    if( strpos($url, 'threads/listUsersVotedThread') !== false || strpos($url, 'threadReactions/loadReactions') !== false ){
         unset($cookies);
     }
 
