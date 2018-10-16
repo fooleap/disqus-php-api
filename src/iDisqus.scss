@@ -4,12 +4,15 @@
         display: none;
     }
     position: relative;
-    font: 14px/1.6 "Helvetica Neue", Helvetica, Arial, "微软雅黑", "Microsoft YaHei", sans-serif;
+    font: 13.5px/1.6 "Helvetica Neue", Helvetica, Arial, "微软雅黑", "Microsoft YaHei", sans-serif;
     color: #2a2e2e;
     margin: 5px auto;
     word-wrap: break-word;
     padding: 0;
     box-sizing: border-box;
+    input, textarea, select, button {
+        font: 13.5px/1.6 "Helvetica Neue", Helvetica, Arial, "微软雅黑", "Microsoft YaHei", sans-serif;
+    }
     a{
         text-decoration:none;
     }
@@ -217,8 +220,8 @@
         width: 80px;
         background-color: #fff;
         height: 32px;
-        line-height: 32px;
-        text-align:center;
+        line-height: 28px;
+        text-align: center;
         right: 0;
         top: 80%;
         color: #656c7a;
@@ -456,8 +459,9 @@
             margin-top: 10px;
         }
         .comment-form-textarea {
-            font: 14px/16px "Helvetica Neue", Helvetica, Arial,"微软雅黑","Microsoft YaHei";
             height: 74px;
+            font-size: 13.5px;
+            line-height: 16px;
         }
         .comment-image{
             transition: padding-bottom .15s ease-in-out;
@@ -483,14 +487,29 @@
         border: 2px solid #c2c6cc;
         .comment-actions {
             border-top: 2px solid #c2c6cc;
-            .comment-actions-label{
-                .icon {
-                    fill: #656c7a;
-                }
+        }
+        .comment-actions-label{
+            .icon {
+                fill: #656c7a;
             }
         }
         &.expanded .comment-image {
             border-top: 2px solid #c2c6cc;
+        }
+    }
+    &.preview{
+        border: 2px solid #c2c6cc;
+        .comment-actions {
+            border-top: 2px solid #c2c6cc;
+        }
+        .comment-actions-label{
+            pointer-events: none;
+        }
+        .comment-actions-label[for^="preview-input"]{
+            pointer-events: auto;
+            .icon {
+                fill: #656c7a;
+            }
         }
     }
     &.expanded{
@@ -518,19 +537,28 @@
             display: block;
         }
     }
+    .comment-form-preview{
+        border-radius: 4px;
+        display: none;
+        min-height: 74px;
+        padding: 7px;
+        white-space: pre-wrap;
+    }
     .comment-form-textarea {
         width: 100%;
         display: block;
         border: none;
+        font-size: 18px;
+        line-height: 30px;
         border-radius: 4px;
-        overflow: auto;
+        overflow: hidden;
         color: rgb(42, 46, 46);
         cursor: text;
         resize: none;
         height: 44px;
-        font: 18px/30px "Helvetica Neue", Helvetica, Arial,"微软雅黑", "Microsoft YaHei";
         padding: 7px;
         transition: all .2s ease-in-out;
+        background-color: #fefefe;
         &::-webkit-input-placeholder {
             color: #7f919e;
         }
@@ -637,7 +665,6 @@
         display: block;
         height: 32px;
         line-height: 32px;
-        font-size: 14px;
         color: #656c7a;
         width: 100px;
         text-align: right;
@@ -649,7 +676,6 @@
         transition: all .2s linear;
         padding: 2px 10px;
         border-radius: 4px;
-        font-size: 14px;
         height: 64px;
         margin: 0 5px;
         width: 30px; 
@@ -666,7 +692,6 @@
     transition: all .2s linear;
     padding: 0 7px;
     border-radius: 4px;
-    font-size: 14px;
     height: 32px;
     margin: 0 5px;
     width: 30px; 
@@ -687,7 +712,6 @@
 }
 
 .comment-list {
-    font-size: 14px;
     &:empty:after{
         content: attr(data-tips);
         display: block;
@@ -707,10 +731,7 @@
         cursor: default;
     }
     pre{
-        font-size: 12px;
-        font-family: monaco,menlo,monospace;
         overflow: hidden;
-        line-height: 20px;
         margin: 0 0 15px;
         border-left: 4px solid #7f919e;
         padding: 0 0 0 12px;
@@ -736,7 +757,6 @@
     }
     .comment-item-header,
     .comment-item-footer {
-        font-size: 13px;
         line-height: 1.2;
         color: #c2c6cc;
         .comment-item-bullet{
@@ -744,6 +764,7 @@
         }
     }
     .comment-item-header {
+        font-size: 13px;
         .comment-item-pname {
             color: #656c7a;
             position: relative;
@@ -820,6 +841,7 @@
         }
     }
     .comment-item-footer {
+        font-size: 12px;
         padding: 5px 0;
         .comment-item-reply,
         .comment-item-edit,
@@ -854,8 +876,17 @@
     }
     .comment-item-content {
         padding-top: 5px;
-        font-size: 14px;
-        line-height: 1.6;
+        letter-spacing: .5px;
+        spoiler{
+            display: inline;
+            background-color: #687a86;
+            color: transparent;
+            white-space: pre-wrap;
+            &:hover{
+                color: #2e2e2e;
+                background-color: transparent;
+            }
+        }
         p{
             margin-bottom: 5px;
             &:last-child{
@@ -905,6 +936,9 @@
     }
     .comment-box{
         margin: 0;
+        + .comment-item-body{
+            display: none;
+        }
     }
     .comment-item-body + .comment-box{
         padding-left: 60px;
@@ -954,7 +988,6 @@
 .comment-form-error{
     position: absolute;
     background-color: #fff;
-    font-size: 14px;
     padding: 10px;
     line-height: 20px;
     border-radius: 3px;
@@ -1049,7 +1082,6 @@
 
 .comment-related{
     color: #444;
-    font-size: 14px;
     margin-top: 20px;
     width: 100%;
     .comment-related-title{
@@ -1057,6 +1089,8 @@
         text-transform: uppercase;
         color: rgba(34,59,74,.5);
         margin-bottom: 5px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
     .comment-related-forumname{
         color: #413a3a;
@@ -1163,6 +1197,7 @@
             border: 1px solid #c2c6cc;
             border-radius: 3px;
             height: 30px;
+            line-height: 30px;
             max-width: 100px;
             color: #656c7a;
             &.selected{
@@ -1172,8 +1207,10 @@
         .comment-reaction-count{
             padding: 5px 0;
         }
+        .comment-reaction-text{
+            margin-left: 5px;
+        }
         img{
-            margin-right: 5px;
             width: 20px;
             height: 20px;
         }
@@ -1186,6 +1223,9 @@
 }
 
 @media screen and(max-width: 450px) {
+    .comment-reaction-text{
+        display: none;
+    }
     .comment-form-wrapper{
         &.editing .comment-actions-form{
             margin: 180px 0 0;

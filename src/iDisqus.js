@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2018-09-23 23:44:35
- * @version 0.2.24
+ * @update 2018-10-16 23:42:23
+ * @version 0.2.25
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
@@ -370,7 +370,6 @@ require('./iDisqus.scss');
             loading: false,     // 评论加载中
             editing: false,     // 评论编辑中
             offsetTop: 0,       // 高度位置
-            thread: null,       // 本页 thread id
             next: null,         // 下条评论
             message: null,      // 新评论
             mediaHtml: null,    // 新上传图片
