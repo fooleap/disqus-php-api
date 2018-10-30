@@ -19,7 +19,7 @@ require_once('init.php');
 require_once('sendemail.php');
 
 $authorName = $_POST['name'];
-$authorEmail = $_POST['email'];
+$authorEmail = strtolower($_POST['email']);
 $authorUrl = $_POST['url'] == '' || $_POST['url'] == 'null' ? null : $_POST['url'];
 $threadId = $_POST['thread'];
 $parent = $_POST['parent'];
