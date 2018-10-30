@@ -105,6 +105,15 @@ if( isset($access_token) ){
 $data = curl_post($curl_url, $post_data);
 
 if( $data -> code == 0 ){
+
+    // 匿名用户暂存邮箱号
+    if( !isset($access_token) ){
+        $authors = $cache -> get('authors');
+        $uid = md5($authorName.email_format($authorEmail));
+        $authors -> $uid = $authorEmail;
+        $cache -> update($authors, 'authors');
+    }
+
     $rPost = post_format($data->response);
 
     $output = array(
@@ -125,15 +134,6 @@ if( $data -> code == 0 ){
     } else {
         $output['verifyCode'] = $pAuthor->isAnonymous ? $pUid : time();
         print_r(json_encode($output));
-    }
-
-
-    // 匿名用户暂存邮箱号
-    if( !isset($access_token) ){
-        $authors = $cache -> get('authors');
-        $uid = md5($authorName.email_format($authorEmail));
-        $authors -> $uid = $authorEmail;
-        $cache -> update($authors, 'authors');
     }
 
 } else {
