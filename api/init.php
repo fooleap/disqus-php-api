@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-10-16 23:44:16
+ * @version  2018-11-05 07:11:36
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -34,6 +34,9 @@ try {
 $jwt = new JWT();
 $emoji = new Emoji();
 
+$disqus_host = IP_MODE == 1 ? DISQUS_IP : 'disqus.com';
+$media_host = IP_MODE == 1 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
+$login_host = IP_MODE == 1 ? DISQUS_LOGINIP  : 'import.disqus.com';
 $url = parse_url(DISQUS_WEBSITE);
 $website = $url['scheme'].'://'.$url['host'];
 $user = $_COOKIE['access_token'];
@@ -65,7 +68,7 @@ if ( isset($user) ){
 
 function adminLogin(){
 
-    global $cache;
+    global $cache, $login_host;
 
     $fields = (object) array(
         'username' => DISQUS_EMAIL,
@@ -75,7 +78,8 @@ function adminLogin(){
     $fields_string = fields_format($fields);
 
     $options = array(
-        CURLOPT_URL => 'https://import.disqus.com/login/',
+        CURLOPT_URL => 'https://'.$login_host.'/login/',
+        CURLOPT_HTTPHEADER => array('Host: import.disqus.com', 'Origin: https://disqus.com'),
         CURLOPT_HEADER => 1,
         CURLOPT_RETURNTRANSFER => 1,
         CURLOPT_POST => count($fields),
@@ -89,7 +93,13 @@ function adminLogin(){
 
     if ($errno == 60 || $errno == 77) {
         curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
-        $data = curl_exec($curl);
+        $result = curl_exec($curl);
+    }
+
+    if( $errno == 51 ){
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        $result = curl_exec($curl);
     }
 
     curl_close($curl);
@@ -113,20 +123,33 @@ function adminLogin(){
 
 // 鉴权
 function getAccessToken($fields){
-    global $access_token, $jwt;
+    global $access_token, $jwt, $disqus_host;
 
     extract($_POST);
-    $url = 'https://disqus.com/api/oauth/2.0/access_token/?';
+    $url = 'https://'.$disqus_host.'/api/oauth/2.0/access_token/?';
 
     $fields_string = fields_format($fields);
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, count($fields));
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $data = curl_exec($ch);
-    curl_close($ch);
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Host: disqus.com', 'Origin: https://disqus.com'));
+    curl_setopt($curl, CURLOPT_POST, count($fields));
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $fields_string);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    $data = curl_exec($curl);
+    $errno = curl_errno($curl);
+
+    if ($errno == 60 || $errno == 77) {
+        curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
+        $data = curl_exec($curl);
+    }
+
+    if( $errno == 51 ){
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        $data = curl_exec($curl);
+    }
+    curl_close($curl);
 
     // 用户授权数据
     $auth_results = json_decode($data);
@@ -203,7 +226,7 @@ function fields_format($fields){
 
 function curl_get($url, $fields = array()){
 
-    global $cache;
+    global $cache, $disqus_host;
 
     if( isset($access_token) && strpos($url, 'threadReactions/loadReactions') !== false ){
 
@@ -222,12 +245,11 @@ function curl_get($url, $fields = array()){
 
     $fields_string = fields_format($fields);
 
-    $curl_url = 'https://disqus.com'.$url.$fields_string;
+    $curl_url = 'https://'.$disqus_host.$url.$fields_string;
 
     $options = array(
         CURLOPT_URL => $curl_url,
         CURLOPT_HTTPHEADER => array('Host: disqus.com','Origin: https://disqus.com'),
-        CURLOPT_RETURNTRANSFER => 1,
         CURLOPT_FOLLOWLOCATION => 1,
         CURLOPT_HEADER => 0,
         CURLOPT_RETURNTRANSFER => 1 
@@ -246,6 +268,11 @@ function curl_get($url, $fields = array()){
         curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
         $data = curl_exec($curl);
     }
+    if( $errno == 51 ){
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        $data = curl_exec($curl);
+    }
     curl_close($curl);
 
     return json_decode($data);
@@ -253,7 +280,7 @@ function curl_get($url, $fields = array()){
 
 function curl_post($url, $fields){
 
-    global $access_token, $cache;
+    global $access_token, $cache, $disqus_host, $media_host;
 
     if( isset($access_token) && strpos($url, 'threads/create') === false && strpos($url, 'media/create') === false ){
 
@@ -273,14 +300,14 @@ function curl_post($url, $fields){
 
     if( strpos($url, 'media/create') !== false ){
 
-        $curl_url = 'https://uploads.services.disqus.com'.$url;
+        $curl_url = 'https://'.$media_host.$url;
         $curl_host = 'uploads.services.disqus.com';
 
         $fields_string = $fields;
 
     } else {
 
-        $curl_url = 'https://disqus.com'.$url;
+        $curl_url = 'https://'.$disqus_host.$url;
         $curl_host = 'disqus.com';
 
         $fields_string = fields_format($fields);
@@ -308,6 +335,11 @@ function curl_post($url, $fields){
     $errno = curl_errno($curl);
     if ($errno == 60 || $errno == 77) {
         curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
+        $data = curl_exec($curl);
+    }
+    if( $errno == 51 ){
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
         $data = curl_exec($curl);
     }
     curl_close($curl);
@@ -348,8 +380,21 @@ function post_format( $post ){
 
     $author = $post -> author;
 
-    // 是否是管理员
-    $isMod = $author -> username == DISQUS_USERNAME || $author -> name == DISQUS_USERNAME ? true : false;
+    $modIdent = defined('MOD_IDENT') ? MOD_IDENT : 1;
+
+    switch($modIdent){
+    case 1:
+        $isMod = $author -> username == DISQUS_USERNAME;
+        break;
+    case 2:
+        $isMod = $author -> name == DISQUS_USERNAME && $author -> email == DISQUS_EMAIL;
+        break;
+    case 3:
+        $isMod = $author -> name == DISQUS_USERNAME || $author -> email == DISQUS_EMAIL;
+        break;
+    default:
+        $isMod = $author -> username == DISQUS_USERNAME;
+    }
 
     $uid = md5($author -> name.$author -> email);
 

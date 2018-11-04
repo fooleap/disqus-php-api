@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-08 13:38:39
+ * @version  2018-11-04 21:43:12
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -21,6 +21,9 @@
  * DISQUS_SHORTNAME 网站在 Disqus 对应的 shortname
  * DISQUS_APPROVED  评论是否免审核，true 即跳过评论预审核，false 则按后台设置
  * DISQUS_BLACKLIST 评论发表应用官方的 IP 黑名单，true 即启用，false 则跳过
+ * MOD_IDENT        识别管理员：1. username 等于 DISQUS_USERNAME，即和原生评论框一样
+ *                              2. 匿名评论 name 等于 DISQUS_USERNAME 且 email 等于 DISQUS_EMAIL
+ *                              3. 匿名评论 name 等于 DISQUS_USERNAME 或 email 等于 DISQUS_EMAIL
  *
  * 填写正确的账号信息之后，将以网站管理员的身份去获取评论数据。
  *
@@ -36,6 +39,21 @@ define('DISQUS_WEBSITE', '');
 define('DISQUS_SHORTNAME', '');
 define('DISQUS_APPROVED', true);
 define('DISQUS_BLACKLIST', false);
+define('MOD_IDENT', 1);
+
+/*
+ * 网络设置
+ *
+ * IP_MODE        IP 模式，在墙内可尝试设置为 true，将指定 IP，不保证能够访问 Disqus API
+ * DISQUS_IP      disqus.com IP 地址，可选：151.101.0.134, 151.101.64.134, 151.101.128.134, 151.101.192.134
+ * DISQUS_MEDIAIP uploads.services.disqus.com IP 地址，可选：151.101.24.64, 151.101.40.64, 151.101.52.64
+ * DISQUS_LOGINIP import.disqus.com IP 地址，可选：151.101.40.134
+ *
+ */
+define('IP_MODE', false);
+define('DISQUS_IP', '151.101.0.134'); 
+define('DISQUS_MEDIAIP', '151.101.24.64');
+define('DISQUS_LOGINIP', '151.101.40.134');
 
 /*
  * 图片设置

@@ -551,7 +551,6 @@
         font-size: 18px;
         line-height: 30px;
         border-radius: 4px;
-        overflow: hidden;
         color: rgb(42, 46, 46);
         cursor: text;
         resize: none;
@@ -730,12 +729,6 @@
         color: #000;
         cursor: default;
     }
-    pre{
-        overflow: hidden;
-        margin: 0 0 15px;
-        border-left: 4px solid #7f919e;
-        padding: 0 0 0 12px;
-    }
     code{
         line-height: 20px;
         font-size: 12px;
@@ -744,6 +737,18 @@
         display: inline-block;
         vertical-align: top;
         margin: 2px;
+    }
+    pre{
+        overflow-x: auto;
+        margin: 0 0 15px;
+        border-left: 4px solid #7f919e;
+        padding: 0 0 0 12px;
+        code {
+            display: block;
+            overflow-y: hidden;
+            white-space: pre;
+            line-height: 1.1;
+        }
     }
     #comment-preview {
         opacity: .6;
