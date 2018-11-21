@@ -5,7 +5,7 @@
  * @param id  评论 ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:47:25
+ * @version  2018-11-07 23:36:55
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -26,7 +26,7 @@ if($data->code !== 0){
         'code' => 2,
         'response' => '请求方式有误或不存在此 post'
     );
-    print_r(json_encode($output));
+    print_r(jsonEncode($output));
     return;
 }
 
@@ -66,4 +66,4 @@ if( $data->response->isDeleted ){
     }
 }
 
-print_r(json_encode($output));
+print_r(jsonEncode($output));

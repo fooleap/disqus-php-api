@@ -5,7 +5,7 @@
  * @param url   支持的链接
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-19 00:07:44
+ * @version  2018-11-07 23:36:05
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -23,4 +23,4 @@ $output = (object) array(
     'response' => media_format($data -> response)
 );
 
-print_r(json_encode($output));
+print_r(jsonEncode($output));

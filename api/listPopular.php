@@ -6,7 +6,7 @@
  * @param interval 时间段，默认为 30d（30天内）
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-31 20:26:50
+ * @version  2018-11-07 23:35:06
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -32,4 +32,4 @@ $output = $data -> code == 0 ? array(
     'response' => $threads
 ) : $data;
 
-print_r(json_encode($output));
+print_r(jsonEncode($output));

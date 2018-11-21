@@ -5,7 +5,7 @@
  * @param thread   Thread Id
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-21 18:59:57
+ * @version  2018-11-07 23:37:32
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -41,4 +41,4 @@ $output = $data -> code == 0 ? (object) array(
     'votedusers' => $userdata -> response
 ) : $data;
 
-print_r(json_encode($output));
+print_r(jsonEncode($output));

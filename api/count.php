@@ -5,7 +5,7 @@
  * @param links  页面链接，以“,”分隔
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:48:27
+ * @version  2018-11-07 23:33:51
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -39,4 +39,4 @@ $output = $data -> code == 0 ? array(
     'response' => $countArr
 ) : $data;
 
-print_r(json_encode($output)); 
+print_r(jsonEncode($output)); 

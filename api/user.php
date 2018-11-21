@@ -3,7 +3,7 @@
  * 获取用户资料
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:48:01
+ * @version  2018-11-07 23:33:33
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -40,4 +40,4 @@ if(isset($access_token)){
     );
 }
 
-print_r(json_encode($output));
+print_r(jsonEncode($output));

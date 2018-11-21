@@ -4,9 +4,9 @@
  *
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 16:19:49
+ * @version  2018-11-07 23:34:16
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 require_once('init.php');
-print_r(json_encode($emoji -> eac()));
+print_r(jsonEncode($emoji -> eac()));

@@ -5,7 +5,7 @@
  * @param file  上传的文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:47:53
+ * @version  2018-11-07 23:38:12
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -16,7 +16,7 @@ if ($_FILES['file']['error']){
         'code' => 2,
         'response' => '上传出错'
     );
-    print_r(json_encode($data));
+    print_r(jsonEncode($data));
     return;
 }
 
@@ -28,4 +28,4 @@ $post_data = (object) array(
     'upload' => $cfile
 );
 $data = curl_post($curl_url, $post_data);
-print_r(json_encode($data));
+print_r(jsonEncode($data));

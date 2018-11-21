@@ -5,7 +5,7 @@
  * @param thread   thread ID
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-22 23:21:08
+ * @version  2018-11-07 23:37:07
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -16,4 +16,4 @@ $fields = (object) array(
 $curl_url = '/api/3.0/threadReactions/loadReactions?';
 $data = curl_get($curl_url, $fields);
 
-print_r(json_encode($data));
+print_r(jsonEncode($data));

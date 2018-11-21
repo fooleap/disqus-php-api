@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-21 23:13:00
+ * @version  2018-11-07 23:34:27
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -54,4 +54,4 @@ $output = $data -> code == 0 ? (object) array(
     'response' => $posts,
 ) : $data;
 
-print_r(json_encode($output));
+print_r(jsonEncode($output));

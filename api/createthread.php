@@ -9,7 +9,7 @@
  * @param identifier  identifier
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:48:36
+ * @version  2018-11-07 23:34:03
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -24,4 +24,4 @@ $post_data = (object) array(
     'url' => $_POST['url']
 );
 $data = curl_post($curl_url, $post_data);
-print_r(json_encode($data)); 
+print_r(jsonEncode($data)); 

@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-11-05 07:11:36
+ * @version  2018-11-21 21:33:36
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -64,6 +64,10 @@ if ( isset($user) ){
         }
 
     }
+}
+
+function jsonEncode($array){
+    return json_encode($array, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
 }
 
 function adminLogin(){
@@ -434,7 +438,7 @@ function post_format( $post ){
             if( strpos($urlMatches[1][$key], 'disqus.com/by') !== false ){
                 $linkItem = '<a href="'.$urlMatches[1][$key].'" title="'.$urlMatches[2][$key].'" target="_blank" rel="nofollow">@'.$urlMatches[3][$key].'</a>';
             }
-            if( filter_var($urlMatches[1][$key], FILTER_VALIDATE_URL) === false ){
+            if( !parse_url($urlMatches[1][$key]) ){
                 $linkItem = $urlMatches[3][$key];
             }
             if( $imgKey !== false ){

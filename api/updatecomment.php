@@ -7,7 +7,7 @@
  * @param unique   匿名用户 unique
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-22 13:58:49
+ * @version  2018-11-07 23:37:59
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -30,7 +30,7 @@ if($data->code !== 0){
         'code' => 2,
         'response' => '请求方式有误或不存在此 post'
     );
-    print_r(json_encode($output));
+    print_r(jsonEncode($output));
     return;
 }
 
@@ -55,4 +55,4 @@ if( $duration < 1800 ){
     );
 }
 
-print_r(json_encode($output));
+print_r(jsonEncode($output));

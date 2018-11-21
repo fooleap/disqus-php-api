@@ -6,7 +6,7 @@
  * @param unique   匿名用户 unique
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-21 16:07:36
+ * @version  2018-11-07 23:37:44
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -22,4 +22,4 @@ if(!empty($unique)){
     $post_data -> unique = $unique;
 }
 $data = curl_post($curl_url, $post_data);
-print_r(json_encode($data)); 
+print_r(jsonEncode($data)); 

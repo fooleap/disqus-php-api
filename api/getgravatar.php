@@ -6,7 +6,7 @@
  * @param email 邮箱号
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-08-17 20:00:19
+ * @version  2018-11-07 23:34:39
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -27,4 +27,4 @@ $output = array(
     'isEmail' => $isEmail,
     'gravatar' => $gravatar
 );
-print_r(json_encode($output));
+print_r(jsonEncode($output));

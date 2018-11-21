@@ -3,7 +3,7 @@
  * 登录
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-05-31 15:48:58
+ * @version  2018-11-07 23:35:40
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
