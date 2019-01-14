@@ -761,6 +761,30 @@ require('./iDisqus.scss');
         }
     };
 
+    // 加载最近评论
+    iDisqus.prototype.postsList = function (listLimit, containerId){
+        var _ = this;
+        listLimit = listLimit || 5;
+        var listContainer =  d.getElementById(typeof(containerId) == 'string' ? containerId : 'disqusPostsList');
+        if (listContainer) {
+            getAjax(
+                _.opts.api + '/postsList.php?limit=' + listLimit, 
+                function(resp) {
+                    var data = JSON.parse(resp);
+                    var posts = data.response;
+                    var popHtml = '';
+                    posts.forEach(function(item){
+                        popHtml += `<li style="list-style-type: none;">${item.name}: ${item.raw_message}</br>评: <a href="${item.thread.link}">${item.thread.title}</a></li>`;
+                    });
+                    popHtml = `<ul>${popHtml}</ul`;
+                    listContainer.innerHTML = popHtml;
+                }, function(){
+                    console.log('获取数据失败！')
+                }
+            );
+        }
+    };
+
     // 加载热门话题
     iDisqus.prototype.loadRelated = function(){
         var _ = this;

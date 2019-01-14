@@ -210,3 +210,8 @@ var disq = new iDisqus('comment', {
 
 * 加载评论数
 * 用法：创建容器（可多个），加属性 data-disqus-url 值放页面链接，创建实例后执行则可显示评论数，具体可查看DEMO 页面
+
+#### postsList
+
+* 加载最近评论
+* 用法：创建容器，指定Id（默认 disqusPostsList），创建实例后执行可显示最近评论，可通过指定参数设置加载评论数量（默认为 5）以及容器Id
