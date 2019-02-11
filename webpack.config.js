@@ -1,44 +1,65 @@
 const webpack = require('webpack');
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const autoprefixer = require('autoprefixer'); 
-module.exports = {
-    entry: './src/main.js',
-    output: {
-        filename: 'disqus-api.js'       
-    },
+const path = require('path');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-    module: {
-        rules: [
-            {
-                test: /\.(scss|css)$/,
-                use: ExtractTextPlugin.extract({
-                    use:[ 'css-loader','sass-loader','postcss-loader'],
-                    fallback: 'style-loader',
-                }),
-            },
+module.exports = function(env, argv) {
+
+    return {
+
+        devtool: argv.mode == 'production' ? 'source-maps' : 'eval',
+
+        entry: {
+            'iDisqus': './src/iDisqus.js',
+        },
+
+        output: {
+            path: path.resolve(__dirname, 'dist'),
+            filename: argv.mode == 'production' ? '[name].min.js' : '[name].js',
+            libraryTarget: 'umd',
+            library: '[name]'
+        },
+
+        stats: {
+            entrypoints: false,
+            children: false
+        },
+
+        module: {
+            rules: [
+                {
+                    test: /\.scss$/,
+                    use: [
+                        argv.mode == 'production' ? MiniCssExtractPlugin.loader : 'style-loader',
+                        'css-loader',
+                        {
+                            loader: 'postcss-loader',
+                            options: { plugins: () => [ require('autoprefixer') ] }
+                        },
+                        'sass-loader'
+                    ]
+                }
+            ]
+        },
+
+        plugins: [
+            new MiniCssExtractPlugin({
+                filename: argv.mode == 'production' ? '[name].min.css' : '[name].css',
+                chunkFilename: '[name].css'
+            }),
+            new HtmlWebpackPlugin({
+                template: './src/demo.html',
+                filename: 'index.html',
+                inject: 'head'
+            })
         ],
-    },
-    plugins: [
-        new webpack.LoaderOptionsPlugin({
-            options: {
-                postcss: [
-                    autoprefixer(),
-                ]
-            }
-        }),
-        new ExtractTextPlugin("disqus-api.css"),
-        new webpack.optimize.UglifyJsPlugin({
-            beautify: false,
-            comments: false,
-            compress: {
-                warnings: false,
-                drop_console: true
-            },
-            mangle: {
-                except: ['$'],
-                screw_ie8 : true,
-                keep_fnames: true
-            }
-        })
-    ],
+
+        devServer: {
+            contentBase: path.join(__dirname, 'dist'),
+            compress: true,
+            port: 9000,
+            openPage: '/index.html'
+        }
+    }
 };

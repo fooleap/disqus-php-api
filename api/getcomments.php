@@ -1,37 +1,57 @@
 <?php
-    namespace Emojione;
-    require_once('init.php');
+/**
+ * 获取评论列表
+ * 暂以 50 条每页，倒序为准
+ *
+ * @param link   页面链接
+ * @param cursor 当前评论位置
+ *
+ * @author   fooleap <fooleap@gmail.com>
+ * @version  2018-11-07 23:34:27
+ * @link     https://github.com/fooleap/disqus-php-api
+ *
+ */
+require_once('init.php');
 
-    $fields_data = array(
-        'api_key' => $public_key,
-        'cursor' => $_GET['cursor'],
-        'limit' => 50,
-        'forum' => $forum,
-        'order' => 'desc',
-        'thread' => 'link:'.$origin.$_GET['link']
-    );
-    $curl_url = 'https://disqus.com/api/3.0/posts/list.json?'.http_build_query($fields_data);
-    $data = curl_get($curl_url);
+$thread = $_GET['thread'];
+$order = $_GET['order'];
+$forum = $cache -> get('forum');
 
-    $fields_data = array(
-        'api_key' => $public_key,
-        'forum' => $forum,
-        'thread' => 'link:'.$origin.$_GET['link'],
-    );
-    $curl_url = 'https://disqus.com/api/3.0/threads/details.json?'.http_build_query($fields_data);
-    $detail = curl_get($curl_url);
+if(!!empty($order)){
+    switch($forum -> sort){
+    case 1:
+        $order = 'asc';
+        break;
+    case 2:
+        $order = 'desc';
+        break;
+    case 4:
+        $order = 'popular';
+        break;
+    }
+}
 
+$fields = (object) array(
+    'cursor' => $_GET['cursor'],
+    'limit' => 50,
+    'order' => $order,
+    'thread' => $thread
+);
+
+$curl_url = '/api/3.0/threads/listPostsThreaded?';
+$data = curl_get($curl_url, $fields);
+
+$posts = array();
+if (is_array($data -> response) || is_object($data -> response)){
     foreach ( $data -> response as $key => $post ) {
         $posts[$key] = post_format($post);
     }
+}
 
-    $listposts = array(
-       'code' => $detail -> code,
-       'cursor' => $data -> cursor,
-       'link' => 'https://disqus.com/home/discussion/'.$forum.'/'.$detail -> response -> slug,
-       'posts' => $detail -> response -> posts,
-       'response' => array_reverse($posts),
-       'thread' => $detail -> response -> id
-    );
-    
-    print_r(json_encode($listposts));
+$output = $data -> code == 0 ? (object) array(
+    'code' => 0,
+    'cursor' => $data -> cursor,
+    'response' => $posts,
+) : $data;
+
+print_r(jsonEncode($output));

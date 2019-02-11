@@ -1,0 +1,7 @@
+{
+    "type": "docker",
+    "features": {
+        "cloud": "v1"
+    },
+    "version": 1
+}

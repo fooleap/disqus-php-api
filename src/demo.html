@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Disqus PHP API 示例</title>
+        <style>
+            body{
+                max-width: 640px;
+                width: 100%;
+                margin: 0 auto;
+                overflow-x: hidden;
+                font-size: 13px;
+            }
+            a{
+                color: #0095dd;
+            }
+        </style>
+    </head>
+    <body>
+        <p>本页共有 <span data-disqus-url="/disqus-php-api.html"></span> 条评论，
+        项目地址：<a href="https://github.com/fooleap/disqus-php-api" target="_blank">https://github.com/fooleap/disqus-php-api</a></p>
+        <div id="comment"></div>
+        <script>
+            var disq = new iDisqus('comment', {
+                forum: 'fooleap',
+                site: 'https://blog.fooleap.org',
+                api: 'https://api.fooleap.org/disqus',
+                url: '/disqus-php-api.html',
+                mode: 2,
+                timeout: 3000,
+                init: true,
+                emojiPreview: true
+            });
+            disq.count();
+        </script>
+    </body>
+</html>
