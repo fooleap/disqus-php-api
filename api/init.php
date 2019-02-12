@@ -191,7 +191,13 @@ function get_ip(){
     } else {
         $ip = $_SERVER['REMOTE_ADDR'];
     }
-    return $ip;
+    return preg_regex('/[\d\.]+/', $ip);
+}
+
+function preg_regex($pattern, $str)
+{
+    preg_match($pattern, $str, $matches);
+    return array_pop($matches);
 }
 
 function encodeURIComponent($str){
