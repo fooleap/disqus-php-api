@@ -176,7 +176,7 @@ var disq = new iDisqus('comment', {
 
 * Emoji 表情 PNG 图片路径
 * {String}
-* 默认：`"https://assets-cdn.github.com/images/icons/emoji/unicode/"`
+* 默认：`"https://github.githubassets.com/images/icons/emoji/unicode/"`
 
 ##### emojiList
 

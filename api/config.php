@@ -66,7 +66,7 @@ define('DISQUS_LOGINIP', '151.101.40.134');
  
 define('GRAVATAR_CDN', '//cn.gravatar.com/avatar/');
 define('GRAVATAR_DEFAULT', 'retro');
-define('EMOJI_PATH', 'https://assets-cdn.github.com/images/icons/emoji/unicode/');
+define('EMOJI_PATH', 'https://github.githubassets.com/images/icons/emoji/unicode/');
 
 /*
  * PHP Mailer 设置
