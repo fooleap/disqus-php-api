@@ -1180,6 +1180,8 @@
         display: flex;
         justify-content: center;
         list-style-type: none;
+        flex-wrap: wrap;
+        align-items: center;
         &:not(:empty){
             padding: 10px 0;
         }
