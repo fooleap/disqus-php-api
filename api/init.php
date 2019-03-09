@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-11-21 21:33:36
+ * @version  2019-03-09 09:38:51
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -190,6 +190,9 @@ function get_ip(){
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
     } else {
         $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    if(strpos($ip, ':') !== false ){
+      return null;
     }
     return preg_regex('/[\d\.]+/', $ip);
 }
