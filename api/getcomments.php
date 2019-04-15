@@ -7,7 +7,7 @@
  * @param cursor 当前评论位置
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-11-07 23:34:27
+ * @version  2019-04-15 13:20:10
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */

@@ -472,6 +472,7 @@ function post_format( $post ){
         'avatar' => $author -> avatar -> cache,
         'isMod' => $isMod,
         'isDeleted' => $post -> isDeleted,
+        'hasMore' => $post -> hasMore,
         'username' => $author -> username,
         'createdAt' => $post -> createdAt.'+00:00',
         'id' => $post -> id,

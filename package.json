@@ -1,6 +1,6 @@
 {
     "name": "disqus-php-api",
-    "version": "0.2.25",
+    "version": "0.2.26",
     "description": "disqus-php-api 利用 PHP cURL 转发 Disqus API 请求",
     "main": "dist/iDisqus.js",
     "dependencies": {},
@@ -10,19 +10,19 @@
         "dist"
     ],
     "devDependencies": {
-        "autoprefixer": "^9.1.5",
-        "css-loader": "^1.0.0",
+        "autoprefixer": "^9.5.1",
+        "css-loader": "^2.1.1",
         "html-webpack-plugin": "^3.2.0",
-        "mini-css-extract-plugin": "^0.4.2",
-        "node-sass": "^4.9.3",
+        "mini-css-extract-plugin": "^0.6.0",
+        "node-sass": "^4.11.0",
         "path": "^0.12.7",
-        "postcss": "^7.0.2",
+        "postcss": "^7.0.14",
         "postcss-loader": "^3.0.0",
         "sass-loader": "^7.1.0",
-        "style-loader": "^0.23.0",
-        "webpack": "^4.19.0",
-        "webpack-cli": "^3.1.0",
-        "webpack-dev-server": "^3.1.8"
+        "style-loader": "^0.23.1",
+        "webpack": "^4.30.0",
+        "webpack-cli": "^3.3.0",
+        "webpack-dev-server": "^3.3.1"
     },
     "scripts": {
         "build": "npm run build:prod && npm run build:dev",

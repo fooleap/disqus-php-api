@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2018-10-16 23:42:23
- * @version 0.2.25
+ * @update 2019-04-15 13:19:46
+ * @version 0.2.26
  * Copyright 2017-2018 fooleap
  * Released under the MIT license
  */
@@ -590,6 +590,7 @@ require('./iDisqus.scss');
             logout: _.user.logout.bind(_),
             login: _.user.login.bind(_),
             loadMore: _.loadMore.bind(_),
+            loadMoreReply: _.loadMoreReply.bind(_),
             post: _.post.bind(_),
             threadCreate: _.threadCreate.bind(_),
             threadVote: _.threadVote.bind(_),
@@ -629,6 +630,7 @@ require('./iDisqus.scss');
         $iDisqus.on('click', '.comment-item-pname', _.handle.jump);
         $iDisqus.on('mouseover', '.comment-item-pname', _.handle.parentShow);
         $iDisqus.on('click', '.comment-loadmore', _.handle.loadMore);
+        $iDisqus.on('click', '.comment-item-loadmore', _.handle.loadMoreReply);
         $iDisqus.on('click', '#thread-submit', _.handle.threadCreate);
         $iDisqus.on('click', '.comment-recommend', _.handle.threadVote);
         $iDisqus.on('click', '.comment-reaction-btn:not(.selected)', _.handle.reactionVote);
@@ -1001,7 +1003,9 @@ require('./iDisqus.scss');
         <div class="comment-item-content">${ post.message}</div>
         <div class="comment-item-footer">${!!post.isPost ? `<span class="comment-item-manage"><a class="comment-item-edit" href="javascript:;">编辑</a><span class="comment-item-bullet"> • </span><a class="comment-item-delete" href="javascript:;">删除</a><span class="comment-item-bullet"> • </span></span>` : ``}<a class="comment-item-reply" href="javascript:;">回复</a></div>
         </div></div>
-        <ul class="comment-item-children"></ul>
+        <ul class="comment-item-children">
+            ${ post.hasMore ? `<li><a class="comment-item-loadmore" href="javascript:;">显示更多回复</a></li>` : `` }
+        </ul>
         </li>`;
 
         // 已删除评论
@@ -1010,7 +1014,9 @@ require('./iDisqus.scss');
             <div class="comment-item-body">
             <a class="comment-item-avatar" href="#comment-${ post.id}"><img src="${post.avatar}"></a>
             <div class="comment-item-main" data-message="此评论已被删除。"></div></div>
-            <ul class="comment-item-children"></ul>
+            <ul class="comment-item-children">
+                ${ post.hasMore ? `<li><a class="comment-item-loadmore" href="javascript:;">显示更多回复</a></li>` : `` }
+            </ul>
             </li>`;
         }
 
@@ -1075,6 +1081,32 @@ require('./iDisqus.scss');
             target.classList.add('loading');
             _.getlist();
         }
+    }
+
+    // 读取更多回复
+    iDisqus.prototype.loadMoreReply = function (e, target) {
+        var _ = this;
+        target.innerHTML = '读取中……';
+        var $children = target.closest('.comment-item-children');
+        var $post = target.closest('.comment-item');
+        getAjax(
+            _.opts.api + '/descendants.php?post=' + $post.dataset.id,
+            function (resp) {
+                var data = JSON.parse(resp);
+                if( data.code == 0 ){
+                    $children.removeChild(target.parentNode);
+                    var posts = data.response;
+                    posts.forEach(function (item) {
+                        _.load(item);
+                    });
+                    _.timeAgo();
+                } else {
+                    target.innerHTML = '读取失败';
+                }
+            }, function () {
+                target.innerHTML = '读取出错';
+            }
+        );
     }
 
     // 评论框焦点
