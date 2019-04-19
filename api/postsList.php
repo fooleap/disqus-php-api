@@ -17,7 +17,6 @@ $fields = (object) array(
     'forum' => DISQUS_SHORTNAME,
     'related' => 'thread',
     'cursor' => isset($_GET['cursor']) ? $_GET['cursor'] : null
-    
 );
 $curl_url = '/api/3.0/posts/list.json?';
 $data = curl_get($curl_url, $fields);

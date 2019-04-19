@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-03-09 09:38:51
+ * @version  2019-04-19 09:56:44
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -23,6 +23,17 @@ function domain($url){
 }
 if(preg_match('(localhost|'.$ipRegex.'|'.domain(DISQUS_WEBSITE).')', $origin)){
     header('Access-Control-Allow-Origin: '.$origin);
+}
+if($_SERVER['REQUEST_METHOD'] == 'OPTIONS')
+{
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])){
+        header('Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT');
+    }
+
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])){
+        header('Access-Control-Allow-Headers: '.$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']);
+    }
+    exit(0);
 }
 
 try {

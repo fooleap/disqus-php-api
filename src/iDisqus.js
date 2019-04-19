@@ -3,9 +3,9 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2019-04-15 13:19:46
- * @version 0.2.26
- * Copyright 2017-2018 fooleap
+ * @update 2019-04-19 13:39:44
+ * @version 0.2.27
+ * Copyright 2017-2019 fooleap
  * Released under the MIT license
  */
 require('./iDisqus.scss');
@@ -286,7 +286,7 @@ require('./iDisqus.scss');
         _.opts.timeout = _.opts.timeout || 3000;
         _.opts.toggle = !!_.opts.toggle ? d.getElementById(_.opts.toggle) : null;
         _.opts.autoCreate = !!_.opts.autoCreate || !!_.opts.auto;
-        _.opts.relatedType = _.opts.relatedType || 'Related'
+        _.opts.relatedType = _.opts.relatedType || 'related'
 
         // emoji 表情
         _.opts.emojiPath = _.opts.emojiPath || _.opts.emoji_path || 'https://github.githubassets.com/images/icons/emoji/unicode/';
@@ -742,7 +742,7 @@ require('./iDisqus.scss');
                 commentArr[i] = counts[i].dataset.disqusUrl.replace(_.opts.site, '');
             }
             getAjax(
-                _.opts.api + '/count.php?links=' + commentArr.join(','),
+                _.opts.api + '/threadsList.php?links=' + commentArr.join(','),
                 function (resp) {
                     var data = JSON.parse(resp);
                     var posts = data.response;
@@ -787,14 +787,14 @@ require('./iDisqus.scss');
         }
     };
 
-    // 加载热门话题
+    // 加载相关话题
     iDisqus.prototype.loadRelated = function () {
         var _ = this;
         if (_.stat.forum.settings.organicDiscoveryEnabled == false || _.stat.relatedLoaded) {
             return;
         }
         getAjax(
-            _.opts.api + '/list' + _.opts.relatedType + '.php' + '?thread=' + _.stat.thread.id,
+            _.opts.api + '/threadsList.php?type=' + _.opts.relatedType.toLowerCase() + '&thread=' + _.stat.thread.id,
             function (resp) {
                 var data = JSON.parse(resp);
                 if (data.code == 0) {
@@ -1086,7 +1086,7 @@ require('./iDisqus.scss');
     // 读取更多回复
     iDisqus.prototype.loadMoreReply = function (e, target) {
         var _ = this;
-        target.innerHTML = '读取中……';
+        target.innerHTML = '加载中……';
         var $children = target.closest('.comment-item-children');
         var $post = target.closest('.comment-item');
         getAjax(
@@ -1424,14 +1424,14 @@ require('./iDisqus.scss');
                 var data = JSON.parse(xhrUpload.responseText);
                 if (data.code == 0) {
                     _.stat.imageSize.push(size);
-                    var imageUrl = data.response[filename].url;
+                    var imageUrl = data.response.thumbnailUrl;
                     var textarea = form.querySelector('.comment-form-textarea');
-                    _.appendText(textarea, imageUrl);
+                    _.appendText(textarea, 'https:'+imageUrl);
 
                     var image = new Image();
                     image.src = imageUrl;
                     image.onload = function () {
-                        $item.innerHTML = '<img class="comment-image-object" src="' + imageUrl + '">';
+                        $item.innerHTML = '<img class="comment-image-object" src="https:' + imageUrl + '">';
                         $item.dataset.imageUrl = imageUrl;
                         $item.classList.remove('loading');
                     }
@@ -1475,7 +1475,7 @@ require('./iDisqus.scss');
             form.querySelector('.comment-image-list').insertAdjacentHTML('beforeend', imageItem);
             $item = form.querySelector('[data-image-size="' + size + '"]');
         }, false);
-        xhrUpload.open('POST', _.opts.api + '/upload.php', true);
+        xhrUpload.open('POST', _.opts.api + '/media.php', true);
         xhrUpload.send(data);
     }
 

@@ -3,7 +3,7 @@
  * 缓存类
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-03 13:52:12
+ * @version  2019-04-19 13:36:26
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -18,7 +18,7 @@ class Cache {
     // 初始化
     public function __construct(){
 
-        self::$dir = dirname(__FILE__) . '/cache/';
+        self::$dir = defined('USE_TEMP') && USE_TEMP == 1 ? sys_get_temp_dir() . '/cache/' : dirname(__FILE__) . '/cache/';
         self::$filename = 'disqus_' . DISQUS_SHORTNAME . '.php';
         self::$file = self::$dir . self::$filename;
         if(!file_exists(self::$file)){

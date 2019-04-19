@@ -1,7 +1,4 @@
 {
-    "type": "docker",
-    "features": {
-        "cloud": "v1"
-    },
-    "version": 1
+  "version": 2,
+  "builds": [{ "src": "*.php", "use": "@now/php" }]
 }

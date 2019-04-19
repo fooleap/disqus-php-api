@@ -2,11 +2,12 @@
 /**
  * 获取后代回复
  *
- * @param link   页面链接
- * @param cursor 当前评论位置
+ * @param limit 数量
+ * @param order 排序
+ * @param post  post id
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-04-15 13:20:32
+ * @version  2019-04-19 09:34:53
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */

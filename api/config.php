@@ -3,7 +3,7 @@
  * 配置文件
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-11-04 21:43:12
+ * @version  2019-04-19 13:23:37
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -24,6 +24,7 @@
  * MOD_IDENT        识别管理员：1. username 等于 DISQUS_USERNAME，即和原生评论框一样
  *                              2. 匿名评论 name 等于 DISQUS_USERNAME 且 email 等于 DISQUS_EMAIL
  *                              3. 匿名评论 name 等于 DISQUS_USERNAME 或 email 等于 DISQUS_EMAIL
+ * USE_TEMP         缓存目录，false 或无定义，则是当前目录下的 cache 目录，否则采用系统临时文件目录
  *
  * 填写正确的账号信息之后，将以网站管理员的身份去获取评论数据。
  *
@@ -40,6 +41,7 @@ define('DISQUS_SHORTNAME', '');
 define('DISQUS_APPROVED', true);
 define('DISQUS_BLACKLIST', false);
 define('MOD_IDENT', 1);
+define('USE_TEMP', false);
 
 /*
  * 网络设置
