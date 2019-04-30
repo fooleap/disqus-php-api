@@ -8,7 +8,7 @@
  * @param interval 时间段，默认为 30d（30天内），仅 popular 可选
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-04-19 10:13:09
+ * @version  2019-04-30 12:52:56
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -60,20 +60,22 @@ $data = curl_get($curl_url, $fields);
 
 $threads = array();
 foreach ( $data -> response as $key => $thread ) {
-    $threads[$key] = thread_format($thread);
+  $threads[$key] = thread_format($thread);
 }
 
-$threadIds = array_column($threads, 'id');
+if(count($threads) > 0 && $type != ''){
+  $threadIds = array_column($threads, 'id');
 
-$fields = (object) array(
+  $fields = (object) array(
     'thread' => $threadIds
-);
+  );
 
-$curl_url = '/api/3.0/discovery/listTopPost.json?';
-$data = curl_get($curl_url, $fields);
-foreach ( $data -> response as $key => $post ) {
+  $curl_url = '/api/3.0/discovery/listTopPost.json?';
+  $data = curl_get($curl_url, $fields);
+  foreach ( $data -> response as $key => $post ) {
     $index = array_search($post -> thread, $threadIds);
     $threads[$index] -> topPost = post_format($post);
+  }
 }
 
 $output = $data -> code == 0 ? array(

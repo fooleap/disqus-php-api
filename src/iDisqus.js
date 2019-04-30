@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2019-04-19 13:39:44
- * @version 0.2.27
+ * @update 2019-04-30 13:26:57
+ * @version 0.2.28
  * Copyright 2017-2019 fooleap
  * Released under the MIT license
  */
@@ -1051,6 +1051,8 @@ require('./iDisqus.scss');
                     if (data.code === 0) {
                         if (data.response.isDeleted == true) {
                             $this.outerHTML = '';
+                            _.stat.thread.posts = parseInt(_.dom.querySelector('#comment-count').innerHTML) - 1;
+                            _.dom.querySelector('#comment-count').innerHTML = _.stat.thread.posts + ' 条评论';
                         } else {
                             alert(data.response.message);
                             $this.querySelector('.comment-item-manage').outerHTML = '';
@@ -1680,6 +1682,7 @@ require('./iDisqus.scss');
                 if (data.code === 0) {
                     _.dom.querySelector('.comment-item[data-id="preview"]').outerHTML = '';
                     _.stat.thread = data.thread;
+                    _.stat.thread.posts = parseInt(_.dom.querySelector('#comment-count').innerHTML) + 1;
                     _.dom.querySelector('#comment-count').innerHTML = _.stat.thread.posts + ' 条评论';
                     var post = data.response;
                     post.isPost = true;

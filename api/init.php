@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-04-19 09:56:44
+ * @version  2019-04-30 12:57:44
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -549,6 +549,10 @@ class Forum {
     protected static function isOld($cForum){
         if(!$cForum){
             return true;
+        } else {
+            if($cForum -> id == null){
+              return true;
+            }
         }
         $forum = new self();
         if(count(array_diff_key((array)$forum, (array)$cForum)) != 0){
