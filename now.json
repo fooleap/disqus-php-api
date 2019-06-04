@@ -1,4 +1,5 @@
 {
   "version": 2,
-  "builds": [{ "src": "*.php", "use": "@now/php" }]
+  "builds": [{ "src": "api/*.php", "use": "@now/php" }],
+  "routes": [{ "src": "/(.*)", "dest": "/api/$1" }]
 }

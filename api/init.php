@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-04-30 12:57:44
+ * @version  2019-06-04 12:31:35
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -39,7 +39,7 @@ if($_SERVER['REQUEST_METHOD'] == 'OPTIONS')
 try {
     $cache = new Cache();
 } catch (Exception $e) {
-    die('没有权限');
+    die('没有权限，请检查设置当前目录写权限，或将 config.php 中的 USE_TEMP 设置为 true');
 }
 
 $jwt = new JWT();
