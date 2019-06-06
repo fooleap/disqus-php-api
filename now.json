@@ -1,5 +1,11 @@
 {
   "version": 2,
-  "builds": [{ "src": "api/*.php", "use": "@now/php" }],
+  "builds": [
+    { "src": "api/*.php", "use": "@now/php" },
+    { "src": "api/PHPMailer/*.php", "use": "@now/php" },
+    { "src": "api/emojione/*.php", "use": "@now/php" },
+    { "src": "api/emojione/src/*.php", "use": "@now/php" },
+    { "src": "dist/*", "use": "@now/static" }
+  ],
   "routes": [{ "src": "/(.*)", "dest": "/api/$1" }]
 }

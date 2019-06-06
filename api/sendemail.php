@@ -7,7 +7,7 @@
  * @param post    当前评论信息
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-09-20 16:08:21
+ * @version  2019-06-06 10:05:11
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -189,6 +189,7 @@ function sendEmail($title, $content, $email, $name, $fromName){
         $GLOBALS['debug'] .= "$level: $str\n";
     };
     if(!$mail->Send()) {
-        file_put_contents(__DIR__.'/cache/phpmailer_error.log', $GLOBALS['debug']);
+        $cacheDir = defined('USE_TEMP') && USE_TEMP == 1 ? sys_get_temp_dir() . '/disqus-php-api' : dirname(__FILE__) . '/cache';
+        file_put_contents($cacheDir.'/phpmailer_error.log', $GLOBALS['debug']);
     }
 }
