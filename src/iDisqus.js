@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2019-04-30 13:26:57
- * @version 0.2.28
+ * @update 2019-08-06 10:27:58
+ * @version 0.2.29
  * Copyright 2017-2019 fooleap
  * Released under the MIT license
  */
@@ -693,28 +693,27 @@ require('./iDisqus.scss');
                 }
             }
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', '//disqus.com/next/config.json?' + Date.now(), true);
-            xhr.timeout = _.opts.timeout;
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    (d.head || d.body).appendChild(s);
-                }
+
+            var img = new Image();
+            img.onerror = function () {
+              if (_.opts.mode == 1) {
+                _tips = '连接超时，加载简易评论框……';
+                _.threadInit();
+              }
             }
-            xhr.ontimeout = function () {
-                xhr.abort();
+            img.onload = function () {
+              (d.head || d.body).appendChild(s);
+              clearTimeout(timer)
+            };
+            img.src = 'https://disqus.com/favicon.ico?' + Date.now();
+            var timer = setTimeout(function () {
+              if ( !img.complete || !img.naturalWidth ) {
                 if (_.opts.mode == 1) {
-                    _tips = '连接超时，加载简易评论框……';
-                    _.threadInit();
+                  _tips = '连接失败，加载简易评论框……';
+                  _.threadInit();
                 }
-            }
-            xhr.onerror = function () {
-                if (_.opts.mode == 1) {
-                    _tips = '连接失败，加载简易评论框……';
-                    _.threadInit();
-                }
-            }
-            xhr.send();
+              }
+            }, _.opts.timeout);
         } else {
             _.stat.current = 'disqus';
             _.dom.querySelector('#idisqus').style.display = 'none';
