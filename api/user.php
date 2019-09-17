@@ -3,7 +3,7 @@
  * 获取用户资料
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-11-07 23:33:33
+ * @version  2019-09-17 13:06:02
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -20,12 +20,24 @@ if(isset($access_token)){
         'api_secret' => SECRET_KEY,
         'access_token' => $access_token
     );
-    $url = 'https://disqus.com/api/3.0/users/details.json?'.http_build_query($fields_data);
+    $url = 'https://'.$disqus_host.'/api/3.0/users/details.json?'.http_build_query($fields_data);
     $ch = curl_init();
     curl_setopt($ch,CURLOPT_URL,$url);
+    curl_setopt($ch,CURLOPT_HTTPHEADER, array('Host: disqus.com', 'Origin: https://disqus.com'));
+    curl_setopt($ch,CURLOPT_HEADER,0);
     curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
     curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
     $data = json_decode(curl_exec($ch));
+    $errno = curl_errno($ch);
+    if ($errno == 60 || $errno == 77) {
+        curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
+        $data = json_decode(curl_exec($ch));
+    }
+    if( $errno == 51 ){
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        $data = json_decode(curl_exec($ch));
+    }
     curl_close($ch);
     $user_detail = array(
         'avatar' => $data -> response -> avatar -> cache,

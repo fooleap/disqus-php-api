@@ -7,7 +7,7 @@
  * @param post    当前评论信息
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-06-06 10:05:11
+ * @version  2019-09-17 13:07:28
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -106,7 +106,7 @@ function sendAnonEmail($thread, $pPost, $rPost, $pEmail){
     $content .= $pMessage;
     $content .= '<p>' . $rName . '  的回复如下：</p>';
     $content .= $rMessage;
-    $content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$threadLink.'?#comment-'.$pId.'">'. $threadTitle . '</a></p>';
+    $content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$threadLink.'#comment-'.$pId.'">'. $threadTitle . '</a></p>';
     $fromName = defined('SMTP_FROMNAME') ? SMTP_FROMNAME : $forumName;
     sendEmail($title, $content, $pEmail, $pName, $fromName);
 }
@@ -143,7 +143,7 @@ function sendModEmail($thread, $pPost, $rPost) {
         $content .= '<p>该留言是对 ' . $pName . ' 以下留言进行的回复：</p>';
         $content .= $pMessage;
     }
-    $content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$threadLink.'?#comment-'.$rId.'">'. $threadTitle . '</a></p>';
+    $content .= '<p>查看详情及回复请点击：<a target="_blank" href="'.$threadLink.'#comment-'.$rId.'">'. $threadTitle . '</a></p>';
     $fromName = defined('SMTP_FROMNAME') ? SMTP_FROMNAME : $forumName;
     sendEmail($title, $content, DISQUS_EMAIL, DISQUS_USERNAME, $fromName);
 }
