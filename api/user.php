@@ -3,7 +3,7 @@
  * 获取用户资料
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-09-17 13:06:02
+ * @version  2019-09-18 16:56:55
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -27,8 +27,18 @@ if(isset($access_token)){
     curl_setopt($ch,CURLOPT_HEADER,0);
     curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
     curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
+
+    if (PROXY_MODE == 1) {
+      curl_setopt($ch, CURLOPT_PROXY, PROXY);
+      curl_setopt($ch, CURLOPT_PROXYTYPE, PROXYTYPE);
+      if (PROXYUSERPWD) {
+        curl_setopt($ch, CURLOPT_PROXYUSERPWD, PROXYUSERPWD);
+      }
+    }
+
     $data = json_decode(curl_exec($ch));
     $errno = curl_errno($ch);
+
     if ($errno == 60 || $errno == 77) {
         curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
         $data = json_decode(curl_exec($ch));

@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-06-04 12:31:35
+ * @version  2019-09-18 16:57:09
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -45,9 +45,9 @@ try {
 $jwt = new JWT();
 $emoji = new Emoji();
 
-$disqus_host = IP_MODE == 1 ? DISQUS_IP : 'disqus.com';
-$media_host = IP_MODE == 1 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
-$login_host = IP_MODE == 1 ? DISQUS_LOGINIP  : 'import.disqus.com';
+$disqus_host = IP_MODE == 1 && PROXY_MODE == 0 ? DISQUS_IP : 'disqus.com';
+$media_host = IP_MODE == 1 && PROXY_MODE == 0 ? DISQUS_MEDIAIP  : 'uploads.services.disqus.com';
+$login_host = IP_MODE == 1 && PROXY_MODE == 0 ? DISQUS_LOGINIP  : 'import.disqus.com';
 $url = parse_url(DISQUS_WEBSITE);
 $website = $url['scheme'].'://'.$url['host'];
 $user = $_COOKIE['access_token'];
@@ -103,6 +103,15 @@ function adminLogin(){
 
     $curl = curl_init();
     curl_setopt_array($curl, $options);
+
+    if (PROXY_MODE == 1) {
+      curl_setopt($curl, CURLOPT_PROXY, PROXY);
+      curl_setopt($curl, CURLOPT_PROXYTYPE, PROXYTYPE);
+      if (PROXYUSERPWD) {
+        curl_setopt($curl, CURLOPT_PROXYUSERPWD, PROXYUSERPWD);
+      }
+    }
+
     $result = curl_exec($curl);
     $errno = curl_errno($curl);
 
@@ -151,6 +160,15 @@ function getAccessToken($fields){
     curl_setopt($curl, CURLOPT_POST, count($fields));
     curl_setopt($curl, CURLOPT_POSTFIELDS, $fields_string);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+
+    if (PROXY_MODE == 1) {
+      curl_setopt($curl, CURLOPT_PROXY, PROXY);
+      curl_setopt($curl, CURLOPT_PROXYTYPE, PROXYTYPE);
+      if (PROXYUSERPWD) {
+        curl_setopt($curl, CURLOPT_PROXYUSERPWD, PROXYUSERPWD);
+      }
+    }
+
     $data = curl_exec($curl);
     $errno = curl_errno($curl);
 
@@ -286,6 +304,14 @@ function curl_get($url, $fields = array()){
         curl_setopt($curl, CURLOPT_COOKIE, $cookies);
     }
 
+    if (PROXY_MODE == 1) {
+      curl_setopt($curl, CURLOPT_PROXY, PROXY);
+      curl_setopt($curl, CURLOPT_PROXYTYPE, PROXYTYPE);
+      if (PROXYUSERPWD) {
+        curl_setopt($curl, CURLOPT_PROXYUSERPWD, PROXYUSERPWD);
+      }
+    }
+
     $data = curl_exec($curl);
     $errno = curl_errno($curl);
     if ($errno == 60 || $errno == 77) {
@@ -355,8 +381,17 @@ function curl_post($url, $fields){
         curl_setopt($curl, CURLOPT_COOKIE, $cookies);
     }
 
+    if (PROXY_MODE == 1) {
+      curl_setopt($curl, CURLOPT_PROXY, PROXY);
+      curl_setopt($curl, CURLOPT_PROXYTYPE, PROXYTYPE);
+      if (PROXYUSERPWD) {
+        curl_setopt($curl, CURLOPT_PROXYUSERPWD, PROXYUSERPWD);
+      }
+    }
+
     $data = curl_exec($curl);
     $errno = curl_errno($curl);
+
     if ($errno == 60 || $errno == 77) {
         curl_setopt($curl, CURLOPT_CAINFO, dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cacert.pem');
         $data = curl_exec($curl);
