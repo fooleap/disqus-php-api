@@ -3,8 +3,8 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2019-08-06 10:27:58
- * @version 0.2.29
+ * @update 2019-11-06 13:53:02
+ * @version 0.2.30
  * Copyright 2017-2019 fooleap
  * Released under the MIT license
  */
@@ -585,7 +585,6 @@ require('./iDisqus.scss');
         <div class="comment" id="disqus_thread"></div>`;
 
         _.user = new User(_.dom, _.opts);
-        _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/, '').replace('comment-form-wrapper', 'comment-form-wrapper editing').replace(/加入讨论……/, '');
         _.handle = {
             logout: _.user.logout.bind(_),
             login: _.user.login.bind(_),
@@ -1788,9 +1787,14 @@ require('./iDisqus.scss');
                 _.dom.querySelector('#comment-link').href = `https://disqus.com/home/discussion/${_.stat.forum.id}/${_.stat.thread.slug}/?l=zh`;
                 _.dom.querySelector('.comment-avatar-image').dataset.avatar = _.stat.forum.avatar;
                 _.dom.querySelector('.comment-recommend-count').innerHTML = _.stat.thread.likes || '';
+                if (_.stat.forum.settings.mediaembedEnabled == false) {
+                    _.dom.querySelector('comment-image-input').outerHTML = ''
+                    _.dom.querySelector('[for="upload-input"]').outerHTML = ''
+                }
                 if (_.user.logged_in == 'false') {
                     _.dom.querySelector('.comment-avatar-image').src = _.stat.forum.avatar;
                 }
+                _.box = _.dom.querySelector('.comment-box').outerHTML.replace(/<label class="comment-actions-label exit"(.|\n)*<\/label>\n/, '').replace('comment-form-wrapper', 'comment-form-wrapper editing').replace(/加入讨论……/, '');
                 _.opts.badge = _.stat.forum.moderatorBadgeText;
                 if (!_.stat.order) {
                     switch (_.stat.forum.order) {

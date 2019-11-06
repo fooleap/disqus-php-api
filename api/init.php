@@ -3,7 +3,7 @@
  * 获取权限，简单封装常用函数
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2019-09-18 16:57:09
+ * @version  2019-11-06 13:37:06
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
@@ -463,6 +463,7 @@ function post_format( $post ){
 
     // 访客指定 Gravatar 头像
     $avatar = $cache -> get('forum') -> avatar;
+    $avatar = strpos($avatar, 'noavatar92') !== false ? 'https://a.disquscdn.com/images/noavatar92.png' : $avatar;
 
     if( defined('GRAVATAR_DEFAULT') ){
         $avatar_default = GRAVATAR_DEFAULT;

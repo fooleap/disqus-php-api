@@ -5,13 +5,14 @@
  * @param thread   Thread Id
  *
  * @author   fooleap <fooleap@gmail.com>
- * @version  2018-11-07 23:37:32
+ * @version  2019-11-06 13:41:15
  * @link     https://github.com/fooleap/disqus-php-api
  *
  */
 require_once('init.php');
 
 $forum = $cache -> get('forum');
+$forum -> avatar = strpos($forum -> avatar, 'noavatar92') !== false ? 'https://a.disquscdn.com/images/noavatar92.png' : $forum -> avatar;
 $thread = 'ident:'.$_GET['ident'];
 $fields = (object) array(
     'forum' => DISQUS_SHORTNAME,
