@@ -3,9 +3,9 @@
  * @author fooleap
  * @email fooleap@gmail.com
  * @create 2017-06-17 20:48:25
- * @update 2019-11-06 13:53:02
- * @version 0.2.30
- * Copyright 2017-2019 fooleap
+ * @update 2021-05-11 11:58:38
+ * @version 0.2.31
+ * Copyright 2017-2021 fooleap
  * Released under the MIT license
  */
 require('./iDisqus.scss');
@@ -1788,7 +1788,7 @@ require('./iDisqus.scss');
                 _.dom.querySelector('.comment-avatar-image').dataset.avatar = _.stat.forum.avatar;
                 _.dom.querySelector('.comment-recommend-count').innerHTML = _.stat.thread.likes || '';
                 if (_.stat.forum.settings.mediaembedEnabled == false) {
-                    _.dom.querySelector('comment-image-input').outerHTML = ''
+                    _.dom.querySelector('.comment-image-input').outerHTML = ''
                     _.dom.querySelector('[for="upload-input"]').outerHTML = ''
                 }
                 if (_.user.logged_in == 'false') {
